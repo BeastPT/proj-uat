@@ -5,8 +5,6 @@ import SearchIcon from "@/src/assets/svg/Magnifying-Glass.svg";
 import ChatIcon from "@/src/assets/svg/Chat-Bubble.svg";
 import UserIcon from "@/src/assets/svg/User.svg";
 
-import test from "@/src/assets/svg/test.svg";
-
 type Props = {
   activeTab: string;
   onTabChange: (tab: string) => void;

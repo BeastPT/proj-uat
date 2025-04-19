@@ -1,22 +1,14 @@
-import { useState } from "react";
 import { View, Text, StyleSheet } from "react-native";
-import BottomTabBar from "@/src/components/BottomNavBar"; // ajuste o caminho conforme necessário
-import { Stack } from "expo-router"; // ← importa isso
+import { Stack } from "expo-router";
 
 export default function Index() {
-  const [activeTab, setActiveTab] = useState("home");
-
   return (
     <>
-      {/* 🔻 Aqui você configura o header */}
       <Stack.Screen options={{ title: "Home", headerShown: false }} />
-
-      {/* 🔻 Seu layout principal */}
       <View style={styles.container}>
         <View style={styles.content}>
-          <Text style={styles.text}>Current tab: {activeTab}</Text>
+          <Text style={styles.text}>Home Page</Text>
         </View>
-        <BottomTabBar activeTab={activeTab} onTabChange={setActiveTab} />
       </View>
     </>
   );
