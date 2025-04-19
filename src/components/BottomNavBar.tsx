@@ -33,7 +33,7 @@ export default function BottomTabBar({ activeTab, onTabChange }: Props) {
           <Icon
             width={30}
             height={30}
-            stroke={"#FFFFF"} //activeTab === key ? Colors.dark.brand : Colors.dark.brandDark
+            stroke={activeTab === key ? Colors.dark.brand : Colors.dark.brandDark}
             fill={'none'}
           />
           {activeTab === key && <View style={styles.activeDot} />}
