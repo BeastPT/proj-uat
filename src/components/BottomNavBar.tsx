@@ -35,6 +35,7 @@ export default function BottomTabBar({ activeTab, onTabChange }: Props) {
             height={30}
             stroke={activeTab === key ? Colors.dark.brand : Colors.dark.brandDark}
             fill={'none'}
+            style={activeTab === key && styles.activeIcon}
           />
           {activeTab === key && <View style={styles.activeDot} />}
         </TouchableOpacity>
@@ -61,5 +62,11 @@ const styles = StyleSheet.create({
     borderRadius: 3,
     backgroundColor: Colors.dark.brand,
     marginTop: 4,
+  },
+  activeIcon: {
+    transform: [
+      { scale: 1.1 },
+      { translateY: -5 },
+    ],
   },
 });
