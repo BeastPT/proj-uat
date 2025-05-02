@@ -2,9 +2,11 @@
   "name": "uat-backend",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
-    "dev": "npx prisma generate && tsx watch src/index.ts",
+    "dev": "npx prisma generate && tsx watch src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
     "postinstall": "npx prisma generate",
     "schema": "npx prisma migrate dev && npx prisma generate"
   },

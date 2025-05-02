@@ -1,143 +1,79 @@
-import { FastifyTypedInstance } from "@/types";
-import { z } from "zod";
+import { FastifyTypedInstance } from '@/types';
+import { userController } from '@/controllers/user.controller';
+import { userRouteSchemas } from '@/schemas/user.schema';
 
 export default async function (app: FastifyTypedInstance) {
   app.register(
     async (router: FastifyTypedInstance) => {
-      router.get("/", async (_request, reply) => {
-        reply.send({ message: "User route" });
+      // Base route
+      router.get('/', async (_request, reply) => {
+        reply.send({ message: 'User route' });
       });
 
       // Register a new user
       router.post(
-        "/register",
+        '/register',
         {
-          schema: {
-            tags: ["user"],
-            body: z.object({
-              name: z.string().min(1).max(50),
-              email: z.string().email(),
-              password: z.string().min(8).max(50),
-            }),
-            response: {
-              201: z.object({ message: z.string() }),
-            },
-          },
+          schema: userRouteSchemas.register
         },
-        (req, reply) => {}
+        userController.registerUser
       );
 
       // Login
       router.post(
-        "/login",
+        '/login',
         {
-          schema: {
-            tags: ["user"],
-            body: z.object({
-              email: z.string().email(),
-              password: z.string().min(8).max(50),
-            }),
-            response: {
-              200: z.object({ token: z.string(), refreshToken: z.string() }),
-            },
-          },
+          schema: userRouteSchemas.login
         },
-        (req, reply) => {}
+        userController.loginUser
       );
 
       // Get all users (admin)
       router.get(
-        "/all",
+        '/all',
         {
-          schema: {
-            tags: ["user"],
-            response: {
-              200: z.array(
-                z.object({
-                  id: z.string(),
-                  name: z.string(),
-                  email: z.string().email(),
-                })
-              ),
-            },
-          },
+          schema: userRouteSchemas.getAll
         },
-        (req, reply) => {}
+        userController.getAllUsers
       );
 
       // Get specific user by ID (admin)
       router.get(
-        "/:id",
+        '/:id',
         {
-          schema: {
-            tags: ["user"],
-            params: z.object({ id: z.string().uuid() }),
-            response: {
-              200: z.object({
-                id: z.string(),
-                name: z.string(),
-                email: z.string().email(),
-              }),
-            },
-          },
+          schema: userRouteSchemas.getById
         },
-        (req, reply) => {}
+        userController.getUserById
       );
 
       // Update user by ID
       router.put(
-        "/:id",
+        '/:id',
         {
-          schema: {
-            tags: ["user"],
-            params: z.object({ id: z.string().uuid() }),
-            body: z.object({
-              name: z.string().min(1).max(50).optional(),
-              email: z.string().email().optional(),
-              password: z.string().min(8).max(50).optional(),
-            }),
-            response: {
-              200: z.object({ message: z.string() }),
-            },
-          },
+          schema: userRouteSchemas.update
         },
-        (req, reply) => {}
+        userController.updateUser
       );
 
       // Delete user by ID
       router.delete(
-        "/:id",
+        '/:id',
         {
-          schema: {
-            tags: ["user"],
-            params: z.object({ id: z.string().uuid() }),
-            response: {
-              204: z.undefined(),
-            },
-          },
+          schema: userRouteSchemas.delete
         },
-        (req, reply) => {}
+        userController.deleteUser
       );
 
       // Get current user profile (requires auth)
       router.get(
-        "/profile",
+        '/profile',
         {
-          schema: {
-            tags: ["user"],
-            response: {
-              200: z.object({
-                id: z.string(),
-                name: z.string(),
-                email: z.string().email(),
-              }),
-            },
-          },
-          // preHandler: [app.authenticate], // Uncomment if you have an auth hook
+          schema: userRouteSchemas.profile,
+          // preHandler: [app.authenticate], // Uncomment when auth is implemented
         },
-        (req, reply) => {}
+        userController.getUserProfile
       );
     },
-    { prefix: "/user" }
+    { prefix: '/user' }
   );
 }
