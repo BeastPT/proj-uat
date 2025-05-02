@@ -1,12 +1,25 @@
-import { UUID } from "node:crypto";
+import { Address } from "./address.type"
+import { PaymentMethod } from "./paymentmethod.type"
 
-export type User = {
-    id: UUID;
-    name: string;
-    email: string;
-    passwordHash: string;
+export interface User {
+  id: string
+  name: string
+  email: string
+  password: string
+  country: string
+  phone: string
+  birthdate: Date
+  address: Address
+  drivingLicense?: DrivingLicense
+  isVerified: boolean
+  paymentMethods: PaymentMethod[]
+  createdAt: Date
+  updatedAt: Date
+}
 
-    createdAt: Date;
-    updatedAt: Date;
-    deletedAt?: Date;
+interface DrivingLicense {
+  number: string
+  issueDate?: Date
+  expiryDate: Date
+  country: string
 }

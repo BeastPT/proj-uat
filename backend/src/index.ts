@@ -11,6 +11,9 @@ import { fastifySwaggerUi } from "@fastify/swagger-ui";
 import autoload from "@fastify/autoload";
 import path from "node:path";
 
+import { PrismaClient } from "../generated/prisma/client";
+const prisma = new PrismaClient();
+
 const app = fastify({ logger: true }).withTypeProvider<ZodTypeProvider>();
 
 app.setValidatorCompiler(validatorCompiler);
