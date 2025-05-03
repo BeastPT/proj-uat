@@ -53,3 +53,53 @@ model PaymentMethod {
 
   user User @relation(fields: [userId], references: [id])
 }
+
+enum CarStatus {
+  AVAILABLE
+  RENTED
+  RESERVED
+  MAINTENANCE
+}
+
+enum Transmission {
+  AUTOMATIC
+  MANUAL
+}
+
+enum FuelType {
+  PETROL
+  DIESEL
+  ELECTRIC
+  HYBRID
+}
+
+enum CarCategory {
+  ECONOMY
+  COMPACT
+  SUV
+  LUXURY
+  ELECTRIC
+  VAN
+}
+
+model Car {
+  id           String        @id @default(auto()) @map("_id") @db.ObjectId
+  brand        String
+  model        String
+  year         Int
+  color        String
+  kilometers   Int
+  plate        String        @unique
+  price        Float
+  description  String
+  seats        Int
+  doors        Int?
+  status       CarStatus     @default(AVAILABLE)
+  transmission Transmission
+  fuel         FuelType
+  category     CarCategory
+  details      Json?
+  images       String[]      
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
