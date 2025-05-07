@@ -1,3 +1,4 @@
+import 'dotenv/config'; // Load environment variables first
 import { createApp } from './app';
 import { appConfig } from './config/app.config';
 

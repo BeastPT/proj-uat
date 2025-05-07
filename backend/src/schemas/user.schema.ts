@@ -13,7 +13,7 @@ export const registerBodySchema = z.object({
 
 export const loginBodySchema = z.object({
   email: z.string().email(),
-  password: z.string().min(8).max(50),
+  password: z.string(),
 });
 
 export const updateUserBodySchema = z.object({
@@ -86,6 +86,7 @@ export const userRouteSchemas = {
   },
   profile: {
     tags: ['user'],
+    seccurity: [{ bearerAuth: [] }],
     response: {
       200: userBasicResponseSchema,
     },

@@ -69,7 +69,7 @@ export default async function (app: FastifyTypedInstance) {
         '/profile',
         {
           schema: userRouteSchemas.profile,
-          // preHandler: [app.authenticate], // Uncomment when auth is implemented
+          preHandler: [router.authenticate],
         },
         userController.getUserProfile
       );

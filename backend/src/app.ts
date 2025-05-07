@@ -33,6 +33,15 @@ export async function createApp() {
         title: appConfig.swagger.title,
         version: appConfig.swagger.version,
       },
+      components: {
+        securitySchemes: {
+          bearerAuth: {
+            type: 'http',
+            scheme: 'bearer',
+            bearerFormat: 'JWT',
+          },
+        },
+      },
     },
     transform: jsonSchemaTransform,
   });

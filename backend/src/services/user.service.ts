@@ -1,6 +1,13 @@
-import { prisma } from '@/config/db.config';
-import { User, UserCreateInput, UserUpdateInput } from '@/models/user.model';
-import { removeUndefined } from '@/utils/common.utils';
+import { prisma } from "@/config/db.config";
+import { User, UserCreateInput, UserUpdateInput } from "@/models/user.model";
+import { removeUndefined } from "@/utils/common.utils";
+import { sign } from "jsonwebtoken";
+
+
+import { compare, hash } from "bcrypt";
+
+const JWT_SECRET = process.env.JWT_SECRET;
+const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET
 
 export class UserService {
   /**
@@ -47,23 +54,22 @@ export class UserService {
    * Create a new user
    */
   async createUser(userData: UserCreateInput) {
-    // In a real application, you would hash the password before storing it
-    // const hashedPassword = await bcrypt.hash(userData.password, 10);
+    const hashedPassword = await hash(userData.password, 10);
 
     return prisma.user.create({
       data: {
         name: userData.name,
         email: userData.email,
-        password: userData.password, // Should be hashed in production
-        country: userData.country || '', // Default values for required fields
-        phone: userData.phone || '',
+        password: hashedPassword,
+        country: userData.country || "", // Default values for required fields
+        phone: userData.phone || "",
         birthdate: userData.birthdate || new Date(),
         address: userData.address || {
-          street: '',
-          city: '',
-          state: '',
-          country: '',
-          zip: '',
+          street: "",
+          city: "",
+          state: "",
+          country: "",
+          zip: "",
         },
       },
       select: {
@@ -77,13 +83,9 @@ export class UserService {
   /**
    * Update user by ID
    */
-  async updateUser(
-    id: string,
-    userData: UserUpdateInput
-  ) {
-    // Remove undefined values to avoid overwriting with null
+  async updateUser(id: string, userData: UserUpdateInput) {
     const cleanedData = removeUndefined(userData);
-    
+
     return prisma.user.update({
       where: { id },
       data: cleanedData,
@@ -108,26 +110,41 @@ export class UserService {
    * Authenticate user (login)
    */
   async authenticateUser(email: string, password: string) {
+    if (!JWT_SECRET || !REFRESH_TOKEN_SECRET) {
+      throw new Error("JWT secret is not defined");
+    }
+
     const user = await prisma.user.findUnique({
       where: { email },
     });
 
     if (!user) {
-      throw new Error('User not found');
+      throw new Error("User not found");
     }
 
-    // In a real application, you would compare the hashed password
-    // const isPasswordValid = await bcrypt.compare(password, user.password);
-    const isPasswordValid = password === user.password; // Insecure, for demo only
+    const isPasswordValid = await compare(password, user.password);
 
     if (!isPasswordValid) {
-      throw new Error('Invalid password');
+      throw new Error("Invalid password");
     }
 
-    // In a real application, you would generate JWT tokens here
+    const token = sign(
+      {
+        id: user.id,
+        email: user.email,
+      },
+      JWT_SECRET,
+      { expiresIn: "1h" }
+    );
+
+    // Generate refresh token
+    const refreshToken = sign({ id: user.id }, REFRESH_TOKEN_SECRET, {
+      expiresIn: "7d",
+    });
+
     return {
-      token: `mock-token-for-${user.id}`,
-      refreshToken: `mock-refresh-token-for-${user.id}`,
+      token,
+      refreshToken,
     };
   }
 }

@@ -1,14 +1,18 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { FastifyTypedInstance } from '@/types';
+import { verify } from 'jsonwebtoken';
 
-// This is a placeholder for actual authentication logic
-// In a real application, you would implement JWT verification or other auth methods
+const JWT_SECRET = process.env.JWT_SECRET
+
 export function registerAuthHandlers(app: FastifyTypedInstance): void {
   app.decorate('authenticate', async (request: FastifyRequest, reply: FastifyReply) => {
+    if (!JWT_SECRET) {
+      throw new Error('JWT_SECRET is not defined in environment variables');
+    }
+
     try {
-      // Get the Authorization header
       const authHeader = request.headers.authorization;
-      
+
       if (!authHeader) {
         throw new Error('No authorization header provided');
       }
@@ -20,17 +24,12 @@ export function registerAuthHandlers(app: FastifyTypedInstance): void {
         throw new Error('Invalid authorization format');
       }
       
-      // TODO: Implement actual token verification logic
-      // For now, this is just a placeholder
-      // const decoded = verifyToken(token);
-      // request.user = decoded;
-      
-      // Mock user for development
-      request.user = {
-        id: 'mock-user-id',
-        email: 'user@example.com',
-        role: 'user'
+      const decoded = verify(token, JWT_SECRET) as {
+        id: string;
+        email: string;
       };
+
+      request.user = decoded;
       
     } catch (err) {
       reply.status(401).send({
@@ -38,17 +37,8 @@ export function registerAuthHandlers(app: FastifyTypedInstance): void {
         error: 'Unauthorized',
         message: 'Authentication failed',
       });
+
+      app.log.error('Authentication error: ' + err);
     }
   });
-}
-
-// Add user property to FastifyRequest
-declare module 'fastify' {
-  interface FastifyRequest {
-    user?: {
-      id: string;
-      email: string;
-      role: string;
-    };
-  }
 }
