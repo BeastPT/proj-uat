@@ -1,4 +1,8 @@
 {
+  "profile": {
+    "logout": "Sair",
+    "accountInfo": "Informações da Conta"
+  },
   "auth": {
     "login": {
       "title": "Bem-vindo de Volta",

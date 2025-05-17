@@ -1,11 +1,19 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+} from "react-native";
 import { Stack } from "expo-router";
 import { Colors } from "@/src/constants/Colors";
+import { SPACING, RADIUS } from "@/src/constants/Spacing";
 
 import Avatar from "@/src/assets/svg/Avatar.svg";
 import Logout from "@/src/assets/svg/Logout.svg";
 import AccountInfo from "@/src/components/FieldsProfile";
 import { useAuth } from "@/src/context/AuthContext";
+import i18n from "@/src/i18n";
 
 export default function Profile() {
   const { user, signOut } = useAuth();
@@ -61,7 +69,7 @@ export default function Profile() {
           </View>
           <TouchableOpacity style={styles.logoutContainer} onPress={signOut}>
             <Logout width={32} height={32} stroke={Colors.dark.brand} />
-            <Text style={styles.logoutText}>Logout</Text>
+            <Text style={styles.logoutText}>{i18n.t("profile.logout")}</Text>
           </TouchableOpacity>
         </View>
 
@@ -70,10 +78,10 @@ export default function Profile() {
             contentContainerStyle={styles.scrollContainer}
             showsVerticalScrollIndicator={false}
           >
-            <AccountInfo name="Account Info" fields={fields} />
-            <AccountInfo name="Account Info" fields={fields} />
-            <AccountInfo name="Account Info" fields={fields} />
-            <AccountInfo name="Account Info" fields={fields} />
+            <AccountInfo name={i18n.t("profile.accountInfo")} fields={fields} />
+            <AccountInfo name={i18n.t("profile.accountInfo")} fields={fields} />
+            <AccountInfo name={i18n.t("profile.accountInfo")} fields={fields} />
+            <AccountInfo name={i18n.t("profile.accountInfo")} fields={fields} />
           </ScrollView>
         </View>
       </View>
@@ -90,10 +98,10 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.dark.bgElevated,
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 16,
+    paddingHorizontal: SPACING.md,
     paddingTop: 60,
-    paddingBottom: 16,
-    gap: 12,
+    paddingBottom: SPACING.md,
+    gap: SPACING.md,
   },
   avatarWrapper: {
     alignItems: "flex-start",
@@ -101,11 +109,14 @@ const styles = StyleSheet.create({
   userInfo: {
     flex: 1,
     justifyContent: "center",
-    marginHorizontal: 16,
+    marginHorizontal: SPACING.md,
   },
   logoutContainer: {
-    alignItems: "flex-end",
-    justifyContent: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center', // This centers the content horizontally
+    padding: SPACING.md,
+    marginTop: SPACING.lg,
   },
   avatarIcon: {},
   userName: {
@@ -121,17 +132,16 @@ const styles = StyleSheet.create({
     color: Colors.dark.textMuted,
   },
   logoutText: {
-    fontFamily: "Inter",
-    fontSize: 8,
-    fontWeight: "600",
-    textTransform: "uppercase",
     color: Colors.dark.brand,
-    marginTop: 2,
-    letterSpacing: -0.5,
+    fontSize: 16,
+    fontWeight: '600',
+    marginLeft: SPACING.sm,
+    fontFamily: 'Inter',
+    textAlign: 'center', // This centers the text within the Text component
   },
   scrollContainer: {
-    padding: 16,
+    padding: SPACING.md,
     paddingBottom: 186,
-    gap: 16,
+    gap: SPACING.md,
   },
 });

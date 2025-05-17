@@ -1,4 +1,8 @@
 {
+  "profile": {
+    "logout": "Log Out",
+    "accountInfo": "Account Information"
+  },
   "auth": {
     "login": {
       "title": "Welcome Back",
