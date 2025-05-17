@@ -1,147 +1,254 @@
-import { View, Text, StyleSheet, FlatList } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  TextInput,
+  KeyboardAvoidingView,
+  Platform,
+  TouchableWithoutFeedback,
+  Keyboard,
+  ListRenderItemInfo,
+  Pressable
+} from "react-native";
 import { Stack } from "expo-router";
+import { useState, useRef, useEffect } from "react";
+import { Colors } from "../../constants/Colors";
+import { SPACING, RADIUS } from "../../constants/Spacing";
+
+// TypeScript interfaces
+interface ChatMessage {
+  id: string;
+  sender: string;
+  message: string;
+  time: string;
+  isAuthor: boolean;
+}
+
+interface ChatHeaderProps {
+  title: string;
+}
+
+interface ChatMessageProps {
+  message: ChatMessage;
+}
+
+interface ChatInputProps {
+  message: string;
+  setMessage: (message: string) => void;
+  onSend: () => void;
+}
 
 // Sample chat data
-const chatData = [
+const initialChatData: ChatMessage[] = [
   {
     id: '1',
-    name: 'John Doe',
-    lastMessage: 'Hey, how are you doing?',
-    time: '10:30 AM',
-    unread: 2,
+    sender: 'John Doe',
+    message: 'Hey, how are you doing?',
+    time: '10:30',
+    isAuthor: false,
   },
   {
     id: '2',
-    name: 'Jane Smith',
-    lastMessage: 'Are you coming to the event?',
-    time: 'Yesterday',
-    unread: 0,
-  },
-  {
-    id: '3',
-    name: 'Mike Johnson',
-    lastMessage: 'The project looks great!',
-    time: 'Yesterday',
-    unread: 0,
-  },
-  {
-    id: '4',
-    name: 'Sarah Williams',
-    lastMessage: 'Thanks for your help!',
-    time: 'Monday',
-    unread: 0,
+    sender: 'Me',
+    message: 'I am good, thanks! How about you?',
+    time: '10:32',
+    isAuthor: true,
   },
 ];
 
-export default function Chat() {
+// Component for the chat header
+const ChatHeader: React.FC<ChatHeaderProps> = ({ title }) => {
   return (
-    <>
+    <Text style={styles.headerTitle}>{title}</Text>
+  );
+};
+
+// Component for individual chat messages
+const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
+  return (
+    <View
+      style={[
+        styles.messageContainer,
+        message.isAuthor ? styles.messageAuthor : styles.messageRecipient,
+      ]}
+    >
+      <Text style={styles.messageSender}>{message.sender}</Text>
+      <Text style={styles.messageText}>{message.message}</Text>
+      <Text style={styles.messageTime}>{message.time}</Text>
+    </View>
+  );
+};
+
+// Component for the chat input
+const ChatInput: React.FC<ChatInputProps> = ({ message, setMessage, onSend }) => {
+  return (
+    <View style={styles.inputContainer}>
+      <TextInput
+        style={styles.inputField}
+        placeholder="Type a message"
+        placeholderTextColor="#bbb"
+        value={message}
+        onChangeText={setMessage}
+        onSubmitEditing={onSend}
+        returnKeyType="send"
+      />
+      <Pressable
+        style={styles.inputButton}
+        onPress={onSend}
+      >
+        <Text style={styles.inputButtonText}>Send</Text>
+      </Pressable>
+    </View>
+  );
+};
+
+export default function Chat() {
+  const [chatData, setChatData] = useState<ChatMessage[]>(initialChatData);
+  const [message, setMessage] = useState<string>("");
+  const flatListRef = useRef<FlatList<ChatMessage>>(null);
+
+  // Scroll to end whenever chat data changes
+  useEffect(() => {
+    if (chatData.length > 0 && flatListRef.current) {
+      setTimeout(() => {
+        flatListRef.current?.scrollToEnd({ animated: true });
+      }, 100); // Small delay to ensure render is complete
+    }
+  }, [chatData]);
+
+  // Function to handle sending the message
+  const sendMessage = () => {
+    if (message.trim()) {
+      const newMessage: ChatMessage = {
+        id: String(Date.now()), // Generate a unique ID using timestamp
+        sender: 'Me',
+        message,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        isAuthor: true,
+      };
+      setChatData([...chatData, newMessage]);
+      setMessage("");
+    }
+  };
+
+  // Render each chat item
+  const renderItem = ({ item }: ListRenderItemInfo<ChatMessage>) => (
+    <ChatMessage message={item} />
+  );
+
+  return (
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    >
       <Stack.Screen options={{ title: "Chat", headerShown: false }} />
-      <View style={styles.container}>
-        <View style={styles.content}>
-          <Text style={styles.title}>Messages</Text>
+      <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+        <View style={styles.wrapper}>
+          <ChatHeader title="Chat with Rent A Car" />
           <FlatList
+            ref={flatListRef}
             data={chatData}
+            renderItem={renderItem}
             keyExtractor={(item) => item.id}
-            renderItem={({ item }) => (
-              <View style={styles.chatItem}>
-                <View style={styles.avatar} />
-                <View style={styles.chatInfo}>
-                  <View style={styles.chatHeader}>
-                    <Text style={styles.chatName}>{item.name}</Text>
-                    <Text style={styles.chatTime}>{item.time}</Text>
-                  </View>
-                  <View style={styles.chatFooter}>
-                    <Text style={styles.chatMessage} numberOfLines={1}>
-                      {item.lastMessage}
-                    </Text>
-                    {item.unread > 0 && (
-                      <View style={styles.unreadBadge}>
-                        <Text style={styles.unreadText}>{item.unread}</Text>
-                      </View>
-                    )}
-                  </View>
-                </View>
-              </View>
-            )}
+            style={styles.chatList}
+            contentContainerStyle={styles.chatListContent}
             showsVerticalScrollIndicator={false}
           />
+          <ChatInput
+            message={message}
+            setMessage={setMessage}
+            onSend={sendMessage}
+          />
         </View>
-      </View>
-    </>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 }
 
+// Properly flattened styles
 const styles = StyleSheet.create({
+  // Container styles
   container: {
     flex: 1,
-    backgroundColor: "#09090B",
+    backgroundColor: Colors.dark.bgBase,
   },
-  content: {
+  wrapper: {
     flex: 1,
-    padding: 20,
   },
-  title: {
-    color: "#fff",
+  chatList: {
+    flex: 1,
+    paddingHorizontal: SPACING.md - 1,
+  },
+  chatListContent: {
+    paddingBottom: SPACING.md - SPACING.xs,
+  },
+  
+  // Header styles
+  headerTitle: {
+    color: Colors.dark.textHeading,
     fontSize: 24,
     fontWeight: "bold",
-    marginTop: 40,
-    marginBottom: 20,
+    marginTop: SPACING.xl + SPACING.lg,
+    marginBottom: SPACING.lg,
+    paddingHorizontal: SPACING.md - 1,
   },
-  chatItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#1A1A1D",
-    borderRadius: 12,
-    marginBottom: 12,
-    padding: 16,
+  
+  // Message styles
+  messageContainer: {
+    marginBottom: SPACING.md - SPACING.xs,
+    padding: SPACING.md - SPACING.xs,
+    borderRadius: RADIUS.md,
+    maxWidth: '80%',
   },
-  avatar: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: "#333",
-    marginRight: 12,
+  messageAuthor: {
+    alignSelf: 'flex-end',
+    backgroundColor: Colors.dark.brand,
   },
-  chatInfo: {
-    flex: 1,
+  messageRecipient: {
+    alignSelf: 'flex-start',
+    backgroundColor: Colors.dark.brandDark,
   },
-  chatHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 4,
-  },
-  chatName: {
-    color: "#fff",
-    fontSize: 16,
+  messageSender: {
+    color: Colors.dark.textHeading,
     fontWeight: "bold",
   },
-  chatTime: {
-    color: "#999",
-    fontSize: 12,
+  messageText: {
+    color: Colors.dark.textBody,
+    marginVertical: SPACING.xs + 1,
   },
-  chatFooter: {
+  messageTime: {
+    color: Colors.dark.textMuted,
+    fontSize: 12,
+    textAlign: 'right',
+  },
+  
+  // Input styles
+  inputContainer: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    padding: SPACING.md - SPACING.xs,
+    backgroundColor: Colors.dark.bgElevated,
+    borderTopWidth: 1,
+    borderTopColor: Colors.dark.textMuted,
   },
-  chatMessage: {
-    color: "#999",
-    fontSize: 14,
+  inputField: {
     flex: 1,
-    marginRight: 8,
+    height: 40,
+    backgroundColor: Colors.dark.bgSection,
+    color: Colors.dark.textBody,
+    paddingLeft: SPACING.md - SPACING.xs,
+    borderRadius: RADIUS.md,
+    marginRight: SPACING.md - SPACING.xs,
   },
-  unreadBadge: {
-    backgroundColor: "#5D5FEF",
-    borderRadius: 10,
-    width: 20,
-    height: 20,
-    justifyContent: "center",
-    alignItems: "center",
+  inputButton: {
+    backgroundColor: Colors.dark.brand,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: SPACING.md,
+    borderRadius: RADIUS.md,
   },
-  unreadText: {
-    color: "#fff",
-    fontSize: 12,
-    fontWeight: "bold",
-  },
+  inputButtonText: {
+    color: Colors.dark.textHeading,
+    fontWeight: 'bold',
+  }
 });
