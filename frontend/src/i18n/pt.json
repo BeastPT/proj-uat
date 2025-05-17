@@ -1,0 +1,33 @@
+{
+  "auth": {
+    "login": {
+      "title": "Bem-vindo de Volta",
+      "subtitle": "Faça login para continuar",
+      "email": "Email",
+      "password": "Senha",
+      "forgotPassword": "Esqueceu a senha?",
+      "signIn": "Entrar",
+      "noAccount": "Não tem uma conta?",
+      "signUp": "Registrar",
+      "show": "Mostrar",
+      "hide": "Ocultar"
+    },
+    "register": {
+      "title": "Criar Conta",
+      "subtitle": "Registre-se para começar",
+      "fullName": "Nome Completo",
+      "email": "Email",
+      "password": "Senha",
+      "confirmPassword": "Confirmar Senha",
+      "signUp": "Registrar",
+      "haveAccount": "Já tem uma conta?",
+      "signIn": "Entrar"
+    },
+    "errors": {
+      "allFieldsRequired": "Todos os campos são obrigatórios",
+      "invalidCredentials": "Email ou senha inválidos",
+      "passwordsDoNotMatch": "As senhas não coincidem",
+      "registrationFailed": "Falha no registro. Por favor, tente novamente."
+    }
+  }
+}

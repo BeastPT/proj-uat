@@ -1,3 +1,33 @@
 {
-    
+  "auth": {
+    "login": {
+      "title": "Welcome Back",
+      "subtitle": "Sign in to continue",
+      "email": "Email",
+      "password": "Password",
+      "forgotPassword": "Forgot Password?",
+      "signIn": "Sign In",
+      "noAccount": "Don't have an account?",
+      "signUp": "Sign Up",
+      "show": "Show",
+      "hide": "Hide"
+    },
+    "register": {
+      "title": "Create Account",
+      "subtitle": "Sign up to get started",
+      "fullName": "Full Name",
+      "email": "Email",
+      "password": "Password",
+      "confirmPassword": "Confirm Password",
+      "signUp": "Sign Up",
+      "haveAccount": "Already have an account?",
+      "signIn": "Sign In"
+    },
+    "errors": {
+      "allFieldsRequired": "All fields are required",
+      "invalidCredentials": "Invalid email or password",
+      "passwordsDoNotMatch": "Passwords do not match",
+      "registrationFailed": "Registration failed. Please try again."
+    }
+  }
 }

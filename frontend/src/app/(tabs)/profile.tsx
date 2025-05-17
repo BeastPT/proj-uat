@@ -1,12 +1,14 @@
-import { View, Text, StyleSheet, ScrollView } from "react-native";
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
 import { Stack } from "expo-router";
 import { Colors } from "@/src/constants/Colors";
 
 import Avatar from "@/src/assets/svg/Avatar.svg";
 import Logout from "@/src/assets/svg/Logout.svg";
 import AccountInfo from "@/src/components/FieldsProfile";
+import { useAuth } from "@/src/context/AuthContext";
 
 export default function Profile() {
+  const { user, signOut } = useAuth();
   const fields = [
     {
       icon: <Logout width={16} height={16} stroke={Colors.dark.brand} />,
@@ -46,7 +48,7 @@ export default function Profile() {
               adjustsFontSizeToFit
               ellipsizeMode="tail"
             >
-              Janrike Gonçalvez
+              {user?.name || "User Name"}
             </Text>
             <Text
               style={styles.userEmail}
@@ -54,13 +56,13 @@ export default function Profile() {
               adjustsFontSizeToFit
               ellipsizeMode="tail"
             >
-              janrike@hot.com
+              {user?.email || "user@example.com"}
             </Text>
           </View>
-          <View style={styles.logoutContainer}>
+          <TouchableOpacity style={styles.logoutContainer} onPress={signOut}>
             <Logout width={32} height={32} stroke={Colors.dark.brand} />
             <Text style={styles.logoutText}>Logout</Text>
-          </View>
+          </TouchableOpacity>
         </View>
 
         <View>
