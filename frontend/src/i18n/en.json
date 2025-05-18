@@ -3,6 +3,51 @@
     "logout": "Log Out",
     "accountInfo": "Account Information"
   },
+  "home": {
+    "welcome": "Welcome back",
+    "searchPlaceholder": "Search for a car",
+    "featuredCars": "Featured Cars",
+    "viewAll": "View All",
+    "recentBookings": "Recent Bookings",
+    "noBookings": "No recent bookings",
+    "specialOffers": "Special Offers",
+    "availableCars": "Available Cars",
+    "pickupDate": "Pickup Date",
+    "returnDate": "Return Date",
+    "bookNow": "Book Now",
+    "seeDetails": "See Details"
+  },
+  "search": {
+    "title": "Find Your Car",
+    "searchPlaceholder": "Search by car name",
+    "filter": "Filter",
+    "sort": "Sort",
+    "allCars": "All Cars",
+    "noResults": "No cars found",
+    "filters": {
+      "title": "Filters",
+      "carType": "Car Type",
+      "priceRange": "Price Range",
+      "seats": "Seats",
+      "transmission": "Transmission",
+      "fuelType": "Fuel Type",
+      "apply": "Apply Filters",
+      "reset": "Reset"
+    },
+    "sortOptions": {
+      "priceLowToHigh": "Price: Low to High",
+      "priceHighToLow": "Price: High to Low",
+      "rating": "Rating",
+      "newest": "Newest"
+    },
+    "carTypes": {
+      "all": "All",
+      "economy": "Economy",
+      "luxury": "Luxury",
+      "suv": "SUV",
+      "sports": "Sports"
+    }
+  },
   "auth": {
     "login": {
       "title": "Welcome Back",

@@ -3,6 +3,51 @@
     "logout": "Sair",
     "accountInfo": "Informações da Conta"
   },
+  "home": {
+    "welcome": "Bem-vindo de volta",
+    "searchPlaceholder": "Procurar um carro",
+    "featuredCars": "Carros em Destaque",
+    "viewAll": "Ver Todos",
+    "recentBookings": "Reservas Recentes",
+    "noBookings": "Sem reservas recentes",
+    "specialOffers": "Ofertas Especiais",
+    "availableCars": "Carros Disponíveis",
+    "pickupDate": "Data de Retirada",
+    "returnDate": "Data de Devolução",
+    "bookNow": "Reservar Agora",
+    "seeDetails": "Ver Detalhes"
+  },
+  "search": {
+    "title": "Encontre Seu Carro",
+    "searchPlaceholder": "Buscar por nome do carro",
+    "filter": "Filtrar",
+    "sort": "Ordenar",
+    "allCars": "Todos os Carros",
+    "noResults": "Nenhum carro encontrado",
+    "filters": {
+      "title": "Filtros",
+      "carType": "Tipo de Carro",
+      "priceRange": "Faixa de Preço",
+      "seats": "Assentos",
+      "transmission": "Transmissão",
+      "fuelType": "Tipo de Combustível",
+      "apply": "Aplicar Filtros",
+      "reset": "Redefinir"
+    },
+    "sortOptions": {
+      "priceLowToHigh": "Preço: Menor para Maior",
+      "priceHighToLow": "Preço: Maior para Menor",
+      "rating": "Avaliação",
+      "newest": "Mais Recente"
+    },
+    "carTypes": {
+      "all": "Todos",
+      "economy": "Econômico",
+      "luxury": "Luxo",
+      "suv": "SUV",
+      "sports": "Esportivo"
+    }
+  },
   "auth": {
     "login": {
       "title": "Bem-vindo de Volta",
