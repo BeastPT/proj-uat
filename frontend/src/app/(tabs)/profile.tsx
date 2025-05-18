@@ -114,7 +114,7 @@ const styles = StyleSheet.create({
   logoutContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center', // This centers the content horizontally
+    justifyContent: 'center',
     padding: SPACING.md,
     marginTop: SPACING.lg,
   },

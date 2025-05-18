@@ -1,100 +1,282 @@
-import { View, Text, StyleSheet, TextInput } from "react-native";
+import React, { useState, useEffect, useMemo } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  TouchableOpacity,
+  SafeAreaView,
+  ActivityIndicator,
+} from "react-native";
 import { Stack } from "expo-router";
+import { Colors } from "@/src/constants/Colors";
+import { SPACING, RADIUS } from "@/src/constants/Spacing";
+import i18n from "@/src/i18n";
+
+import SearchBar from "@/src/components/SearchBar";
+import CarCard from "@/src/components/CarCard";
+import FilterModal, { FilterOptions } from "@/src/components/FilterModal";
+import SortModal, { SortOption } from "@/src/components/SortModal";
+import { cars } from "@/src/data/mockData";
+import { Car } from "@/src/data/mockData";
 
 export default function Search() {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isFilterModalVisible, setIsFilterModalVisible] = useState(false);
+  const [isSortModalVisible, setIsSortModalVisible] = useState(false);
+  const [filters, setFilters] = useState<FilterOptions>({
+    carType: "all",
+    priceRange: [0, 500],
+    seats: null,
+    transmission: "all",
+    fuelType: "all",
+  });
+  const [sortOption, setSortOption] = useState<SortOption>("priceLowToHigh");
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Filter and sort cars based on search query, filters, and sort option
+  const filteredCars = useMemo(() => {
+    // Simulate loading
+    setIsLoading(true);
+    
+    let filtered = [...cars];
+
+    // Apply search query filter
+    if (searchQuery) {
+      filtered = filtered.filter((car) =>
+        car.name.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    // Apply car type filter
+    if (filters.carType !== "all") {
+      filtered = filtered.filter((car) => car.type === filters.carType);
+    }
+
+    // Apply seats filter
+    if (filters.seats !== null) {
+      filtered = filtered.filter((car) => car.seats === filters.seats);
+    }
+
+    // Apply transmission filter
+    if (filters.transmission !== "all") {
+      filtered = filtered.filter((car) => car.transmission === filters.transmission);
+    }
+
+    // Apply fuel type filter
+    if (filters.fuelType !== "all") {
+      filtered = filtered.filter((car) => car.fuelType === filters.fuelType);
+    }
+
+    // Apply sorting
+    filtered.sort((a, b) => {
+      switch (sortOption) {
+        case "priceLowToHigh":
+          return a.price - b.price;
+        case "priceHighToLow":
+          return b.price - a.price;
+        case "rating":
+          return b.rating - a.rating;
+        case "newest":
+          // In a real app, we would sort by date added
+          // For now, just use the id as a proxy for "newest"
+          return parseInt(b.id) - parseInt(a.id);
+        default:
+          return 0;
+      }
+    });
+
+    // Simulate API delay
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 500);
+
+    return filtered;
+  }, [searchQuery, filters, sortOption]);
+
+  const handleApplyFilters = (newFilters: FilterOptions) => {
+    setFilters(newFilters);
+  };
+
+  const handleSelectSortOption = (option: SortOption) => {
+    setSortOption(option);
+  };
+
+  const renderCarItem = ({ item }: { item: Car }) => (
+    <View style={styles.carCardContainer}>
+      <CarCard
+        id={item.id}
+        name={item.name}
+        image={item.image}
+        price={item.price}
+        priceUnit={item.priceUnit}
+        rating={item.rating}
+        location={item.location}
+        onPress={() => {}}
+      />
+    </View>
+  );
+
   return (
-    <>
+    <SafeAreaView style={styles.safeArea}>
       <Stack.Screen options={{ title: "Search", headerShown: false }} />
       <View style={styles.container}>
-        <View style={styles.content}>
-          <Text style={styles.title}>Search</Text>
-          <View style={styles.searchContainer}>
-            <TextInput
-              style={styles.searchInput}
-              placeholder="Search..."
-              placeholderTextColor="#666"
-            />
-          </View>
-          <View style={styles.resultsContainer}>
-            <Text style={styles.sectionTitle}>Recent Searches</Text>
-            {[1, 2, 3].map((item) => (
-              <View key={item} style={styles.resultItem}>
-                <View style={styles.resultIcon} />
-                <View style={styles.resultInfo}>
-                  <Text style={styles.resultTitle}>Search Result {item}</Text>
-                  <Text style={styles.resultDescription}>
-                    Brief description about this search result
-                  </Text>
-                </View>
-              </View>
-            ))}
-          </View>
+        <View style={styles.header}>
+          <Text style={styles.title}>{i18n.t("search.title")}</Text>
         </View>
+
+        <View style={styles.searchContainer}>
+          <SearchBar
+            placeholder={i18n.t("search.searchPlaceholder")}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+          />
+        </View>
+
+        <View style={styles.filterSortContainer}>
+          <TouchableOpacity
+            style={styles.filterButton}
+            onPress={() => setIsFilterModalVisible(true)}
+          >
+            <Text style={styles.filterButtonText}>{i18n.t("search.filter")}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.sortButton}
+            onPress={() => setIsSortModalVisible(true)}
+          >
+            <Text style={styles.sortButtonText}>{i18n.t("search.sort")}</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.resultsContainer}>
+          <Text style={styles.resultsTitle}>
+            {filteredCars.length > 0
+              ? `${i18n.t("search.allCars")} (${filteredCars.length})`
+              : i18n.t("search.noResults")}
+          </Text>
+
+          {isLoading ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color={Colors.dark.brand} />
+            </View>
+          ) : (
+            <FlatList
+              data={filteredCars}
+              keyExtractor={(item) => item.id}
+              renderItem={renderCarItem}
+              contentContainerStyle={styles.carsList}
+              showsVerticalScrollIndicator={false}
+              ListEmptyComponent={
+                <View style={styles.emptyContainer}>
+                  <Text style={styles.emptyText}>{i18n.t("search.noResults")}</Text>
+                </View>
+              }
+            />
+          )}
+        </View>
+
+        <FilterModal
+          visible={isFilterModalVisible}
+          onClose={() => setIsFilterModalVisible(false)}
+          onApplyFilters={handleApplyFilters}
+          initialFilters={filters}
+        />
+
+        <SortModal
+          visible={isSortModalVisible}
+          onClose={() => setIsSortModalVisible(false)}
+          onSelectOption={handleSelectSortOption}
+          selectedOption={sortOption}
+        />
       </View>
-    </>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: Colors.dark.bgBase,
+  },
   container: {
     flex: 1,
-    backgroundColor: "#09090B",
+    backgroundColor: Colors.dark.bgBase,
+    paddingHorizontal: SPACING.md,
   },
-  content: {
-    flex: 1,
-    padding: 20,
+  header: {
+    marginTop: SPACING.xl,
+    marginBottom: SPACING.md,
   },
   title: {
-    color: "#fff",
+    color: Colors.dark.textHeading,
     fontSize: 24,
     fontWeight: "bold",
-    marginTop: 40,
-    marginBottom: 20,
+    fontFamily: "Sora",
   },
   searchContainer: {
-    marginBottom: 20,
+    marginBottom: SPACING.md,
   },
-  searchInput: {
-    backgroundColor: "#1A1A1D",
-    borderRadius: 8,
-    color: "#fff",
-    fontSize: 16,
-    padding: 12,
+  filterSortContainer: {
+    flexDirection: "row",
+    marginBottom: SPACING.md,
+  },
+  filterButton: {
+    flex: 1,
+    backgroundColor: Colors.dark.bgElevated,
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.md,
+    borderRadius: RADIUS.md,
+    marginRight: SPACING.sm,
+    alignItems: "center",
+  },
+  filterButtonText: {
+    color: Colors.dark.textBody,
+    fontSize: 14,
+    fontFamily: "Inter",
+  },
+  sortButton: {
+    flex: 1,
+    backgroundColor: Colors.dark.bgElevated,
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.md,
+    borderRadius: RADIUS.md,
+    marginLeft: SPACING.sm,
+    alignItems: "center",
+  },
+  sortButtonText: {
+    color: Colors.dark.textBody,
+    fontSize: 14,
+    fontFamily: "Inter",
   },
   resultsContainer: {
     flex: 1,
   },
-  sectionTitle: {
-    color: "#999",
+  resultsTitle: {
+    color: Colors.dark.textMuted,
     fontSize: 16,
-    marginBottom: 12,
+    marginBottom: SPACING.md,
+    fontFamily: "Inter",
   },
-  resultItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#1A1A1D",
-    borderRadius: 8,
-    marginBottom: 12,
-    padding: 16,
+  carsList: {
+    paddingBottom: SPACING.xl,
   },
-  resultIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "#333",
-    marginRight: 12,
+  carCardContainer: {
+    marginBottom: SPACING.md,
   },
-  resultInfo: {
+  loadingContainer: {
     flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
-  resultTitle: {
-    color: "#fff",
+  emptyContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingTop: SPACING.xl * 2,
+  },
+  emptyText: {
+    color: Colors.dark.textMuted,
     fontSize: 16,
-    fontWeight: "bold",
-    marginBottom: 4,
-  },
-  resultDescription: {
-    color: "#999",
-    fontSize: 14,
+    fontFamily: "Inter",
   },
 });
