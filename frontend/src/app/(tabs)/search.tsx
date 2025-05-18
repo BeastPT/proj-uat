@@ -113,6 +113,7 @@ export default function Search() {
         rating={item.rating}
         location={item.location}
         onPress={() => {}}
+        featured={true}
       />
     </View>
   );
@@ -166,6 +167,7 @@ export default function Search() {
               renderItem={renderCarItem}
               contentContainerStyle={styles.carsList}
               showsVerticalScrollIndicator={false}
+              numColumns={1} // Ensure single column layout
               ListEmptyComponent={
                 <View style={styles.emptyContainer}>
                   <Text style={styles.emptyText}>{i18n.t("search.noResults")}</Text>
@@ -201,7 +203,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.dark.bgBase,
-    paddingHorizontal: SPACING.md,
+    paddingHorizontal: SPACING.sm, // Reduced horizontal padding to use more screen width
   },
   header: {
     marginTop: SPACING.xl,
@@ -215,18 +217,20 @@ const styles = StyleSheet.create({
   },
   searchContainer: {
     marginBottom: SPACING.md,
+    width: '100%', // Ensure search bar uses full width
   },
   filterSortContainer: {
     flexDirection: "row",
     marginBottom: SPACING.md,
+    width: '100%', // Ensure buttons container uses full width
   },
   filterButton: {
     flex: 1,
     backgroundColor: Colors.dark.bgElevated,
     paddingVertical: SPACING.sm,
-    paddingHorizontal: SPACING.md,
+    paddingHorizontal: SPACING.sm, // Reduced horizontal padding
     borderRadius: RADIUS.md,
-    marginRight: SPACING.sm,
+    marginRight: SPACING.xs, // Reduced margin between buttons
     alignItems: "center",
   },
   filterButtonText: {
@@ -238,9 +242,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.dark.bgElevated,
     paddingVertical: SPACING.sm,
-    paddingHorizontal: SPACING.md,
+    paddingHorizontal: SPACING.sm, // Reduced horizontal padding
     borderRadius: RADIUS.md,
-    marginLeft: SPACING.sm,
+    marginLeft: SPACING.xs, // Reduced margin between buttons
     alignItems: "center",
   },
   sortButtonText: {
@@ -250,6 +254,7 @@ const styles = StyleSheet.create({
   },
   resultsContainer: {
     flex: 1,
+    width: '100%', // Ensure results container uses full width
   },
   resultsTitle: {
     color: Colors.dark.textMuted,
@@ -259,9 +264,12 @@ const styles = StyleSheet.create({
   },
   carsList: {
     paddingBottom: SPACING.xl,
+    width: '100%', // Ensure list uses full width
   },
   carCardContainer: {
     marginBottom: SPACING.md,
+    width: '100%', // Ensure each card container uses full width
+    paddingHorizontal: 0, // Remove any horizontal padding
   },
   loadingContainer: {
     flex: 1,

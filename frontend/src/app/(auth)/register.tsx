@@ -43,9 +43,14 @@ export default function Register() {
     try {
       await signUp(name, email, password);
       router.replace("/(tabs)");
-    } catch (error) {
+    } catch (error: any) {
       // No need to log expected authentication errors
-      setError(i18n.t('auth.errors.registrationFailed'));
+      if (error.response && error.response.status === 409) {
+        setError(i18n.t('auth.errors.emailAlreadyExists'));
+        return;
+      } else {
+        setError(i18n.t('auth.errors.registrationFailed'));
+      }
     }
   };
 
@@ -61,7 +66,7 @@ export default function Register() {
         <ScrollView contentContainerStyle={styles.scrollContent}>
           <View style={styles.logoContainer}>
             <Image
-              source={require("@/src/assets/images/react-logo.png")}
+              source={require("@/src/assets/images/logo.png")}
               style={styles.logo}
               resizeMode="contain"
             />
@@ -73,7 +78,7 @@ export default function Register() {
           <View style={styles.form}>
             <AuthInput
               label={i18n.t('auth.register.fullName')}
-              placeholder="Enter your full name"
+              placeholder={i18n.t('auth.register.fullNamePlaceholder')}
               placeholderTextColor={Colors.dark.textMuted}
               value={name}
               onChangeText={setName}
@@ -82,7 +87,7 @@ export default function Register() {
 
             <AuthInput
               label={i18n.t('auth.register.email')}
-              placeholder="Enter your email"
+              placeholder={i18n.t('auth.register.emailPlaceholder')}
               placeholderTextColor={Colors.dark.textMuted}
               value={email}
               onChangeText={setEmail}
@@ -92,7 +97,7 @@ export default function Register() {
 
             <AuthInput
               label={i18n.t('auth.register.password')}
-              placeholder="Create a password"
+              placeholder={i18n.t('auth.register.passwordPlaceholder')}
               placeholderTextColor={Colors.dark.textMuted}
               value={password}
               onChangeText={setPassword}
@@ -103,7 +108,7 @@ export default function Register() {
 
             <AuthInput
               label={i18n.t('auth.register.confirmPassword')}
-              placeholder="Confirm your password"
+              placeholder={i18n.t('auth.register.confirmPasswordPlaceholder')}
               placeholderTextColor={Colors.dark.textMuted}
               value={confirmPassword}
               onChangeText={setConfirmPassword}

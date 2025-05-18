@@ -79,11 +79,11 @@ PHYSICAL_DEVICE_API_URL=http://YOUR_IP_ADDRESS:3000/api
 Replace `YOUR_IP_ADDRESS` with your actual IP address (e.g., 192.168.1.5).
 
 This will display all your network interfaces and their IP addresses. Use the IP address of the network interface that's connected to the same network as your mobile device.
-
+    
 Alternatively, you can find your IP address manually:
 - On Windows: Open Command Prompt and type `ipconfig`
-- On macOS: Open System Preferences > Network or type `ifconfig` in Terminal
-- On Linux: Open Terminal and type `ip addr show` or `ifconfig`
+- On macOS: Open System Preferences > Network or type `ipconfig` in Terminal
+- On Linux: Open Terminal and type `ip addr show` or `ipconfig`
 
 ### Running the Application
 

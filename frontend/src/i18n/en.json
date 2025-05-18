@@ -59,7 +59,9 @@
       "noAccount": "Don't have an account?",
       "signUp": "Sign Up",
       "show": "Show",
-      "hide": "Hide"
+      "hide": "Hide",
+      "emailPlaceholder": "Enter your email",
+      "passwordPlaceholder": "Enter your password"
     },
     "register": {
       "title": "Create Account",
@@ -70,13 +72,18 @@
       "confirmPassword": "Confirm Password",
       "signUp": "Sign Up",
       "haveAccount": "Already have an account?",
-      "signIn": "Sign In"
+      "signIn": "Sign In",
+      "namePlaceholder": "Enter your full name",
+      "emailPlaceholder": "Enter your email",
+      "passwordPlaceholder": "Enter your password",
+      "confirmPasswordPlaceholder": "Confirm your password"
     },
     "errors": {
       "allFieldsRequired": "All fields are required",
       "invalidCredentials": "Invalid email or password",
       "passwordsDoNotMatch": "Passwords do not match",
-      "registrationFailed": "Registration failed. Please try again."
+      "registrationFailed": "Registration failed. Please try again.",
+      "emailAlreadyExists": "This email is already in use."
     }
   }
 }

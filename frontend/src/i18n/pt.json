@@ -59,7 +59,9 @@
       "noAccount": "Não tem uma conta?",
       "signUp": "Registrar",
       "show": "Mostrar",
-      "hide": "Ocultar"
+      "hide": "Ocultar",
+      "emailPlaceholder": "Digite seu email",
+      "passwordPlaceholder": "Digite sua senha"
     },
     "register": {
       "title": "Criar Conta",
@@ -70,13 +72,18 @@
       "confirmPassword": "Confirmar Senha",
       "signUp": "Registrar",
       "haveAccount": "Já tem uma conta?",
-      "signIn": "Entrar"
+      "signIn": "Entrar",
+      "namePlaceholder": "Digite seu nome completo",
+      "emailPlaceholder": "Digite seu email",
+      "passwordPlaceholder": "Digite sua senha",
+      "confirmPasswordPlaceholder": "Confirme sua senha"
     },
     "errors": {
       "allFieldsRequired": "Todos os campos são obrigatórios",
       "invalidCredentials": "Email ou senha inválidos",
       "passwordsDoNotMatch": "As senhas não coincidem",
-      "registrationFailed": "Falha no registro. Por favor, tente novamente."
+      "registrationFailed": "Falha no registro. Por favor, tente novamente.",
+      "emailAlreadyExists": "Este email já está em uso."
     }
   }
 }

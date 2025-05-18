@@ -58,7 +58,7 @@ export default function Login() {
         <ScrollView contentContainerStyle={styles.scrollContent}>
           <View style={styles.logoContainer}>
             <Image
-              source={require("@/src/assets/images/react-logo.png")}
+              source={require("@/src/assets/images/logo.png")}
               style={styles.logo}
               resizeMode="contain"
             />
@@ -70,7 +70,7 @@ export default function Login() {
           <View style={styles.form}>
             <AuthInput
               label={i18n.t('auth.login.email')}
-              placeholder="Enter your email"
+              placeholder={i18n.t('auth.login.emailPlaceholder')}
               placeholderTextColor={Colors.dark.textMuted}
               value={email}
               onChangeText={setEmail}
@@ -80,7 +80,7 @@ export default function Login() {
 
             <AuthInput
               label={i18n.t('auth.login.password')}
-              placeholder="Enter your password"
+              placeholder={i18n.t('auth.login.passwordPlaceholder')}
               placeholderTextColor={Colors.dark.textMuted}
               value={password}
               onChangeText={setPassword}
