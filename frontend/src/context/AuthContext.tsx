@@ -1,11 +1,17 @@
 import { createContext, useState, useContext, ReactNode, useEffect } from "react";
 import { useRouter, useSegments } from "expo-router";
+import { apiService } from "@/src/services/api.service";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // Define the user type
 type User = {
   id: string;
   name: string;
   email: string;
+  country?: string;
+  phone?: string;
+  birthdate?: string;
+  isVerified?: boolean;
 } | null;
 
 // Define the context type
@@ -29,12 +35,45 @@ const AuthContext = createContext<AuthContextType>({
 // Provider component
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true); // Start with loading true to check token
   const router = useRouter();
   const segments = useSegments();
 
+  // Check for existing token on app start
+  useEffect(() => {
+    const checkToken = async () => {
+      try {
+        const token = await apiService.getToken();
+        
+        if (token) {
+          // If token exists, fetch user profile
+          const userProfile = await apiService.getUserProfile();
+          setUser({
+            id: userProfile.id,
+            name: userProfile.name,
+            email: userProfile.email,
+            country: userProfile.country,
+            phone: userProfile.phone,
+            birthdate: userProfile.birthdate,
+            isVerified: userProfile.isVerified,
+          });
+        }
+      } catch (error) {
+        console.error("Token validation error:", error);
+        // If token is invalid, clear it
+        await apiService.clearTokens();
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    checkToken();
+  }, []);
+
   // Check if the user is authenticated and redirect accordingly
   useEffect(() => {
+    if (isLoading) return; // Skip navigation while checking token
+    
     const inAuthGroup = segments[0] === "(auth)";
 
     if (!user && !inAuthGroup) {
@@ -44,24 +83,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Redirect to the home page if authenticated
       router.replace("/(tabs)");
     }
-  }, [user, segments]);
+  }, [user, segments, isLoading]);
 
   // Sign in function
   const signIn = async (email: string, password: string) => {
     setIsLoading(true);
     try {
-      // Here you would implement actual authentication logic
-      // For now, we'll just simulate a successful login
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Use the API service to authenticate
+      const response = await apiService.login(email, password);
+      
+      // Fetch user profile
+      const userProfile = await apiService.getUserProfile();
       
       // Set the user
       setUser({
-        id: "1",
-        name: "John Doe",
-        email: email,
+        id: userProfile.id,
+        name: userProfile.name,
+        email: userProfile.email,
+        country: userProfile.country,
+        phone: userProfile.phone,
+        birthdate: userProfile.birthdate,
+        isVerified: userProfile.isVerified,
       });
-    } catch (error) {
-      console.error("Sign in error:", error);
+    } catch (error: any) {
+      // Only log unexpected errors, not authentication errors
+      if (!error.response || (error.response.status !== 400 && error.response.status !== 401)) {
+        console.error("Sign in error:", error);
+      }
       throw error;
     } finally {
       setIsLoading(false);
@@ -72,18 +120,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signUp = async (name: string, email: string, password: string) => {
     setIsLoading(true);
     try {
-      // Here you would implement actual registration logic
-      // For now, we'll just simulate a successful registration
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Use the API service to register and login
+      await apiService.register(name, email, password);
+      
+      // Fetch user profile
+      const userProfile = await apiService.getUserProfile();
       
       // Set the user
       setUser({
-        id: "1",
-        name: name,
-        email: email,
+        id: userProfile.id,
+        name: userProfile.name,
+        email: userProfile.email,
+        country: userProfile.country,
+        phone: userProfile.phone,
+        birthdate: userProfile.birthdate,
+        isVerified: userProfile.isVerified,
       });
-    } catch (error) {
-      console.error("Sign up error:", error);
+    } catch (error: any) {
+      // Only log unexpected errors, not authentication errors
+      if (!error.response || (error.response.status !== 400 && error.response.status !== 401 && error.response.status !== 409)) {
+        console.error("Sign up error:", error);
+      }
       throw error;
     } finally {
       setIsLoading(false);
@@ -91,9 +148,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   // Sign out function
-  const signOut = () => {
-    setUser(null);
-    router.replace("/(auth)/login");
+  const signOut = async () => {
+    setIsLoading(true);
+    try {
+      await apiService.logout();
+      setUser(null);
+      router.replace("/(auth)/login");
+    } catch (error) {
+      console.error("Sign out error:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

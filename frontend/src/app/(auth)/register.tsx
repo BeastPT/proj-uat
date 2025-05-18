@@ -44,7 +44,7 @@ export default function Register() {
       await signUp(name, email, password);
       router.replace("/(tabs)");
     } catch (error) {
-      console.error("Registration error:", error);
+      // No need to log expected authentication errors
       setError(i18n.t('auth.errors.registrationFailed'));
     }
   };

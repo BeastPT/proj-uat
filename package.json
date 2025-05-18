@@ -1,0 +1,25 @@
+{
+  "name": "uat-project",
+  "version": "1.0.0",
+  "description": "UAT Project with React Native Frontend and Fastify Backend",
+  "main": "index.js",
+  "scripts": {
+    "start:backend": "cd backend && pnpm dev",
+    "start:frontend": "cd frontend && pnpm start",
+    "dev": "concurrently \"pnpm run start:backend\" \"pnpm run start:frontend\"",
+    "build:backend": "cd backend && pnpm build",
+    "start:prod": "cd backend && pnpm start",
+    "install:all": "pnpm install && cd backend && pnpm install && cd ../frontend && pnpm install",
+    "get-ip": "node get-ip.js"
+  },
+  "keywords": [
+    "react-native",
+    "fastify",
+    "typescript"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

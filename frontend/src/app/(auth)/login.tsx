@@ -41,7 +41,7 @@ export default function Login() {
 
       // The AuthContext will handle navigation
     } catch (error) {
-      console.error("Login error:", error);
+      // No need to log expected authentication errors
       setError(i18n.t('auth.errors.invalidCredentials'));
     }
   };
