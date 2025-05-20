@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import {
   View,
   Text,
@@ -8,8 +8,8 @@ import {
   ScrollView,
   SafeAreaView,
 } from "react-native";
-import { Colors } from "@/src/constants/Colors";
 import { SPACING, RADIUS } from "@/src/constants/Spacing";
+import { useTheme } from "@/src/context/ThemeContext";
 import i18n from "@/src/i18n";
 
 type CarType = "all" | "economy" | "luxury" | "suv" | "sports";
@@ -37,7 +37,9 @@ const FilterModal: React.FC<FilterModalProps> = ({
   onApplyFilters,
   initialFilters,
 }) => {
+  const { colors } = useTheme();
   const [filters, setFilters] = useState<FilterOptions>(initialFilters);
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   const handleReset = () => {
     setFilters({
@@ -210,14 +212,15 @@ const FilterModal: React.FC<FilterModalProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
+// Create styles function that takes colors as a parameter
+const createStyles = (colors: any) => StyleSheet.create({
   modalContainer: {
     flex: 1,
     backgroundColor: "rgba(0, 0, 0, 0.5)",
     justifyContent: "flex-end",
   },
   modalContent: {
-    backgroundColor: Colors.dark.bgBase,
+    backgroundColor: colors.bgBase,
     borderTopLeftRadius: RADIUS.xl,
     borderTopRightRadius: RADIUS.xl,
     paddingTop: SPACING.lg,
@@ -232,13 +235,13 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.lg,
   },
   title: {
-    color: Colors.dark.textHeading,
+    color: colors.textHeading,
     fontSize: 20,
     fontWeight: "bold",
     fontFamily: "Sora",
   },
   closeButton: {
-    color: Colors.dark.textMuted,
+    color: colors.textMuted,
     fontSize: 20,
     padding: SPACING.sm,
   },
@@ -250,7 +253,7 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.xl,
   },
   filterTitle: {
-    color: Colors.dark.textBody,
+    color: colors.textBody,
     fontSize: 16,
     fontWeight: "bold",
     marginBottom: SPACING.md,
@@ -262,7 +265,7 @@ const styles = StyleSheet.create({
     marginHorizontal: -SPACING.xs,
   },
   optionButton: {
-    backgroundColor: Colors.dark.bgElevated,
+    backgroundColor: colors.bgElevated,
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.sm,
     borderRadius: RADIUS.md,
@@ -272,16 +275,16 @@ const styles = StyleSheet.create({
     borderColor: "transparent",
   },
   selectedOption: {
-    borderColor: Colors.dark.brand,
-    backgroundColor: Colors.dark.bgSection,
+    borderColor: colors.brand,
+    backgroundColor: colors.bgSection,
   },
   optionText: {
-    color: Colors.dark.textBody,
+    color: colors.textBody,
     fontSize: 14,
     fontFamily: "Inter",
   },
   selectedOptionText: {
-    color: Colors.dark.brand,
+    color: colors.brand,
     fontWeight: "bold",
   },
   footer: {
@@ -290,29 +293,29 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.lg,
     paddingTop: SPACING.md,
     borderTopWidth: 1,
-    borderTopColor: Colors.dark.bgElevated,
+    borderTopColor: colors.bgElevated,
   },
   resetButton: {
     paddingVertical: SPACING.md,
     paddingHorizontal: SPACING.lg,
     borderRadius: RADIUS.md,
     borderWidth: 1,
-    borderColor: Colors.dark.brand,
+    borderColor: colors.brand,
   },
   resetButtonText: {
-    color: Colors.dark.brand,
+    color: colors.brand,
     fontSize: 16,
     fontWeight: "bold",
     fontFamily: "Sora",
   },
   applyButton: {
-    backgroundColor: Colors.dark.brand,
+    backgroundColor: colors.brand,
     paddingVertical: SPACING.md,
     paddingHorizontal: SPACING.lg,
     borderRadius: RADIUS.md,
   },
   applyButtonText: {
-    color: Colors.dark.textInvert,
+    color: colors.textInvert,
     fontSize: 16,
     fontWeight: "bold",
     fontFamily: "Sora",

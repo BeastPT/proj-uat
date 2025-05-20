@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { View, Text, StyleSheet } from "react-native";
-import { Colors } from "@/src/constants/Colors";
+import { useTheme } from "@/src/context/ThemeContext";
 import Pencil from "@/src/assets/svg/Pencil.svg";
 
 type Field = {
@@ -16,12 +16,14 @@ export default function AccountInfo({
   name: string;
   fields: Field[];
 }) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   return (
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerText}>{name}</Text>
-        <Pencil width={20} height={20} stroke={Colors.dark.brand} />
+        <Pencil width={20} height={20} stroke={colors.brand} />
       </View>
 
       {/* Info Rows */}
@@ -46,6 +48,8 @@ function InfoRow({
   label: string;
   value: string;
 }) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   return (
     <View style={styles.row}>
       <View style={styles.labelContainer}>
@@ -57,9 +61,10 @@ function InfoRow({
   );
 }
 
-const styles = StyleSheet.create({
+// Create styles function that takes colors as a parameter
+const createStyles = (colors: any) => StyleSheet.create({
   container: {
-    backgroundColor: Colors.dark.bgSection,
+    backgroundColor: colors.bgSection,
     borderRadius: 12,
     padding: 16,
     gap: 16,
@@ -72,7 +77,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   headerText: {
-    color: Colors.dark.textHeading,
+    color: colors.textHeading,
     fontSize: 18,
     fontWeight: "600",
   },
@@ -91,12 +96,12 @@ const styles = StyleSheet.create({
     flexShrink: 1,
   },
   labelText: {
-    color: Colors.dark.textBody,
+    color: colors.textBody,
     fontSize: 16,
     fontWeight: "500",
   },
   valueText: {
-    color: Colors.dark.textMuted,
+    color: colors.textMuted,
     fontSize: 14,
     lineHeight: 20,
     textAlign: "right",

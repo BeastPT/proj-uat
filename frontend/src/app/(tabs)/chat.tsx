@@ -12,9 +12,9 @@ import {
   Pressable
 } from "react-native";
 import { Stack } from "expo-router";
-import { useState, useRef, useEffect } from "react";
-import { Colors } from "../../constants/Colors";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { SPACING, RADIUS } from "../../constants/Spacing";
+import { useTheme } from "../../context/ThemeContext";
 
 // TypeScript interfaces
 interface ChatMessage {
@@ -59,6 +59,8 @@ const initialChatData: ChatMessage[] = [
 
 // Component for the chat header
 const ChatHeader: React.FC<ChatHeaderProps> = ({ title }) => {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   return (
     <Text style={styles.headerTitle}>{title}</Text>
   );
@@ -66,6 +68,8 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({ title }) => {
 
 // Component for individual chat messages
 const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   return (
     <View
       style={[
@@ -82,12 +86,14 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
 
 // Component for the chat input
 const ChatInput: React.FC<ChatInputProps> = ({ message, setMessage, onSend }) => {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   return (
     <View style={styles.inputContainer}>
       <TextInput
         style={styles.inputField}
         placeholder="Type a message"
-        placeholderTextColor="#bbb"
+        placeholderTextColor={colors.textMuted}
         value={message}
         onChangeText={setMessage}
         onSubmitEditing={onSend}
@@ -104,9 +110,11 @@ const ChatInput: React.FC<ChatInputProps> = ({ message, setMessage, onSend }) =>
 };
 
 export default function Chat() {
+  const { colors } = useTheme();
   const [chatData, setChatData] = useState<ChatMessage[]>(initialChatData);
   const [message, setMessage] = useState<string>("");
   const flatListRef = useRef<FlatList<ChatMessage>>(null);
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   // Scroll to end whenever chat data changes
   useEffect(() => {
@@ -166,12 +174,12 @@ export default function Chat() {
   );
 }
 
-// Properly flattened styles
-const styles = StyleSheet.create({
+// Create styles function that takes colors as a parameter
+const createStyles = (colors: any) => StyleSheet.create({
   // Container styles
   container: {
     flex: 1,
-    backgroundColor: Colors.dark.bgBase,
+    backgroundColor: colors.bgBase,
   },
   wrapper: {
     flex: 1,
@@ -186,7 +194,7 @@ const styles = StyleSheet.create({
   
   // Header styles
   headerTitle: {
-    color: Colors.dark.textHeading,
+    color: colors.textHeading,
     fontSize: 24,
     fontWeight: "bold",
     marginTop: SPACING.xl + SPACING.lg,
@@ -203,22 +211,22 @@ const styles = StyleSheet.create({
   },
   messageAuthor: {
     alignSelf: 'flex-end',
-    backgroundColor: Colors.dark.brand,
+    backgroundColor: colors.brand,
   },
   messageRecipient: {
     alignSelf: 'flex-start',
-    backgroundColor: Colors.dark.brandDark,
+    backgroundColor: colors.brandDark,
   },
   messageSender: {
-    color: Colors.dark.textHeading,
+    color: colors.textHeading,
     fontWeight: "bold",
   },
   messageText: {
-    color: Colors.dark.textBody,
+    color: colors.textBody,
     marginVertical: SPACING.xs + 1,
   },
   messageTime: {
-    color: Colors.dark.textMuted,
+    color: colors.textMuted,
     fontSize: 12,
     textAlign: 'right',
   },
@@ -227,28 +235,28 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: "row",
     padding: SPACING.md - SPACING.xs,
-    backgroundColor: Colors.dark.bgElevated,
+    backgroundColor: colors.bgElevated,
     borderTopWidth: 1,
-    borderTopColor: Colors.dark.textMuted,
+    borderTopColor: colors.textMuted,
   },
   inputField: {
     flex: 1,
     height: 40,
-    backgroundColor: Colors.dark.bgSection,
-    color: Colors.dark.textBody,
+    backgroundColor: colors.bgSection,
+    color: colors.textBody,
     paddingLeft: SPACING.md - SPACING.xs,
     borderRadius: RADIUS.md,
     marginRight: SPACING.md - SPACING.xs,
   },
   inputButton: {
-    backgroundColor: Colors.dark.brand,
+    backgroundColor: colors.brand,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: SPACING.md,
     borderRadius: RADIUS.md,
   },
   inputButtonText: {
-    color: Colors.dark.textHeading,
+    color: colors.textHeading,
     fontWeight: 'bold',
   }
 });

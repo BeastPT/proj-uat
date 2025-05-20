@@ -1,5 +1,6 @@
 import { Slot } from "expo-router";
 import { AuthProvider } from "@/src/context/AuthContext";
+import { ThemeProvider } from "@/src/context/ThemeContext";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
@@ -27,10 +28,12 @@ export default function RootLayout() {
     return null;
   }
 
-  // Wrap the app with the AuthProvider
+  // Wrap the app with the AuthProvider and ThemeProvider
   return (
     <AuthProvider>
-      <Slot />
+      <ThemeProvider>
+        <Slot />
+      </ThemeProvider>
     </AuthProvider>
   );
 }

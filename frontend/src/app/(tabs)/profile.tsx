@@ -6,36 +6,39 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { Stack } from "expo-router";
-import { Colors } from "@/src/constants/Colors";
 import { SPACING, RADIUS } from "@/src/constants/Spacing";
 
 import Avatar from "@/src/assets/svg/Avatar.svg";
 import Logout from "@/src/assets/svg/Logout.svg";
 import AccountInfo from "@/src/components/FieldsProfile";
 import { useAuth } from "@/src/context/AuthContext";
+import { useTheme } from "@/src/context/ThemeContext";
+import ThemeSwitcher from "@/src/components/ThemeSwitcher";
 import i18n from "@/src/i18n";
 
 export default function Profile() {
   const { user, signOut } = useAuth();
+  const { colors } = useTheme();
+  
   const fields = [
     {
-      icon: <Logout width={16} height={16} stroke={Colors.dark.brand} />,
+      icon: <Logout width={16} height={16} stroke={colors.brand} />,
       label: "Full Name",
       value: "Janrike Serão Gonçalvez",
     },
     {
-      icon: <Logout width={16} height={16} stroke={Colors.dark.brand} />,
+      icon: <Logout width={16} height={16} stroke={colors.brand} />,
       label: "Phone Number",
       value: "+351 900000000",
     },
     {
-      icon: <Logout width={16} height={16} stroke={Colors.dark.brand} />,
+      icon: <Logout width={16} height={16} stroke={colors.brand} />,
       label: "Date of Birth",
       value: "September 8, 2004",
     },
     {
-      icon: <Logout width={16} height={16} stroke={Colors.dark.brand} />,
-      label: "Driver’s License",
+      icon: <Logout width={16} height={16} stroke={colors.brand} />,
+      label: "Driver's License",
       value: "M-12321313 1",
     },
   ];
@@ -43,15 +46,15 @@ export default function Profile() {
   return (
     <>
       <Stack.Screen options={{ title: "Profile", headerShown: false }} />
-      <View style={styles.container}>
+      <View style={[styles.container, { backgroundColor: colors.bgBase }]}>
         {/* HEADER */}
-        <View style={styles.header}>
+        <View style={[styles.header, { backgroundColor: colors.bgElevated }]}>
           <View style={styles.avatarWrapper}>
             <Avatar width={80} height={80} style={styles.avatarIcon} />
           </View>
           <View style={styles.userInfo}>
             <Text
-              style={styles.userName}
+              style={[styles.userName, { color: colors.textBody }]}
               numberOfLines={1}
               adjustsFontSizeToFit
               ellipsizeMode="tail"
@@ -59,7 +62,7 @@ export default function Profile() {
               {user?.name || "User Name"}
             </Text>
             <Text
-              style={styles.userEmail}
+              style={[styles.userEmail, { color: colors.textMuted }]}
               numberOfLines={1}
               adjustsFontSizeToFit
               ellipsizeMode="tail"
@@ -68,8 +71,8 @@ export default function Profile() {
             </Text>
           </View>
           <TouchableOpacity style={styles.logoutContainer} onPress={signOut}>
-            <Logout width={32} height={32} stroke={Colors.dark.brand} />
-            <Text style={styles.logoutText}>{i18n.t("profile.logout")}</Text>
+            <Logout width={32} height={32} stroke={colors.brand} />
+            <Text style={[styles.logoutText, { color: colors.brand }]}>{i18n.t("profile.logout")}</Text>
           </TouchableOpacity>
         </View>
 
@@ -78,6 +81,7 @@ export default function Profile() {
             contentContainerStyle={styles.scrollContainer}
             showsVerticalScrollIndicator={false}
           >
+            <ThemeSwitcher style={[styles.themeSwitcher, { backgroundColor: colors.bgElevated }]} />
             <AccountInfo name={i18n.t("profile.accountInfo")} fields={fields} />
             <AccountInfo name={i18n.t("profile.accountInfo")} fields={fields} />
             <AccountInfo name={i18n.t("profile.accountInfo")} fields={fields} />
@@ -89,13 +93,14 @@ export default function Profile() {
   );
 }
 
+// Create styles using the current theme
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.dark.bgBase,
+    backgroundColor: "transparent", // Will be set dynamically
   },
   header: {
-    backgroundColor: Colors.dark.bgElevated,
+    backgroundColor: "transparent", // Will be set dynamically
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: SPACING.md,
@@ -123,25 +128,29 @@ const styles = StyleSheet.create({
     fontFamily: "Sora",
     fontSize: 18,
     fontWeight: "600",
-    color: Colors.dark.textBody,
+    color: "transparent", // Will be set dynamically
     width: "100%",
   },
   userEmail: {
     fontFamily: "Inter",
     fontSize: 14,
-    color: Colors.dark.textMuted,
+    color: "transparent", // Will be set dynamically
   },
   logoutText: {
-    color: Colors.dark.brand,
     fontSize: 16,
     fontWeight: '600',
     marginLeft: SPACING.sm,
     fontFamily: 'Inter',
-    textAlign: 'center', // This centers the text within the Text component
+    textAlign: 'center',
   },
   scrollContainer: {
     padding: SPACING.md,
     paddingBottom: 186,
     gap: SPACING.md,
+  },
+  themeSwitcher: {
+    marginBottom: SPACING.md,
+    backgroundColor: "transparent", // Will be set dynamically
+    borderRadius: RADIUS.md,
   },
 });

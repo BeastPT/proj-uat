@@ -1,5 +1,6 @@
 import { View, StyleSheet, TouchableOpacity } from "react-native";
-import { Colors } from "@/src/constants/Colors";
+import { useTheme } from "@/src/context/ThemeContext";
+import { useMemo } from "react";
 import HomeIcon from "@/src/assets/svg/Home.svg";
 import SearchIcon from "@/src/assets/svg/Magnifying-Glass.svg";
 import ChatIcon from "@/src/assets/svg/Chat-Bubble.svg";
@@ -18,6 +19,8 @@ const tabs = [
 ];
 
 export default function BottomTabBar({ activeTab, onTabChange }: Props) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   return (
     <View style={styles.navBar}>
       {tabs.map(({ key, Icon }) => (
@@ -31,7 +34,7 @@ export default function BottomTabBar({ activeTab, onTabChange }: Props) {
           <Icon
             width={30}
             height={30}
-            stroke={activeTab === key ? Colors.dark.brand : Colors.dark.brandDark}
+            stroke={activeTab === key ? colors.brand : colors.brandDark}
             fill={'none'}
             style={activeTab === key && styles.activeIcon}
           />
@@ -42,13 +45,14 @@ export default function BottomTabBar({ activeTab, onTabChange }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
+// Create styles function that takes colors as a parameter
+const createStyles = (colors: any) => StyleSheet.create({
   navBar: {
     flexDirection: "row",
     justifyContent: "space-around",
     alignItems: "center",
     padding: 16,
-    backgroundColor: Colors.dark.bgElevated,
+    backgroundColor: colors.bgElevated,
   },
   tabButton: {
     alignItems: "center",
@@ -58,7 +62,7 @@ const styles = StyleSheet.create({
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: Colors.dark.brand,
+    backgroundColor: colors.brand,
     marginTop: 4,
   },
   activeIcon: {

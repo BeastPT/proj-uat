@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { View, Text, Image, StyleSheet, TouchableOpacity, ImageSourcePropType } from "react-native";
-import { Colors } from "@/src/constants/Colors";
+import { useTheme } from "@/src/context/ThemeContext";
 import { SPACING, RADIUS } from "@/src/constants/Spacing";
 
 interface CarCardProps {
@@ -25,6 +25,10 @@ const CarCard: React.FC<CarCardProps> = ({
   onPress,
   featured = false,
 }) => {
+  const { colors } = useTheme();
+  
+  // Create styles with the current theme colors
+  const styles = useMemo(() => createStyles(colors), [colors]);
   return (
     <TouchableOpacity
       style={[styles.container, featured && styles.featuredContainer]}
@@ -64,9 +68,10 @@ const CarCard: React.FC<CarCardProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
+// Create styles function that takes colors as a parameter
+const createStyles = (colors: any) => StyleSheet.create({
   container: {
-    backgroundColor: Colors.dark.bgElevated,
+    backgroundColor: colors.bgElevated,
     borderRadius: RADIUS.lg,
     overflow: "hidden",
     marginBottom: SPACING.md,
@@ -90,13 +95,13 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: SPACING.sm,
     left: SPACING.sm,
-    backgroundColor: Colors.dark.brand,
+    backgroundColor: colors.brand,
     paddingHorizontal: SPACING.sm,
     paddingVertical: SPACING.xs,
     borderRadius: RADIUS.sm,
   },
   featuredText: {
-    color: Colors.dark.textHeading,
+    color: colors.textHeading,
     fontSize: 12,
     fontWeight: "bold",
   },
@@ -104,13 +109,13 @@ const styles = StyleSheet.create({
     padding: SPACING.md,
   },
   name: {
-    color: Colors.dark.textHeading,
+    color: colors.textHeading,
     fontSize: 16,
     fontWeight: "bold",
     marginBottom: SPACING.xs,
   },
   location: {
-    color: Colors.dark.textMuted,
+    color: colors.textMuted,
     fontSize: 14,
     marginBottom: SPACING.sm,
   },
@@ -120,12 +125,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   price: {
-    color: Colors.dark.textHeading,
+    color: colors.textHeading,
     fontSize: 16,
     fontWeight: "bold",
   },
   priceUnit: {
-    color: Colors.dark.textMuted,
+    color: colors.textMuted,
     fontSize: 14,
     fontWeight: "normal",
   },
@@ -134,7 +139,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   rating: {
-    color: Colors.dark.brand,
+    color: colors.brand,
     fontSize: 14,
     fontWeight: "bold",
   },

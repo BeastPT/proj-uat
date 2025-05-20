@@ -9,8 +9,8 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { Stack } from "expo-router";
-import { Colors } from "@/src/constants/Colors";
 import { SPACING, RADIUS } from "@/src/constants/Spacing";
+import { useTheme } from "@/src/context/ThemeContext";
 import i18n from "@/src/i18n";
 
 import SearchBar from "@/src/components/SearchBar";
@@ -21,6 +21,7 @@ import { cars } from "@/src/data/mockData";
 import { Car } from "@/src/data/mockData";
 
 export default function Search() {
+  const { colors } = useTheme();
   const [searchQuery, setSearchQuery] = useState("");
   const [isFilterModalVisible, setIsFilterModalVisible] = useState(false);
   const [isSortModalVisible, setIsSortModalVisible] = useState(false);
@@ -119,90 +120,95 @@ export default function Search() {
   );
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <>
       <Stack.Screen options={{ title: "Search", headerShown: false }} />
-      <View style={styles.container}>
-        <View style={styles.header}>
-          <Text style={styles.title}>{i18n.t("search.title")}</Text>
-        </View>
+      <SafeAreaView style={{ flex: 1, backgroundColor: colors.bgBase }}>
+        <View style={[styles.container, { backgroundColor: colors.bgBase }]}>
+          <View style={styles.header}>
+            <Text style={[styles.title, { color: colors.textHeading }]}>
+              {i18n.t("search.title")}
+            </Text>
+          </View>
 
-        <View style={styles.searchContainer}>
-          <SearchBar
-            placeholder={i18n.t("search.searchPlaceholder")}
-            value={searchQuery}
-            onChangeText={setSearchQuery}
+          <View style={styles.searchContainer}>
+            <SearchBar
+              placeholder={i18n.t("search.searchPlaceholder")}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+            />
+          </View>
+
+          <View style={styles.filterSortContainer}>
+            <TouchableOpacity
+              style={[styles.filterButton, { backgroundColor: colors.bgElevated }]}
+              onPress={() => setIsFilterModalVisible(true)}
+            >
+              <Text style={[styles.filterButtonText, { color: colors.textBody }]}>
+                {i18n.t("search.filter")}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.sortButton, { backgroundColor: colors.bgElevated }]}
+              onPress={() => setIsSortModalVisible(true)}
+            >
+              <Text style={[styles.sortButtonText, { color: colors.textBody }]}>
+                {i18n.t("search.sort")}
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.resultsContainer}>
+            <Text style={[styles.resultsTitle, { color: colors.textMuted }]}>
+              {filteredCars.length > 0
+                ? `${i18n.t("search.allCars")} (${filteredCars.length})`
+                : i18n.t("search.noResults")}
+            </Text>
+
+            {isLoading ? (
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color={colors.brand} />
+              </View>
+            ) : (
+              <FlatList
+                data={filteredCars}
+                keyExtractor={(item) => item.id}
+                renderItem={renderCarItem}
+                contentContainerStyle={styles.carsList}
+                showsVerticalScrollIndicator={false}
+                numColumns={1} // Ensure single column layout
+                ListEmptyComponent={
+                  <View style={styles.emptyContainer}>
+                    <Text style={[styles.emptyText, { color: colors.textMuted }]}>
+                      {i18n.t("search.noResults")}
+                    </Text>
+                  </View>
+                }
+              />
+            )}
+          </View>
+
+          <FilterModal
+            visible={isFilterModalVisible}
+            onClose={() => setIsFilterModalVisible(false)}
+            onApplyFilters={handleApplyFilters}
+            initialFilters={filters}
+          />
+
+          <SortModal
+            visible={isSortModalVisible}
+            onClose={() => setIsSortModalVisible(false)}
+            onSelectOption={handleSelectSortOption}
+            selectedOption={sortOption}
           />
         </View>
-
-        <View style={styles.filterSortContainer}>
-          <TouchableOpacity
-            style={styles.filterButton}
-            onPress={() => setIsFilterModalVisible(true)}
-          >
-            <Text style={styles.filterButtonText}>{i18n.t("search.filter")}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.sortButton}
-            onPress={() => setIsSortModalVisible(true)}
-          >
-            <Text style={styles.sortButtonText}>{i18n.t("search.sort")}</Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.resultsContainer}>
-          <Text style={styles.resultsTitle}>
-            {filteredCars.length > 0
-              ? `${i18n.t("search.allCars")} (${filteredCars.length})`
-              : i18n.t("search.noResults")}
-          </Text>
-
-          {isLoading ? (
-            <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color={Colors.dark.brand} />
-            </View>
-          ) : (
-            <FlatList
-              data={filteredCars}
-              keyExtractor={(item) => item.id}
-              renderItem={renderCarItem}
-              contentContainerStyle={styles.carsList}
-              showsVerticalScrollIndicator={false}
-              numColumns={1} // Ensure single column layout
-              ListEmptyComponent={
-                <View style={styles.emptyContainer}>
-                  <Text style={styles.emptyText}>{i18n.t("search.noResults")}</Text>
-                </View>
-              }
-            />
-          )}
-        </View>
-
-        <FilterModal
-          visible={isFilterModalVisible}
-          onClose={() => setIsFilterModalVisible(false)}
-          onApplyFilters={handleApplyFilters}
-          initialFilters={filters}
-        />
-
-        <SortModal
-          visible={isSortModalVisible}
-          onClose={() => setIsSortModalVisible(false)}
-          onSelectOption={handleSelectSortOption}
-          selectedOption={sortOption}
-        />
-      </View>
-    </SafeAreaView>
+      </SafeAreaView>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: Colors.dark.bgBase,
-  },
   container: {
     flex: 1,
-    backgroundColor: Colors.dark.bgBase,
     paddingHorizontal: SPACING.sm, // Reduced horizontal padding to use more screen width
   },
   header: {
@@ -210,7 +216,6 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.md,
   },
   title: {
-    color: Colors.dark.textHeading,
     fontSize: 24,
     fontWeight: "bold",
     fontFamily: "Sora",
@@ -226,7 +231,6 @@ const styles = StyleSheet.create({
   },
   filterButton: {
     flex: 1,
-    backgroundColor: Colors.dark.bgElevated,
     paddingVertical: SPACING.sm,
     paddingHorizontal: SPACING.sm, // Reduced horizontal padding
     borderRadius: RADIUS.md,
@@ -234,13 +238,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   filterButtonText: {
-    color: Colors.dark.textBody,
     fontSize: 14,
     fontFamily: "Inter",
   },
   sortButton: {
     flex: 1,
-    backgroundColor: Colors.dark.bgElevated,
     paddingVertical: SPACING.sm,
     paddingHorizontal: SPACING.sm, // Reduced horizontal padding
     borderRadius: RADIUS.md,
@@ -248,7 +250,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   sortButtonText: {
-    color: Colors.dark.textBody,
     fontSize: 14,
     fontFamily: "Inter",
   },
@@ -257,7 +258,6 @@ const styles = StyleSheet.create({
     width: '100%', // Ensure results container uses full width
   },
   resultsTitle: {
-    color: Colors.dark.textMuted,
     fontSize: 16,
     marginBottom: SPACING.md,
     fontFamily: "Inter",
@@ -283,7 +283,6 @@ const styles = StyleSheet.create({
     paddingTop: SPACING.xl * 2,
   },
   emptyText: {
-    color: Colors.dark.textMuted,
     fontSize: 16,
     fontFamily: "Inter",
   },

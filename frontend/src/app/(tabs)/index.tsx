@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { View, Text, StyleSheet, ScrollView, FlatList, SafeAreaView, Image } from "react-native";
 import { Stack } from "expo-router";
 
 import { useAuth } from "@/src/context/AuthContext";
+import { useTheme } from "@/src/context/ThemeContext";
 import i18n from "@/src/i18n";
-import { Colors } from "@/src/constants/Colors";
 import { SPACING } from "@/src/constants/Spacing";
 
 import SearchBar from "@/src/components/SearchBar";
@@ -17,7 +17,9 @@ import { cars, bookings, specialOffers } from "@/src/data/mockData";
 
 export default function Index() {
   const { user } = useAuth();
+  const { colors } = useTheme();
   const [searchQuery, setSearchQuery] = useState("");
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   const featuredCar = cars.find(car => car.featured);
   const otherCars = cars.filter(car => !car.featured);
@@ -149,14 +151,15 @@ export default function Index() {
   );
 }
 
-const styles = StyleSheet.create({
+// Create styles function that takes colors as a parameter
+const createStyles = (colors: any) => StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: Colors.dark.bgBase,
+    backgroundColor: colors.bgBase,
   },
   container: {
     flex: 1,
-    backgroundColor: Colors.dark.bgBase,
+    backgroundColor: colors.bgBase,
     paddingHorizontal: SPACING.md,
   },
   header: {
@@ -167,13 +170,13 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.lg,
   },
   welcomeText: {
-    color: Colors.dark.textMuted,
+    color: colors.textMuted,
     fontSize: 14,
     marginBottom: SPACING.xs,
     fontFamily: "Inter",
   },
   userName: {
-    color: Colors.dark.textHeading,
+    color: colors.textHeading,
     fontSize: 20,
     fontWeight: "bold",
     fontFamily: "Sora",
@@ -187,12 +190,12 @@ const styles = StyleSheet.create({
   profileImagePlaceholder: {
     width: "100%",
     height: "100%",
-    backgroundColor: Colors.dark.brand,
+    backgroundColor: colors.brand,
     justifyContent: "center",
     alignItems: "center",
   },
   profileInitial: {
-    color: Colors.dark.textHeading,
+    color: colors.textHeading,
     fontSize: 18,
     fontWeight: "bold",
   },
@@ -203,13 +206,13 @@ const styles = StyleSheet.create({
     paddingRight: SPACING.md,
   },
   emptyBookings: {
-    backgroundColor: Colors.dark.bgElevated,
+    backgroundColor: colors.bgElevated,
     padding: SPACING.lg,
     borderRadius: 8,
     alignItems: "center",
   },
   emptyBookingsText: {
-    color: Colors.dark.textMuted,
+    color: colors.textMuted,
     fontSize: 14,
     fontFamily: "Inter",
   },

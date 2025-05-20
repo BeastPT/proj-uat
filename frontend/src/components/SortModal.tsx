@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import {
   View,
   Text,
@@ -7,8 +7,8 @@ import {
   Modal,
   SafeAreaView,
 } from "react-native";
-import { Colors } from "@/src/constants/Colors";
 import { SPACING, RADIUS } from "@/src/constants/Spacing";
+import { useTheme } from "@/src/context/ThemeContext";
 import i18n from "@/src/i18n";
 
 export type SortOption = "priceLowToHigh" | "priceHighToLow" | "rating" | "newest";
@@ -26,6 +26,8 @@ const SortModal: React.FC<SortModalProps> = ({
   onSelectOption,
   selectedOption,
 }) => {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const sortOptions: SortOption[] = [
     "priceLowToHigh",
     "priceHighToLow",
@@ -84,14 +86,15 @@ const SortModal: React.FC<SortModalProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
+// Create styles function that takes colors as a parameter
+const createStyles = (colors: any) => StyleSheet.create({
   modalContainer: {
     flex: 1,
     backgroundColor: "rgba(0, 0, 0, 0.5)",
     justifyContent: "flex-end",
   },
   modalContent: {
-    backgroundColor: Colors.dark.bgBase,
+    backgroundColor: colors.bgBase,
     borderTopLeftRadius: RADIUS.xl,
     borderTopRightRadius: RADIUS.xl,
     paddingTop: SPACING.lg,
@@ -105,13 +108,13 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.lg,
   },
   title: {
-    color: Colors.dark.textHeading,
+    color: colors.textHeading,
     fontSize: 20,
     fontWeight: "bold",
     fontFamily: "Sora",
   },
   closeButton: {
-    color: Colors.dark.textMuted,
+    color: colors.textMuted,
     fontSize: 20,
     padding: SPACING.sm,
   },
@@ -124,22 +127,22 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingVertical: SPACING.md,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.dark.bgElevated,
+    borderBottomColor: colors.bgElevated,
   },
   selectedOption: {
-    backgroundColor: Colors.dark.bgSection,
+    backgroundColor: colors.bgSection,
   },
   optionText: {
-    color: Colors.dark.textBody,
+    color: colors.textBody,
     fontSize: 16,
     fontFamily: "Inter",
   },
   selectedOptionText: {
-    color: Colors.dark.brand,
+    color: colors.brand,
     fontWeight: "bold",
   },
   checkmark: {
-    color: Colors.dark.brand,
+    color: colors.brand,
     fontSize: 18,
     fontWeight: "bold",
   },

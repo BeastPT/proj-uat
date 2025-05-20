@@ -1,7 +1,7 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { View, TextInput, StyleSheet, TouchableOpacity } from "react-native";
-import { Colors } from "@/src/constants/Colors";
 import { SPACING, RADIUS } from "@/src/constants/Spacing";
+import { useTheme } from "@/src/context/ThemeContext";
 import SearchIcon from "@/src/assets/svg/Magnifying-Glass.svg";
 
 interface SearchBarProps {
@@ -17,20 +17,22 @@ const SearchBar: React.FC<SearchBarProps> = ({
   onChangeText,
   onSubmit,
 }) => {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   return (
     <View style={styles.container}>
       <View style={styles.searchContainer}>
         <SearchIcon
           width={20}
           height={20}
-          stroke={Colors.dark.textMuted}
+          stroke={colors.textMuted}
           fill="none"
           style={styles.icon}
         />
         <TextInput
           style={styles.input}
           placeholder={placeholder}
-          placeholderTextColor={Colors.dark.textMuted}
+          placeholderTextColor={colors.textMuted}
           value={value}
           onChangeText={onChangeText}
           onSubmitEditing={onSubmit}
@@ -43,14 +45,15 @@ const SearchBar: React.FC<SearchBarProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
+// Create styles function that takes colors as a parameter
+const createStyles = (colors: any) => StyleSheet.create({
   container: {
     marginBottom: SPACING.md,
   },
   searchContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: Colors.dark.bgElevated,
+    backgroundColor: colors.bgElevated,
     borderRadius: RADIUS.lg,
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.sm,
@@ -60,7 +63,7 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    color: Colors.dark.textBody,
+    color: colors.textBody,
     fontSize: 16,
     fontFamily: "Inter",
     padding: 0,
