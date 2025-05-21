@@ -1,19 +1,10 @@
-// API Configuration
-import {
-  API_URL,
-  ANDROID_API_URL,
-  IOS_API_URL,
-  PHYSICAL_DEVICE_API_URL
-} from '@env';
-
-// Determine if we're running in a development environment
-const isDev = process.env.NODE_ENV === 'development';
+const isDev = true;
 
 // Base URLs for different environments
-const DEV_API_URL = ANDROID_API_URL || 'http://10.0.2.2:3000/api'; // Android emulator
-const IOS_DEV_API_URL = IOS_API_URL || 'http://localhost:3000/api'; // iOS simulator
-const DEVICE_API_URL = PHYSICAL_DEVICE_API_URL || 'http://192.168.64.106:3000/api'; // Physical device
-const PROD_API_URL = API_URL || 'https://your-production-api.com/api'; // Production
+const DEV_API_URL = 'http://10.0.2.2:3000/api'; // Android emulator
+const IOS_DEV_API_URL = 'http://localhost:3000/api'; // iOS simulator
+const DEVICE_API_URL = 'http://192.168.64.117:3000/api'; // Physical device
+const PROD_API_URL = 'https://your-production-api.com/api'; // Production
 
 // Platform detection
 const getPlatformInfo = () => {
