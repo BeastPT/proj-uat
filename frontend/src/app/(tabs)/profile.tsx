@@ -1,6 +1,6 @@
 import { View, StyleSheet, ScrollView, Alert } from "react-native";
 import { Stack } from "expo-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { SPACING } from "@/src/constants/Spacing";
 
 // SVG Icons
@@ -15,7 +15,7 @@ import ChatBubble from "@/src/assets/svg/Chat-Bubble.svg";
 import AccountInfo from "@/src/components/FieldsProfile";
 import { useAuth } from "@/src/context/AuthContext";
 import { useTheme } from "@/src/context/ThemeContext";
-import i18n from "@/src/i18n";
+import i18n, { loadSavedLanguage, saveLanguagePreference } from "@/src/i18n";
 
 // Profile Components
 import ThemeSwitcher from "@/src/components/profile/ThemeSwitcher";
@@ -32,6 +32,16 @@ export default function Profile() {
   const [emailNotificationsEnabled, setEmailNotificationsEnabled] = useState(true);
   const [locationEnabled, setLocationEnabled] = useState(true);
   const [currentLanguage, setCurrentLanguage] = useState(i18n.locale);
+  
+  // Load saved language preference when component mounts
+  useEffect(() => {
+    const loadLanguage = async () => {
+      const savedLanguage = await loadSavedLanguage();
+      setCurrentLanguage(savedLanguage);
+    };
+    
+    loadLanguage();
+  }, []);
   
   // Format date of birth if available
   const formatDate = (dateString?: string): string => {
@@ -53,6 +63,8 @@ export default function Profile() {
   const handleLanguageChange = (language: string) => {
     i18n.locale = language;
     setCurrentLanguage(language);
+    // Save language preference to AsyncStorage
+    saveLanguagePreference(language);
   };
 
   // Personal information section

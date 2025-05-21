@@ -4,6 +4,7 @@ import { ThemeProvider } from "@/src/context/ThemeContext";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
+import { loadSavedLanguage } from "@/src/i18n";
 
 // Prevent the splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync();
@@ -16,9 +17,13 @@ export default function RootLayout() {
     Inter: require("@/src/assets/fonts/Inter-Regular.ttf"),
   });
 
-  // Hide the splash screen once fonts are loaded
+  // Hide the splash screen once fonts are loaded and load saved language
   useEffect(() => {
     if (loaded) {
+      // Load saved language preference
+      loadSavedLanguage();
+      
+      // Hide splash screen
       SplashScreen.hideAsync();
     }
   }, [loaded]);
