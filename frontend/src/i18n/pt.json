@@ -1,7 +1,45 @@
 {
   "profile": {
     "logout": "Sair",
-    "accountInfo": "Informações da Conta"
+    "accountInfo": "Informações da Conta",
+    "appearance": "Aparência",
+    "language": "Idioma",
+    "locationServices": "Serviços de Localização",
+    "locationServicesDescription": "Permitir que o aplicativo acesse sua localização",
+    "privacy_security": "Privacidade e Segurança",
+    "help_support": "Ajuda e Suporte",
+    "terms_conditions": "Termos e Condições",
+    "privacy_policy": "Política de Privacidade",
+    "contact_us": "Fale Conosco",
+    "theme": "Tema",
+    "dark": "Escuro",
+    "light": "Claro",
+    "notifications": {
+        "title": "Notifications",
+        "push": "Push Notifications",
+        "pushDescription": "Receive notifications about bookings and offers",
+        "email": "Email Notifications",
+        "emailDescription": "Receive updates and promotions via email"
+      },
+    "help": {
+      "title": "Ajuda e Suporte",
+      "contactSupport": "Contatar Suporte",
+      "faq": "Perguntas Frequentes",
+      "about": "Sobre"
+    },
+    "privacy": {
+      "title": "Privacidade e Segurança",
+      "privacyPolicy": "Política de Privacidade",
+      "termsOfService": "Termos de Serviço"
+    },
+    "personalInfo": {
+      "fullName": "Nome Completo",
+      "email": "Email",
+      "phoneNumber": "Número de Telefone",
+      "dateOfBirth": "Data de Nascimento",
+      "country": "País",
+      "notSet": "Não definido"
+    }
   },
   "home": {
     "welcome": "Bem-vindo de volta",

@@ -1,6 +1,7 @@
 import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { useTheme, ThemeType } from "@/src/context/ThemeContext";
+import i18n from "@/src/i18n";
 
 interface ThemeSwitcherProps {
   style?: object;
@@ -15,7 +16,9 @@ const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({ style }) => {
 
   return (
     <View style={[styles.container, style]}>
-      <Text style={[styles.title, { color: colors.textHeading }]}>Theme</Text>
+      <Text style={[styles.title, { color: colors.textHeading }]}>
+        {i18n.t("profile.theme")}
+      </Text>
       <View style={styles.buttonsContainer}>
         <TouchableOpacity
           style={[
@@ -32,7 +35,7 @@ const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({ style }) => {
               theme === "dark" && styles.activeText,
             ]}
           >
-            Dark
+            {i18n.t("profile.dark")}
           </Text>
         </TouchableOpacity>
 
@@ -51,7 +54,7 @@ const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({ style }) => {
               theme === "light" && styles.activeText,
             ]}
           >
-            Light
+            {i18n.t("profile.light")}
           </Text>
         </TouchableOpacity>
       </View>

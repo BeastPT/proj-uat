@@ -1,8 +1,47 @@
 {
-  "profile": {
-    "logout": "Log Out",
-    "accountInfo": "Account Information"
-  },
+    "profile": {
+      "logout": "Logout",
+      "accountInfo": "Account Information",
+      "appearance": "Appearance",
+      "language": "Language",
+
+      "locationServices": "Location Services",
+      "locationServicesDescription": "Allow the app to access your location",
+      "privacy_security": "Privacy and Security",
+      "help_support": "Help & Support",
+      "terms_conditions": "Terms and Conditions",
+      "privacy_policy": "Privacy Policy",
+      "contact_us": "Contact Us",
+      "theme": "Theme",
+      "dark": "Dark",
+      "light": "Light",
+      "notifications": {
+        "title": "Notifications",
+        "push": "Push Notifications",
+        "pushDescription": "Receive notifications about bookings and offers",
+        "email": "Email Notifications",
+        "emailDescription": "Receive updates and promotions via email"
+      },
+      "help": {
+        "title": "Help & Support",
+        "contactSupport": "Contact Support",
+        "faq": "FAQ",
+        "about": "About"
+      },
+      "privacy": {
+        "title": "Privacy and Security",
+        "privacyPolicy": "Privacy Policy",
+        "termsOfService": "Terms of Service"
+      },
+      "personalInfo": {
+        "fullName": "Full Name",
+        "email": "Email",
+        "phoneNumber": "Phone Number",
+        "dateOfBirth": "Date of Birth",
+        "country": "Country",
+        "notSet": "Not set"
+      }
+    },
   "home": {
     "welcome": "Welcome back",
     "searchPlaceholder": "Search for a car",
