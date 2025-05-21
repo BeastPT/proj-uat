@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Image, ImageSourcePropType } from "react-native";
-import { Colors } from "@/src/constants/Colors";
 import { SPACING, RADIUS } from "@/src/constants/Spacing";
+import { useTheme } from "@/src/context/ThemeContext";
 
 interface BookingCardProps {
   id: string;
@@ -21,16 +21,18 @@ const BookingCard: React.FC<BookingCardProps> = ({
   status,
   onPress,
 }) => {
+  const { colors } = useTheme();
+  
   const getStatusColor = () => {
     switch (status) {
       case "active":
         return "#4CAF50"; // Green
       case "completed":
-        return Colors.dark.textMuted;
+        return colors.textMuted;
       case "cancelled":
         return "#F44336"; // Red
       default:
-        return Colors.dark.textMuted;
+        return colors.textMuted;
     }
   };
 
@@ -48,17 +50,21 @@ const BookingCard: React.FC<BookingCardProps> = ({
   };
 
   return (
-    <TouchableOpacity style={styles.container} activeOpacity={0.8} onPress={onPress}>
+    <TouchableOpacity
+      style={[styles.container, { backgroundColor: colors.bgElevated }]}
+      activeOpacity={0.8}
+      onPress={onPress}
+    >
       <Image source={carImage} style={styles.image} resizeMode="cover" />
       <View style={styles.infoContainer}>
-        <Text style={styles.carName} numberOfLines={1}>
+        <Text style={[styles.carName, { color: colors.textHeading }]} numberOfLines={1}>
           {carName}
         </Text>
-        <Text style={styles.dateText}>
+        <Text style={[styles.dateText, { color: colors.textBody }]}>
           {startDate} - {endDate}
         </Text>
         <View style={[styles.statusBadge, { backgroundColor: getStatusColor() }]}>
-          <Text style={styles.statusText}>{getStatusText()}</Text>
+          <Text style={[styles.statusText, { color: colors.textHeading }]}>{getStatusText()}</Text>
         </View>
       </View>
     </TouchableOpacity>
@@ -68,7 +74,6 @@ const BookingCard: React.FC<BookingCardProps> = ({
 const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
-    backgroundColor: Colors.dark.bgElevated,
     borderRadius: RADIUS.md,
     overflow: "hidden",
     marginBottom: SPACING.md,
@@ -83,13 +88,11 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   carName: {
-    color: Colors.dark.textHeading,
     fontSize: 16,
     fontWeight: "bold",
     marginBottom: SPACING.xs,
   },
   dateText: {
-    color: Colors.dark.textBody,
     fontSize: 14,
     marginBottom: SPACING.sm,
   },
@@ -100,7 +103,6 @@ const styles = StyleSheet.create({
     borderRadius: RADIUS.sm,
   },
   statusText: {
-    color: Colors.dark.textHeading,
     fontSize: 12,
     fontWeight: "bold",
   },

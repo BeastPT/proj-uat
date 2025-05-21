@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
-import { Colors } from "@/src/constants/Colors";
 import { SPACING } from "@/src/constants/Spacing";
+import { useTheme } from "@/src/context/ThemeContext";
 
 interface SectionHeaderProps {
   title: string;
@@ -14,12 +14,14 @@ const SectionHeader: React.FC<SectionHeaderProps> = ({
   actionText,
   onActionPress,
 }) => {
+  const { colors } = useTheme();
+  
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>{title}</Text>
+      <Text style={[styles.title, { color: colors.textHeading }]}>{title}</Text>
       {actionText && onActionPress && (
         <TouchableOpacity onPress={onActionPress}>
-          <Text style={styles.actionText}>{actionText}</Text>
+          <Text style={[styles.actionText, { color: colors.brand }]}>{actionText}</Text>
         </TouchableOpacity>
       )}
     </View>
@@ -34,13 +36,11 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.md,
   },
   title: {
-    color: Colors.dark.textHeading,
     fontSize: 18,
     fontWeight: "bold",
     fontFamily: "Sora",
   },
   actionText: {
-    color: Colors.dark.brand,
     fontSize: 14,
     fontFamily: "Inter",
   },
