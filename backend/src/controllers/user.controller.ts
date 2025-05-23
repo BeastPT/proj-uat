@@ -1,11 +1,12 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { userService } from '@/services/user.service';
 import { z } from 'zod';
-import { 
-  idParamSchema, 
-  registerBodySchema, 
-  loginBodySchema, 
-  updateUserBodySchema 
+import {
+  idParamSchema,
+  registerBodySchema,
+  loginBodySchema,
+  updateUserBodySchema,
+  updateProfileBodySchema
 } from '@/schemas/user.schema';
 
 export class UserController {
@@ -143,11 +144,42 @@ export class UserController {
       if (!user) {
         return reply.status(404).send({ error: 'User not found' });
       }
-      
+
       return reply.send(user);
     } catch (error) {
       request.log.error(error);
       return reply.status(500).send({ error: 'Failed to retrieve user profile' });
+    }
+  }
+
+  /**
+   * Update current user profile
+   */
+  async updateUserProfile(
+    request: FastifyRequest,
+    reply: FastifyReply
+  ) {
+    try {
+      if (!request.user) {
+        return reply.status(401).send({ error: 'Not authenticated' });
+      }
+      
+      const userData = request.body as z.infer<typeof updateProfileBodySchema>;
+      
+      // Convert birthdate string to Date if provided
+      const updatedUserData = {
+        ...userData,
+        birthdate: userData.birthdate ? new Date(userData.birthdate) : undefined
+      };
+      
+      await userService.updateUser(request.user.id, updatedUserData);
+      return reply.send({ message: 'Profile updated successfully' });
+    } catch (error) {
+      request.log.error(error);
+      if ((error as any).code === 'P2025') {
+        return reply.status(404).send({ error: 'User not found' });
+      }
+      return reply.status(500).send({ error: 'Failed to update user profile' });
     }
   }
 }

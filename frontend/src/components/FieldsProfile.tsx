@@ -1,7 +1,8 @@
-import React, { useMemo } from "react";
-import { View, Text, StyleSheet } from "react-native";
+import React, { useMemo, useState } from "react";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { useTheme } from "@/src/context/ThemeContext";
 import Pencil from "@/src/assets/svg/Pencil.svg";
+import EditProfileForm from "./profile/EditProfileForm";
 
 type Field = {
   icon: React.ReactNode;
@@ -18,23 +19,41 @@ export default function AccountInfo({
 }) {
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
+  const [isEditing, setIsEditing] = useState(false);
+
+  const handleEditPress = () => {
+    setIsEditing(true);
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+  };
+
   return (
     <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.headerText}>{name}</Text>
-        <Pencil width={20} height={20} stroke={colors.brand} />
-      </View>
+      {isEditing ? (
+        <EditProfileForm onCancel={handleCancelEdit} />
+      ) : (
+        <>
+          {/* Header */}
+          <View style={styles.header}>
+            <Text style={styles.headerText}>{name}</Text>
+            <TouchableOpacity onPress={handleEditPress}>
+              <Pencil width={20} height={20} stroke={colors.brand} />
+            </TouchableOpacity>
+          </View>
 
-      {/* Info Rows */}
-      {fields.map((field, index) => (
-        <InfoRow
-          key={index}
-          icon={field.icon}
-          label={field.label}
-          value={field.value}
-        />
-      ))}
+          {/* Info Rows */}
+          {fields.map((field, index) => (
+            <InfoRow
+              key={index}
+              icon={field.icon}
+              label={field.label}
+              value={field.value}
+            />
+          ))}
+        </>
+      )}
     </View>
   );
 }

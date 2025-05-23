@@ -93,6 +93,13 @@ export class UserService {
         id: true,
         name: true,
         email: true,
+        country: true,
+        phone: true,
+        birthdate: true,
+        address: true,
+        isVerified: true,
+        createdAt: true,
+        updatedAt: true,
       },
     });
   }

@@ -1,7 +1,11 @@
 {
+  "cancel": "Cancelar",
+  "save": "Salvar",
+  "saving": "Salvando...",
   "profile": {
     "logout": "Sair",
     "accountInfo": "Informações da Conta",
+    "editProfile": "Editar Perfil",
     "appearance": "Aparência",
     "language": "Idioma",
     "locationServices": "Serviços de Localização",

@@ -20,6 +20,13 @@ type AuthContextType = {
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (name: string, email: string, password: string) => Promise<void>;
   signOut: () => void;
+  updateProfile: (userData: {
+    name?: string;
+    email?: string;
+    phone?: string;
+    country?: string;
+    birthdate?: string;
+  }) => Promise<void>;
   isLoading: boolean;
 };
 
@@ -29,6 +36,7 @@ const AuthContext = createContext<AuthContextType>({
   signIn: async () => {},
   signUp: async () => {},
   signOut: () => {},
+  updateProfile: async () => {},
   isLoading: false,
 });
 
@@ -94,7 +102,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       // Fetch user profile
       const userProfile = await apiService.getUserProfile();
-      
+
       // Set the user
       setUser({
         id: userProfile.id,
@@ -161,8 +169,42 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // Update user profile
+  const updateProfile = async (userData: {
+    name?: string;
+    email?: string;
+    phone?: string;
+    country?: string;
+    birthdate?: string;
+  }) => {
+    setIsLoading(true);
+    try {
+      // Use the API service to update the profile
+      await apiService.updateUserProfile(userData);
+      
+      // Fetch updated user profile
+      const userProfile = await apiService.getUserProfile();
+
+      // Update the user state
+      setUser({
+        id: userProfile.id,
+        name: userProfile.name,
+        email: userProfile.email,
+        country: userProfile.country,
+        phone: userProfile.phone,
+        birthdate: userProfile.birthdate,
+        isVerified: userProfile.isVerified,
+      });
+    } catch (error: any) {
+      console.error("Update profile error:", error);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, signIn, signUp, signOut, isLoading }}>
+    <AuthContext.Provider value={{ user, signIn, signUp, signOut, updateProfile, isLoading }}>
       {children}
     </AuthContext.Provider>
   );

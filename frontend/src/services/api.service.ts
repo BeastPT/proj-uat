@@ -87,6 +87,22 @@ class ApiService {
     }
   }
 
+  async updateUserProfile(userData: {
+    name?: string;
+    email?: string;
+    phone?: string;
+    country?: string;
+    birthdate?: string;
+  }): Promise<any> {
+    try {
+      const response: AxiosResponse = await apiClient.put(ENDPOINTS.UPDATE_PROFILE, userData);
+      return response.data;
+    } catch (error) {
+      console.error('Update user profile error:', error);
+      throw error;
+    }
+  }
+
   // Token management
   async setTokens(token: string, refreshToken: string): Promise<void> {
     try {

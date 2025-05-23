@@ -1,6 +1,6 @@
 import { View, StyleSheet, ScrollView, Alert } from "react-native";
 import { Stack } from "expo-router";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { SPACING } from "@/src/constants/Spacing";
 
 // SVG Icons
@@ -67,8 +67,9 @@ export default function Profile() {
     saveLanguagePreference(language);
   };
 
-  // Personal information section
-  const personalInfo = [
+  // Personal information section - using useMemo to update when user data changes
+  const personalInfo = useMemo(() => {
+    return [
     {
       icon: <User width={16} height={16} stroke={colors.brand} />,
       label: i18n.t("profile.personalInfo.fullName") as string,
@@ -94,7 +95,7 @@ export default function Profile() {
       label: i18n.t("profile.personalInfo.country") as string,
       value: (user?.country ?? i18n.t("profile.personalInfo.notSet")) as string,
     },
-  ];
+  ]}, [user, colors.brand, i18n.locale]); // Re-create when user data or theme changes
 
   return (
     <>

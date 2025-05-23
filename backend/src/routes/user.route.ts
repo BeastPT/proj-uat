@@ -73,6 +73,16 @@ export default async function (app: FastifyTypedInstance) {
         },
         userController.getUserProfile
       );
+
+      // Update current user profile (requires auth)
+      router.put(
+        '/profile',
+        {
+          schema: userRouteSchemas.updateProfile,
+          preHandler: [router.authenticate],
+        },
+        userController.updateUserProfile
+      );
     },
     { prefix: '/user' }
   );

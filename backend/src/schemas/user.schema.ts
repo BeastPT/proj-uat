@@ -22,6 +22,14 @@ export const updateUserBodySchema = z.object({
   password: z.string().min(8).max(50).optional(),
 });
 
+export const updateProfileBodySchema = z.object({
+  name: z.string().min(1).max(50).optional(),
+  email: z.string().email().optional(),
+  phone: z.string().optional(),
+  country: z.string().optional(),
+  birthdate: z.string().optional(),
+});
+
 // Response schemas
 export const messageResponseSchema = z.object({ 
   message: z.string() 
@@ -36,6 +44,9 @@ export const userBasicResponseSchema = z.object({
   id: z.string(),
   name: z.string(),
   email: z.string().email(),
+  phone: z.string().optional(),
+  country: z.string().optional(),
+  birthdate: z.date().optional(),
 });
 
 export const userListResponseSchema = z.array(userBasicResponseSchema);
@@ -86,9 +97,17 @@ export const userRouteSchemas = {
   },
   profile: {
     tags: ['user'],
-    seccurity: [{ bearerAuth: [] }],
+    security: [{ bearerAuth: [] }],
     response: {
       200: userBasicResponseSchema,
+    },
+  },
+  updateProfile: {
+    tags: ['user'],
+    security: [{ bearerAuth: [] }],
+    body: updateProfileBodySchema,
+    response: {
+      200: messageResponseSchema,
     },
   },
 };
