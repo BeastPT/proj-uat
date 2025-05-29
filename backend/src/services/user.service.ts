@@ -23,6 +23,7 @@ export class UserService {
         phone: true,
         birthdate: true,
         isVerified: true,
+        isAdmin: true,
         createdAt: true,
         updatedAt: true,
       },
@@ -44,6 +45,7 @@ export class UserService {
         birthdate: true,
         address: true,
         isVerified: true,
+        isAdmin: true,
         createdAt: true,
         updatedAt: true,
       },
@@ -98,6 +100,7 @@ export class UserService {
         birthdate: true,
         address: true,
         isVerified: true,
+        isAdmin: true,
         createdAt: true,
         updatedAt: true,
       },
@@ -139,6 +142,7 @@ export class UserService {
       {
         id: user.id,
         email: user.email,
+        isAdmin: user.isAdmin,
       },
       JWT_SECRET,
       { expiresIn: "1h" }

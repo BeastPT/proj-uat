@@ -12,6 +12,7 @@ type User = {
   phone?: string;
   birthdate?: string;
   isVerified?: boolean;
+  isAdmin?: boolean;
 } | null;
 
 // Define the context type
@@ -64,6 +65,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             phone: userProfile.phone,
             birthdate: userProfile.birthdate,
             isVerified: userProfile.isVerified,
+            isAdmin: userProfile.isAdmin,
           });
         }
       } catch (error) {
@@ -83,12 +85,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (isLoading) return; // Skip navigation while checking token
     
     const inAuthGroup = segments[0] === "(auth)";
+    // Use string comparison for segment check
+    const segmentValue = segments[0] ? String(segments[0]) : "";
+    const inAdminGroup = segmentValue === "(admin)";
 
     if (!user && !inAuthGroup) {
       // Redirect to the sign-in page if not authenticated
       router.replace("/(auth)/login");
     } else if (user && inAuthGroup) {
-      // Redirect to the home page if authenticated
+      // Redirect authenticated users based on admin status
+      if (user.isAdmin) {
+        // Use string for navigation
+        router.replace("/(admin)" as any);
+      } else {
+        router.replace("/(tabs)");
+      }
+    } else if (user && inAdminGroup && !user.isAdmin) {
+      // Redirect non-admin users trying to access admin pages
       router.replace("/(tabs)");
     }
   }, [user, segments, isLoading]);
@@ -112,6 +125,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         phone: userProfile.phone,
         birthdate: userProfile.birthdate,
         isVerified: userProfile.isVerified,
+        isAdmin: userProfile.isAdmin,
       });
     } catch (error: any) {
       // Only log unexpected errors, not authentication errors
@@ -143,6 +157,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         phone: userProfile.phone,
         birthdate: userProfile.birthdate,
         isVerified: userProfile.isVerified,
+        isAdmin: userProfile.isAdmin,
       });
     } catch (error: any) {
       // Only log unexpected errors, not authentication errors
@@ -194,6 +209,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         phone: userProfile.phone,
         birthdate: userProfile.birthdate,
         isVerified: userProfile.isVerified,
+        isAdmin: userProfile.isAdmin,
       });
     } catch (error: any) {
       console.error("Update profile error:", error);

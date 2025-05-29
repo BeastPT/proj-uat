@@ -47,6 +47,8 @@ export const userBasicResponseSchema = z.object({
   phone: z.string().optional(),
   country: z.string().optional(),
   birthdate: z.date().optional(),
+  isVerified: z.boolean().optional(),
+  isAdmin: z.boolean().optional(),
 });
 
 export const userListResponseSchema = z.array(userBasicResponseSchema);
@@ -108,6 +110,24 @@ export const userRouteSchemas = {
     body: updateProfileBodySchema,
     response: {
       200: messageResponseSchema,
+    },
+  },
+  setAdmin: {
+    tags: ['user'],
+    security: [{ bearerAuth: [] }],
+    params: idParamSchema,
+    response: {
+      200: messageResponseSchema,
+      403: z.object({ error: z.string() }),
+    },
+  },
+  removeAdmin: {
+    tags: ['user'],
+    security: [{ bearerAuth: [] }],
+    params: idParamSchema,
+    response: {
+      200: messageResponseSchema,
+      403: z.object({ error: z.string() }),
     },
   },
 };

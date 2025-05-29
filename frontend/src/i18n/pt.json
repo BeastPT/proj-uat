@@ -115,7 +115,7 @@
       "signUp": "Registrar",
       "haveAccount": "Já tem uma conta?",
       "signIn": "Entrar",
-      "namePlaceholder": "Digite seu nome completo",
+      "fullNamePlaceholder": "Digite seu nome completo",
       "emailPlaceholder": "Digite seu email",
       "passwordPlaceholder": "Digite sua senha",
       "confirmPasswordPlaceholder": "Confirme sua senha"

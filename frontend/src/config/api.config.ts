@@ -3,7 +3,7 @@ const isDev = true;
 // Base URLs for different environments
 const DEV_API_URL = 'http://10.0.2.2:3000/api'; // Android emulator
 const IOS_DEV_API_URL = 'http://localhost:3000/api'; // iOS simulator
-const DEVICE_API_URL = 'http://172.20.10.3:3000/api'; // Physical device
+const DEVICE_API_URL = 'http://192.168.0.6:3000/api'; // Physical device
 const PROD_API_URL = 'https://your-production-api.com/api'; // Production
 
 // Platform detection
@@ -57,7 +57,10 @@ export const ENDPOINTS = {
   REGISTER: '/user/register',
   PROFILE: '/user/profile',
   UPDATE_PROFILE: '/user/profile',
-  CARS: '/cars',
+  SET_ADMIN: '/user/:id/set-admin',
+  REMOVE_ADMIN: '/user/:id/remove-admin',
+  CARS: '/cars/all',
+  CARS_BASE: '/cars',
 };
 
 // API timeouts

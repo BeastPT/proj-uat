@@ -182,6 +182,56 @@ export class UserController {
       return reply.status(500).send({ error: 'Failed to update user profile' });
     }
   }
+
+  /**
+   * Set user as admin
+   */
+  async setUserAsAdmin(
+    request: FastifyRequest,
+    reply: FastifyReply
+  ) {
+    try {
+      if (!request.user || !request.user.isAdmin) {
+        return reply.status(403).send({ error: 'Forbidden: Only admins can perform this action' });
+      }
+      
+      const { id } = request.params as z.infer<typeof idParamSchema>;
+      
+      await userService.updateUser(id, { isAdmin: true });
+      return reply.send({ message: 'User set as admin successfully' });
+    } catch (error) {
+      request.log.error(error);
+      if ((error as any).code === 'P2025') {
+        return reply.status(404).send({ error: 'User not found' });
+      }
+      return reply.status(500).send({ error: 'Failed to set user as admin' });
+    }
+  }
+
+  /**
+   * Remove admin privileges from user
+   */
+  async removeUserAdmin(
+    request: FastifyRequest,
+    reply: FastifyReply
+  ) {
+    try {
+      if (!request.user || !request.user.isAdmin) {
+        return reply.status(403).send({ error: 'Forbidden: Only admins can perform this action' });
+      }
+      
+      const { id } = request.params as z.infer<typeof idParamSchema>;
+      
+      await userService.updateUser(id, { isAdmin: false });
+      return reply.send({ message: 'Admin privileges removed successfully' });
+    } catch (error) {
+      request.log.error(error);
+      if ((error as any).code === 'P2025') {
+        return reply.status(404).send({ error: 'User not found' });
+      }
+      return reply.status(500).send({ error: 'Failed to remove admin privileges' });
+    }
+  }
 }
 
 export const userController = new UserController();

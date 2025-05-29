@@ -153,10 +153,63 @@ class ApiService {
 
   async getCarById(id: string): Promise<any> {
     try {
-      const response: AxiosResponse = await apiClient.get(`${ENDPOINTS.CARS}/${id}`);
+      const response: AxiosResponse = await apiClient.get(`${ENDPOINTS.CARS_BASE}/${id}`);
       return response.data;
     } catch (error) {
       console.error('Get car by ID error:', error);
+      throw error;
+    }
+  }
+  
+  async createCar(carData: any): Promise<any> {
+    try {
+      const response: AxiosResponse = await apiClient.post(ENDPOINTS.CARS_BASE, carData);
+      return response.data;
+    } catch (error) {
+      console.error('Create car error:', error);
+      throw error;
+    }
+  }
+
+  async updateCar(id: string, carData: any): Promise<any> {
+    try {
+      const response: AxiosResponse = await apiClient.put(`${ENDPOINTS.CARS_BASE}/${id}`, carData);
+      return response.data;
+    } catch (error) {
+      console.error('Update car error:', error);
+      throw error;
+    }
+  }
+
+  async deleteCar(id: string): Promise<any> {
+    try {
+      const response: AxiosResponse = await apiClient.delete(`${ENDPOINTS.CARS_BASE}/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error('Delete car error:', error);
+      throw error;
+    }
+  }
+
+  // Admin management
+  async setUserAsAdmin(userId: string): Promise<any> {
+    try {
+      const endpoint = ENDPOINTS.SET_ADMIN.replace(':id', userId);
+      const response: AxiosResponse = await apiClient.put(endpoint);
+      return response.data;
+    } catch (error) {
+      console.error('Set user as admin error:', error);
+      throw error;
+    }
+  }
+
+  async removeUserAdmin(userId: string): Promise<any> {
+    try {
+      const endpoint = ENDPOINTS.REMOVE_ADMIN.replace(':id', userId);
+      const response: AxiosResponse = await apiClient.put(endpoint);
+      return response.data;
+    } catch (error) {
+      console.error('Remove user admin error:', error);
       throw error;
     }
   }

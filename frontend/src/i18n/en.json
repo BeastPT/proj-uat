@@ -116,7 +116,7 @@
       "signUp": "Sign Up",
       "haveAccount": "Already have an account?",
       "signIn": "Sign In",
-      "namePlaceholder": "Enter your full name",
+      "fullNamePlaceholder": "Enter your full name",
       "emailPlaceholder": "Enter your email",
       "passwordPlaceholder": "Enter your password",
       "confirmPasswordPlaceholder": "Confirm your password"

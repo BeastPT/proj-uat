@@ -1,12 +1,10 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
-import { userService } from '@/services/user.service';
 import { z } from 'zod';
-import { 
-  idParamSchema, 
-  registerBodySchema, 
-  loginBodySchema, 
-  updateUserBodySchema 
-} from '@/schemas/user.schema';
+import {
+  idParamSchema,
+  createCarSchema,
+  updateCarSchema
+} from '@/schemas/car.schema';
 import { carService } from '@/services/car.service';
 
 export class CarController {
@@ -19,7 +17,15 @@ export class CarController {
   ) {
     try {
       const cars = await carService.getAllCars();
-      return reply.send(cars);
+      
+      // Convert Date objects to strings for serialization
+      const serializedCars = cars.map(car => ({
+        ...car,
+        createdAt: car.createdAt.toISOString(),
+        updatedAt: car.updatedAt.toISOString()
+      }));
+      
+      return reply.send(serializedCars);
     } catch (error) {
       request.log.error(error);
       return reply.status(500).send({ error: 'Failed to retrieve cars' });
@@ -41,10 +47,99 @@ export class CarController {
         return reply.status(404).send({ error: 'Car not found' });
       }
 
-      return reply.send(car);
+      // Convert Date objects to strings for serialization
+      const serializedCar = {
+        ...car,
+        createdAt: car.createdAt.toISOString(),
+        updatedAt: car.updatedAt.toISOString()
+      };
+
+      return reply.send(serializedCar);
     } catch (error) {
       request.log.error(error);
       return reply.status(500).send({ error: 'Failed to retrieve car' });
+    }
+  }
+
+  /**
+   * Create a new car
+   */
+  async createCar(
+    request: FastifyRequest,
+    reply: FastifyReply
+  ) {
+    try {
+      const data = request.body as z.infer<typeof createCarSchema>;
+      const car = await carService.createCar(data);
+      
+      // Convert Date objects to strings for serialization
+      const serializedCar = {
+        ...car,
+        createdAt: car.createdAt.toISOString(),
+        updatedAt: car.updatedAt.toISOString()
+      };
+      
+      return reply.status(201).send(serializedCar);
+    } catch (error) {
+      request.log.error(error);
+      return reply.status(500).send({ error: 'Failed to create car' });
+    }
+  }
+
+  /**
+   * Update an existing car
+   */
+  async updateCar(
+    request: FastifyRequest,
+    reply: FastifyReply
+  ) {
+    try {
+      const { id } = request.params as z.infer<typeof idParamSchema>;
+      const data = request.body as z.infer<typeof updateCarSchema>;
+      
+      // Check if car exists
+      const existingCar = await carService.getCarById(id);
+      if (!existingCar) {
+        return reply.status(404).send({ error: 'Car not found' });
+      }
+      
+      const updatedCar = await carService.updateCar(id, data);
+      
+      // Convert Date objects to strings for serialization
+      const serializedCar = {
+        ...updatedCar,
+        createdAt: updatedCar.createdAt.toISOString(),
+        updatedAt: updatedCar.updatedAt.toISOString()
+      };
+      
+      return reply.send(serializedCar);
+    } catch (error) {
+      request.log.error(error);
+      return reply.status(500).send({ error: 'Failed to update car' });
+    }
+  }
+
+  /**
+   * Delete a car
+   */
+  async deleteCar(
+    request: FastifyRequest,
+    reply: FastifyReply
+  ) {
+    try {
+      const { id } = request.params as z.infer<typeof idParamSchema>;
+      
+      // Check if car exists
+      const existingCar = await carService.getCarById(id);
+      if (!existingCar) {
+        return reply.status(404).send({ error: 'Car not found' });
+      }
+      
+      await carService.deleteCar(id);
+      return reply.status(204).send();
+    } catch (error) {
+      request.log.error(error);
+      return reply.status(500).send({ error: 'Failed to delete car' });
     }
   }
 }

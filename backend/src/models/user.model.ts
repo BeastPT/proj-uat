@@ -19,6 +19,7 @@ export interface User {
   address: Address;
   drivingLicense?: DrivingLicense;
   isVerified: boolean;
+  isAdmin: boolean;
   paymentMethods: PaymentMethod[];
   createdAt: Date;
   updatedAt: Date;
@@ -45,6 +46,7 @@ export interface UserUpdateInput {
   address?: Address;
   drivingLicense?: DrivingLicense;
   isVerified?: boolean;
+  isAdmin?: boolean;
 }
 
 export interface UserResponse {
@@ -57,6 +59,7 @@ export interface UserResponse {
   address: Address;
   drivingLicense?: DrivingLicense;
   isVerified: boolean;
+  isAdmin: boolean;
   createdAt: Date;
   updatedAt: Date;
 }

@@ -83,6 +83,26 @@ export default async function (app: FastifyTypedInstance) {
         },
         userController.updateUserProfile
       );
+
+      // Set user as admin (requires admin auth)
+      router.put(
+        '/:id/set-admin',
+        {
+          schema: userRouteSchemas.setAdmin,
+          preHandler: [router.authenticate],
+        },
+        userController.setUserAsAdmin
+      );
+
+      // Remove admin privileges (requires admin auth)
+      router.put(
+        '/:id/remove-admin',
+        {
+          schema: userRouteSchemas.removeAdmin,
+          preHandler: [router.authenticate],
+        },
+        userController.removeUserAdmin
+      );
     },
     { prefix: '/user' }
   );
