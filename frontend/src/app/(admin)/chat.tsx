@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo, useCallback } from "react";
+import { apiService } from "@/src/services/api.service";
 import {
   View,
   Text,
@@ -238,32 +239,76 @@ export default function AdminChat() {
   const params = useLocalSearchParams();
   const showChatParam = params.showChat === 'true';
   
-  const [conversations, setConversations] = useState<ChatConversation[]>(initialChatData);
+  const [conversations, setConversations] = useState<ChatConversation[]>([]);
   const [selectedConversation, setSelectedConversation] = useState<ChatConversation | null>(null);
   const [message, setMessage] = useState<string>("");
   const [showConversations, setShowConversations] = useState(!showChatParam);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
   const chatListRef = useRef<FlatList<ChatMessage>>(null);
   const { width } = useWindowDimensions();
   const isMobile = width < 768;
   const styles = useMemo(() => createStyles(colors, isMobile), [colors, isMobile]);
 
+  // Fetch all chats on component mount
+  useEffect(() => {
+    fetchChats();
+  }, []);
+
+  // Fetch chats from API
+  const fetchChats = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const chatsData = await apiService.getAdminChats();
+      
+      // Transform API data to match our component's expected format
+      const formattedChats: ChatConversation[] = await Promise.all(
+        chatsData.map(async (chat: any) => {
+          // Fetch user details
+          const userDetails = await apiService.getUserProfile();
+          
+          // Fetch messages for this chat
+          const messages = await apiService.getChatMessages(chat.id);
+          
+          // Calculate unread count (messages not from admin that haven't been read)
+          const unreadCount = messages.filter((msg: any) => !msg.isAdmin).length;
+          
+          // Get the last message
+          const lastMessage = messages.length > 0 ? messages[messages.length - 1] : null;
+          
+          return {
+            id: chat.id,
+            userName: userDetails.name || 'User',
+            lastMessage: lastMessage ? lastMessage.content : 'No messages yet',
+            lastMessageTime: lastMessage ? new Date(lastMessage.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'New',
+            unreadCount,
+            messages: messages.map((msg: any) => ({
+              id: msg.id,
+              sender: msg.isAdmin ? 'Admin' : userDetails.name || 'User',
+              message: msg.content,
+              time: new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+              isAdmin: msg.isAdmin,
+            })),
+          };
+        })
+      );
+      
+      setConversations(formattedChats);
+      setLoading(false);
+    } catch (err) {
+      console.error('Error fetching chats:', err);
+      setError('Failed to load chats. Please try again.');
+      setLoading(false);
+    }
+  };
+
   // Set the first conversation as selected by default
   useEffect(() => {
     if (conversations.length > 0 && !selectedConversation) {
       const firstConversation = conversations[0];
-      // Mark conversation as read by setting unreadCount to 0
-      const updatedConversation = {
-        ...firstConversation,
-        unreadCount: 0,
-      };
-      
-      // Update the conversations array
-      const updatedConversations = conversations.map(conv =>
-        conv.id === firstConversation.id ? updatedConversation : conv
-      );
-      
-      setConversations(updatedConversations);
-      setSelectedConversation(updatedConversation);
+      setSelectedConversation(firstConversation);
     }
   }, [conversations, selectedConversation]);
 
@@ -277,54 +322,88 @@ export default function AdminChat() {
   }, [selectedConversation]);
 
   // Function to handle sending the message
-  const sendMessage = () => {
+  const sendMessage = async () => {
     if (message.trim() && selectedConversation) {
-      const newMessage: ChatMessage = {
-        id: String(Date.now()), // Generate a unique ID using timestamp
-        sender: 'Admin',
-        message,
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        isAdmin: true,
-      };
+      try {
+        // Send message to API
+        const sentMessage = await apiService.sendMessage(
+          selectedConversation.id,
+          message,
+          true // isAdmin = true
+        );
+        
+        // Create a new message object for the UI
+        const newMessage: ChatMessage = {
+          id: sentMessage.id,
+          sender: 'Admin',
+          message: sentMessage.content,
+          time: new Date(sentMessage.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          isAdmin: true,
+        };
 
-      // Update the selected conversation with the new message
-      const updatedConversation = {
-        ...selectedConversation,
-        lastMessage: message,
-        lastMessageTime: newMessage.time,
-        messages: [...selectedConversation.messages, newMessage],
-      };
+        // Update the selected conversation with the new message
+        const updatedConversation = {
+          ...selectedConversation,
+          lastMessage: message,
+          lastMessageTime: newMessage.time,
+          messages: [...selectedConversation.messages, newMessage],
+        };
 
-      // Update the conversations array
-      const updatedConversations = conversations.map(conv => 
-        conv.id === selectedConversation.id ? updatedConversation : conv
-      );
+        // Update the conversations array
+        const updatedConversations = conversations.map(conv =>
+          conv.id === selectedConversation.id ? updatedConversation : conv
+        );
 
-      setConversations(updatedConversations);
-      setSelectedConversation(updatedConversation);
-      setMessage("");
+        setConversations(updatedConversations);
+        setSelectedConversation(updatedConversation);
+        setMessage("");
+      } catch (err) {
+        console.error('Error sending message:', err);
+        alert('Failed to send message. Please try again.');
+      }
     }
   };
 
   // Handle selecting a conversation
-  const handleSelectConversation = (conversation: ChatConversation) => {
-    // Mark conversation as read by setting unreadCount to 0
-    const updatedConversation = {
-      ...conversation,
-      unreadCount: 0,
-    };
+  const handleSelectConversation = async (conversation: ChatConversation) => {
+    try {
+      // Fetch the latest messages for this chat
+      const messages = await apiService.getChatMessages(conversation.id);
+      
+      // Get user details
+      const userDetails = await apiService.getUserProfile();
+      
+      // Format messages for the UI
+      const formattedMessages = messages.map((msg: any) => ({
+        id: msg.id,
+        sender: msg.isAdmin ? 'Admin' : userDetails.name || 'User',
+        message: msg.content,
+        time: new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        isAdmin: msg.isAdmin,
+      }));
+      
+      // Update the selected conversation with fresh data
+      const updatedConversation = {
+        ...conversation,
+        messages: formattedMessages,
+        unreadCount: 0, // Mark as read
+      };
 
-    // Update the conversations array
-    const updatedConversations = conversations.map(conv =>
-      conv.id === conversation.id ? updatedConversation : conv
-    );
+      // Update the conversations array
+      const updatedConversations = conversations.map(conv =>
+        conv.id === conversation.id ? updatedConversation : conv
+      );
 
-    setConversations(updatedConversations);
-    setSelectedConversation(updatedConversation);
-    
-    // Automatically switch to chat view when a conversation is selected
-    if (isMobile) {
-      setShowConversations(false);
+      setConversations(updatedConversations);
+      setSelectedConversation(updatedConversation);
+      
+      // Automatically switch to chat view when a conversation is selected
+      if (isMobile) {
+        setShowConversations(false);
+      }
+    } catch (err) {
+      console.error('Error fetching conversation details:', err);
+      alert('Failed to load conversation. Please try again.');
     }
   };
   

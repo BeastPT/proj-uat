@@ -213,6 +213,96 @@ class ApiService {
       throw error;
     }
   }
+
+  // Chat endpoints
+  async getAdminChats(): Promise<any> {
+    try {
+      const response: AxiosResponse = await apiClient.get(ENDPOINTS.CHATS);
+      return response.data;
+    } catch (error) {
+      console.error('Get admin chats error:', error);
+      throw error;
+    }
+  }
+
+  async getUserChats(userId: string): Promise<any> {
+    try {
+      const endpoint = ENDPOINTS.USER_CHATS.replace(':userId', userId);
+      const response: AxiosResponse = await apiClient.get(endpoint);
+      return response.data;
+    } catch (error) {
+      console.error('Get user chats error:', error);
+      throw error;
+    }
+  }
+
+  async getChatById(chatId: string): Promise<any> {
+    try {
+      const endpoint = `${ENDPOINTS.CHATS}/${chatId}`;
+      const response: AxiosResponse = await apiClient.get(endpoint);
+      return response.data;
+    } catch (error) {
+      console.error('Get chat by ID error:', error);
+      throw error;
+    }
+  }
+
+  async createChat(userId: string): Promise<any> {
+    try {
+      const response: AxiosResponse = await apiClient.post(ENDPOINTS.CHATS, { userId });
+      return response.data;
+    } catch (error) {
+      console.error('Create chat error:', error);
+      throw error;
+    }
+  }
+
+  async getChatMessages(chatId: string): Promise<any> {
+    try {
+      const endpoint = ENDPOINTS.CHAT_MESSAGES.replace(':id', chatId);
+      const response: AxiosResponse = await apiClient.get(endpoint);
+      return response.data;
+    } catch (error) {
+      console.error('Get chat messages error:', error);
+      throw error;
+    }
+  }
+
+  async sendMessage(chatId: string, content: string, isAdmin: boolean = false): Promise<any> {
+    try {
+      const endpoint = ENDPOINTS.CHAT_MESSAGES.replace(':id', chatId);
+      const response: AxiosResponse = await apiClient.post(endpoint, {
+        content,
+        isAdmin
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Send message error:', error);
+      throw error;
+    }
+  }
+
+  async closeChat(chatId: string): Promise<any> {
+    try {
+      const endpoint = `${ENDPOINTS.CHATS}/${chatId}/close`;
+      const response: AxiosResponse = await apiClient.put(endpoint);
+      return response.data;
+    } catch (error) {
+      console.error('Close chat error:', error);
+      throw error;
+    }
+  }
+
+  async reopenChat(chatId: string): Promise<any> {
+    try {
+      const endpoint = `${ENDPOINTS.CHATS}/${chatId}/reopen`;
+      const response: AxiosResponse = await apiClient.put(endpoint);
+      return response.data;
+    } catch (error) {
+      console.error('Reopen chat error:', error);
+      throw error;
+    }
+  }
 }
 
 export const apiService = new ApiService();

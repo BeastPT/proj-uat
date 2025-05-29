@@ -9,10 +9,13 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   ListRenderItemInfo,
-  Pressable
+  Pressable,
+  ActivityIndicator
 } from "react-native";
 import { Stack } from "expo-router";
 import { useState, useRef, useEffect, useMemo } from "react";
+import { apiService } from "../../services/api.service";
+import { useAuth } from "../../context/AuthContext";
 import { SPACING, RADIUS } from "../../constants/Spacing";
 import { useTheme } from "../../context/ThemeContext";
 
@@ -38,24 +41,6 @@ interface ChatInputProps {
   setMessage: (message: string) => void;
   onSend: () => void;
 }
-
-// Sample chat data
-const initialChatData: ChatMessage[] = [
-  {
-    id: '1',
-    sender: 'John Doe',
-    message: 'Hey, how are you doing?',
-    time: '10:30',
-    isAuthor: false,
-  },
-  {
-    id: '2',
-    sender: 'Me',
-    message: 'I am good, thanks! How about you?',
-    time: '10:32',
-    isAuthor: true,
-  },
-];
 
 // Component for the chat header
 const ChatHeader: React.FC<ChatHeaderProps> = ({ title }) => {
@@ -111,10 +96,68 @@ const ChatInput: React.FC<ChatInputProps> = ({ message, setMessage, onSend }) =>
 
 export default function Chat() {
   const { colors } = useTheme();
-  const [chatData, setChatData] = useState<ChatMessage[]>(initialChatData);
+  const { user } = useAuth();
+  const [chatData, setChatData] = useState<ChatMessage[]>([]);
   const [message, setMessage] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [chatId, setChatId] = useState<string | null>(null);
   const flatListRef = useRef<FlatList<ChatMessage>>(null);
   const styles = useMemo(() => createStyles(colors), [colors]);
+
+  // Fetch or create chat on component mount
+  useEffect(() => {
+    if (user) {
+      fetchOrCreateChat();
+    }
+  }, [user]);
+
+  // Fetch existing chat or create a new one
+  const fetchOrCreateChat = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // Get user's chats
+      const userChats = await apiService.getUserChats(user?.id || '');
+      
+      let activeChat;
+      
+      // If user has an active chat, use it
+      if (userChats && userChats.length > 0) {
+        activeChat = userChats.find((chat: any) => chat.isActive);
+      }
+      
+      // If no active chat, create one
+      if (!activeChat && user) {
+        activeChat = await apiService.createChat(user.id);
+      }
+      
+      if (activeChat) {
+        setChatId(activeChat.id);
+        
+        // Fetch messages for this chat
+        const messages = await apiService.getChatMessages(activeChat.id);
+        
+        // Format messages for the UI
+        const formattedMessages = messages.map((msg: any) => ({
+          id: msg.id,
+          sender: msg.isAdmin ? 'Rent A Car Support' : 'Me',
+          message: msg.content,
+          time: new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          isAuthor: !msg.isAdmin,
+        }));
+        
+        setChatData(formattedMessages);
+      }
+      
+      setLoading(false);
+    } catch (err) {
+      console.error('Error fetching chat:', err);
+      setError('Failed to load chat. Please try again.');
+      setLoading(false);
+    }
+  };
 
   // Scroll to end whenever chat data changes
   useEffect(() => {
@@ -126,17 +169,49 @@ export default function Chat() {
   }, [chatData]);
 
   // Function to handle sending the message
-  const sendMessage = () => {
-    if (message.trim()) {
-      const newMessage: ChatMessage = {
-        id: String(Date.now()), // Generate a unique ID using timestamp
-        sender: 'Me',
-        message,
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        isAuthor: true,
-      };
-      setChatData([...chatData, newMessage]);
-      setMessage("");
+  const sendMessage = async () => {
+    if (message.trim() && chatId) {
+      try {
+        // Optimistically update UI
+        const tempMessage: ChatMessage = {
+          id: String(Date.now()),
+          sender: 'Me',
+          message,
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          isAuthor: true,
+        };
+        
+        setChatData([...chatData, tempMessage]);
+        const currentMessage = message;
+        setMessage("");
+        
+        // Send message to API
+        const sentMessage = await apiService.sendMessage(
+          chatId,
+          currentMessage,
+          false // isAdmin = false
+        );
+        
+        // Update with the actual message from the server
+        const newMessage: ChatMessage = {
+          id: sentMessage.id,
+          sender: 'Me',
+          message: sentMessage.content,
+          time: new Date(sentMessage.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          isAuthor: true,
+        };
+        
+        // Replace the temporary message with the real one
+        setChatData(prev => 
+          prev.map(msg => msg.id === tempMessage.id ? newMessage : msg)
+        );
+      } catch (err) {
+        console.error('Error sending message:', err);
+        alert('Failed to send message. Please try again.');
+        
+        // Remove the optimistic message on error
+        setChatData(prev => prev.filter(msg => msg.id !== String(Date.now())));
+      }
     }
   };
 
@@ -154,20 +229,44 @@ export default function Chat() {
       <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
         <View style={styles.wrapper}>
           <ChatHeader title="Chat with Rent A Car" />
-          <FlatList
-            ref={flatListRef}
-            data={chatData}
-            renderItem={renderItem}
-            keyExtractor={(item) => item.id}
-            style={styles.chatList}
-            contentContainerStyle={styles.chatListContent}
-            showsVerticalScrollIndicator={false}
-          />
-          <ChatInput
-            message={message}
-            setMessage={setMessage}
-            onSend={sendMessage}
-          />
+          
+          {loading ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color={colors.brand} />
+              <Text style={styles.loadingText}>Loading chat...</Text>
+            </View>
+          ) : error ? (
+            <View style={styles.errorContainer}>
+              <Text style={styles.errorText}>{error}</Text>
+              <Pressable style={styles.retryButton} onPress={fetchOrCreateChat}>
+                <Text style={styles.retryButtonText}>Retry</Text>
+              </Pressable>
+            </View>
+          ) : (
+            <>
+              <FlatList
+                ref={flatListRef}
+                data={chatData}
+                renderItem={renderItem}
+                keyExtractor={(item) => item.id}
+                style={styles.chatList}
+                contentContainerStyle={styles.chatListContent}
+                showsVerticalScrollIndicator={false}
+                ListEmptyComponent={
+                  <View style={styles.emptyContainer}>
+                    <Text style={styles.emptyText}>
+                      No messages yet. Start a conversation with our support team!
+                    </Text>
+                  </View>
+                }
+              />
+              <ChatInput
+                message={message}
+                setMessage={setMessage}
+                onSend={sendMessage}
+              />
+            </>
+          )}
         </View>
       </TouchableWithoutFeedback>
     </KeyboardAvoidingView>
@@ -229,6 +328,52 @@ const createStyles = (colors: any) => StyleSheet.create({
     color: colors.textMuted,
     fontSize: 12,
     textAlign: 'right',
+  },
+  
+  // Loading and error styles
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    color: colors.textBody,
+    marginTop: SPACING.md,
+    fontSize: 16,
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: SPACING.lg,
+  },
+  errorText: {
+    color: colors.textBody,
+    marginBottom: SPACING.md,
+    fontSize: 16,
+    textAlign: 'center',
+  },
+  retryButton: {
+    backgroundColor: colors.brand,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.sm,
+    borderRadius: RADIUS.md,
+  },
+  retryButtonText: {
+    color: colors.textHeading,
+    fontWeight: 'bold',
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: SPACING.lg,
+    marginTop: SPACING.xl,
+  },
+  emptyText: {
+    color: colors.textMuted,
+    textAlign: 'center',
+    fontSize: 16,
   },
   
   // Input styles
