@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 // Request schemas
 export const idParamSchema = z.object({
-  id: z.string().uuid()
+  id: z.string().regex(/^[0-9a-fA-F]{24}$/, 'Invalid ObjectId format')
 });
 
 // Car status enum
