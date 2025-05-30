@@ -1,11 +1,12 @@
-import React, { useState, useMemo } from "react";
-import { View, Text, StyleSheet, ScrollView, FlatList, SafeAreaView, Image } from "react-native";
+import React, { useState, useMemo, useEffect } from "react";
+import { View, Text, StyleSheet, ScrollView, FlatList, SafeAreaView, Image, ActivityIndicator } from "react-native";
 import { Stack } from "expo-router";
 
 import { useAuth } from "@/src/context/AuthContext";
 import { useTheme } from "@/src/context/ThemeContext";
 import i18n from "@/src/i18n";
 import { SPACING } from "@/src/constants/Spacing";
+import { apiService } from "@/src/services/api.service";
 
 import SearchBar from "@/src/components/SearchBar";
 import SectionHeader from "@/src/components/SectionHeader";
@@ -13,16 +14,64 @@ import CarCard from "@/src/components/CarCard";
 import BookingCard from "@/src/components/BookingCard";
 import SpecialOfferCard from "@/src/components/SpecialOfferCard";
 
-import { cars, bookings, specialOffers } from "@/src/data/mockData";
+import { specialOffers } from "@/src/data/mockData";
 
 export default function Index() {
   const { user } = useAuth();
   const { colors } = useTheme();
   const [searchQuery, setSearchQuery] = useState("");
+  const [cars, setCars] = useState<any[]>([]);
+  const [bookings, setBookings] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadingBookings, setLoadingBookings] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [bookingsError, setBookingsError] = useState<string | null>(null);
   const styles = useMemo(() => createStyles(colors), [colors]);
 
-  const featuredCar = cars.find(car => car.featured);
-  const otherCars = cars.filter(car => !car.featured);
+  useEffect(() => {
+    const fetchCars = async () => {
+      try {
+        setLoading(true);
+        const carsData = await apiService.getCars();
+        setCars(carsData);
+        setError(null);
+      } catch (err) {
+        console.error('Error fetching cars:', err);
+        setError('Failed to load cars. Please try again later.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const fetchUserBookings = async () => {
+      try {
+        setLoadingBookings(true);
+        // Since there's no bookings API yet, we'll simulate a fetch
+        // In the future, this would be replaced with an actual API call
+        // For example: const bookingsData = await apiService.getUserBookings();
+        
+        // Simulate API delay
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // For now, we'll set empty bookings to show the "no bookings" message
+        setBookings([]);
+        setBookingsError(null);
+      } catch (err) {
+        console.error('Error fetching bookings:', err);
+        setBookingsError('Failed to load bookings. Please try again later.');
+      } finally {
+        setLoadingBookings(false);
+      }
+    };
+
+    fetchCars();
+    fetchUserBookings();
+  }, []);
+
+  // Find a featured car (first car for demo purposes)
+  const featuredCar = cars.length > 0 ? cars[0] : null;
+  // Rest of the cars
+  const otherCars = cars.length > 0 ? cars.slice(1) : [];
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -96,25 +145,43 @@ export default function Index() {
             actionText={i18n.t("home.viewAll")}
             onActionPress={() => {}}
           />
-          <FlatList
-            data={otherCars}
-            keyExtractor={item => item.id}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            renderItem={({ item }) => (
-              <CarCard
-                id={item.id}
-                name={item.name}
-                image={item.image}
-                price={item.price}
-                priceUnit={item.priceUnit}
-                rating={item.rating}
-                location={item.location}
-                onPress={() => {}}
-              />
-            )}
-            contentContainerStyle={styles.carsList}
-          />
+          
+          {loading ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color={colors.brand} />
+              <Text style={styles.loadingText}>Loading cars...</Text>
+            </View>
+          ) : error ? (
+            <View style={styles.errorContainer}>
+              <Text style={styles.errorText}>{error}</Text>
+            </View>
+          ) : (
+            <FlatList
+              data={otherCars}
+              keyExtractor={item => item.id}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              renderItem={({ item }) => (
+                <CarCard
+                  id={item.id}
+                  name={`${item.brand} ${item.model}`}
+                  // Use a local image as fallback if no images available
+                  image={require("@/src/assets/images/loadingCar.png")}
+                  price={item.price}
+                  priceUnit="day"
+                  rating={4.5} // Default rating since backend doesn't provide it
+                  location={item.category} // Use category as location for now
+                  onPress={() => {}}
+                />
+              )}
+              contentContainerStyle={styles.carsList}
+              ListEmptyComponent={
+                <View style={styles.emptyContainer}>
+                  <Text style={styles.emptyText}>No cars available</Text>
+                </View>
+              }
+            />
+          )}
         </View>
 
         {/* Recent Bookings Section */}
@@ -124,7 +191,17 @@ export default function Index() {
             actionText={bookings.length > 0 ? i18n.t("home.viewAll") : undefined}
             onActionPress={bookings.length > 0 ? () => {} : undefined}
           />
-          {bookings.length > 0 ? (
+          
+          {loadingBookings ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color={colors.brand} />
+              <Text style={styles.loadingText}>Loading bookings...</Text>
+            </View>
+          ) : bookingsError ? (
+            <View style={styles.errorContainer}>
+              <Text style={styles.errorText}>{bookingsError}</Text>
+            </View>
+          ) : bookings.length > 0 ? (
             bookings.map(booking => (
               <BookingCard
                 key={booking.id}
@@ -218,5 +295,41 @@ const createStyles = (colors: any) => StyleSheet.create({
   },
   bottomPadding: {
     height: SPACING.xl,
+  },
+  loadingContainer: {
+    padding: SPACING.lg,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  loadingText: {
+    color: colors.textMuted,
+    fontSize: 14,
+    marginTop: SPACING.sm,
+    fontFamily: "Inter",
+  },
+  errorContainer: {
+    backgroundColor: colors.bgElevated,
+    padding: SPACING.lg,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  errorText: {
+    color: "red",
+    fontSize: 14,
+    fontFamily: "Inter",
+  },
+  emptyContainer: {
+    width: 220,
+    backgroundColor: colors.bgElevated,
+    padding: SPACING.lg,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+    height: 150,
+  },
+  emptyText: {
+    color: colors.textMuted,
+    fontSize: 14,
+    fontFamily: "Inter",
   },
 });
