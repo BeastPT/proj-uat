@@ -8,7 +8,7 @@ const i18n = new I18n({
 });
 
 // Set default locale based on device settings
-const deviceLocale = getLocales()[0].languageCode ?? 'en';
+const deviceLocale = getLocales()[0]?.languageCode ?? 'en';
 
 // Initialize with device locale, will be updated when AsyncStorage is checked
 i18n.locale = deviceLocale;

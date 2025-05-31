@@ -3,12 +3,18 @@ const isDev = true;
 // Base URLs for different environments
 const DEV_API_URL = 'http://10.0.2.2:3000/api'; // Android emulator
 const IOS_DEV_API_URL = 'http://localhost:3000/api'; // iOS simulator
-const DEVICE_API_URL = 'http://192.168.0.29:3000/api'; // Physical device
+const DEVICE_API_URL = 'http://192.168.1.130:3000/api'; // Physical device
+const WEB_DEV_API_URL = 'http://localhost:3000/api'; // Web browser
 const PROD_API_URL = 'https://your-production-api.com/api'; // Production
 
 // Platform detection
 const getPlatformInfo = () => {
   try {
+    // Check if we're in a browser environment
+    if (typeof window !== 'undefined' && typeof document !== 'undefined') {
+      return { isWeb: true, isIOS: false, isAndroid: false, isPhysicalDevice: false };
+    }
+    
     // This will only work in a React Native environment
     if (typeof navigator !== 'undefined' && navigator.product === 'ReactNative') {
       const { Platform } = require('react-native');
@@ -20,20 +26,26 @@ const getPlatformInfo = () => {
       // Check if running on a physical device or simulator/emulator
       const isPhysicalDevice = !Constants.isDevice;
       
-      return { isIOS, isAndroid, isPhysicalDevice };
+      return { isWeb: false, isIOS, isAndroid, isPhysicalDevice };
     }
-    return { isIOS: false, isAndroid: false, isPhysicalDevice: false };
+    return { isWeb: false, isIOS: false, isAndroid: false, isPhysicalDevice: false };
   } catch (e) {
-    return { isIOS: false, isAndroid: false, isPhysicalDevice: false };
+    // Fallback: if we can access window, assume we're in a browser
+    if (typeof window !== 'undefined') {
+      return { isWeb: true, isIOS: false, isAndroid: false, isPhysicalDevice: false };
+    }
+    return { isWeb: false, isIOS: false, isAndroid: false, isPhysicalDevice: false };
   }
 };
 
 // Determine the appropriate API URL based on environment and platform
 export const getApiUrl = () => {
   if (isDev) {
-    const { isIOS, isAndroid, isPhysicalDevice } = getPlatformInfo();
+    const { isWeb, isIOS, isAndroid, isPhysicalDevice } = getPlatformInfo();
     
-    if (isPhysicalDevice) {
+    if (isWeb) {
+      return WEB_DEV_API_URL;
+    } else if (isPhysicalDevice) {
       return DEVICE_API_URL;
     } else if (isIOS) {
       return IOS_DEV_API_URL;
