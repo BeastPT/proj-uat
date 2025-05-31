@@ -25,6 +25,38 @@ apiClient.interceptors.request.use(
   }
 );
 
+// Response interceptor to handle token expiration
+apiClient.interceptors.response.use(
+  (response) => {
+    return response;
+  },
+  async (error) => {
+    const originalRequest = error.config;
+    
+    // If the error is 401 (Unauthorized) and we haven't tried to refresh the token yet
+    if (error.response && error.response.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+      
+      try {
+        // Try to get a refresh token
+        const refreshToken = await AsyncStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN);
+        
+        if (refreshToken) {
+          // Implement token refresh logic here if your backend supports it
+          // For now, we'll just clear tokens to force re-login
+          console.log('Token expired, clearing tokens to force re-login');
+          await AsyncStorage.removeItem(STORAGE_KEYS.TOKEN);
+          await AsyncStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
+        }
+      } catch (refreshError) {
+        console.error('Error during token refresh:', refreshError);
+      }
+    }
+    
+    return Promise.reject(error);
+  }
+);
+
 // API service class
 class ApiService {
   // Auth endpoints
@@ -227,11 +259,39 @@ class ApiService {
 
   async getUserChats(userId: string): Promise<any> {
     try {
+      console.log(`Getting chats for user: ${userId}`);
+      
+      if (!userId) {
+        console.error('Missing user ID in getUserChats');
+        throw new Error('User ID is required');
+      }
+      
       const endpoint = ENDPOINTS.USER_CHATS.replace(':userId', userId);
+      console.log(`Using endpoint: ${endpoint}`);
+      
+      // Check if we have a valid token before sending
+      const token = await this.getToken();
+      if (!token) {
+        console.error('No authentication token available');
+        throw new Error('Authentication required. Please log in again.');
+      }
+      
       const response: AxiosResponse = await apiClient.get(endpoint);
+      console.log(`Retrieved ${response.data?.length || 0} chats for user ${userId}`);
       return response.data;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Get user chats error:', error);
+      
+      // Log more detailed error information
+      if (error.response) {
+        console.error('Error response status:', error.response.status);
+        console.error('Error response data:', error.response.data);
+      } else if (error.request) {
+        console.error('No response received:', error.request);
+      } else {
+        console.error('Error message:', error.message);
+      }
+      
       throw error;
     }
   }
@@ -249,10 +309,55 @@ class ApiService {
 
   async createChat(userId: string): Promise<any> {
     try {
-      const response: AxiosResponse = await apiClient.post(ENDPOINTS.CHATS, { userId });
+      console.log(`Creating chat for user: ${userId}`);
+      
+      if (!userId) {
+        console.error('Missing user ID in createChat');
+        throw new Error('User ID is required');
+      }
+      
+      const endpoint = ENDPOINTS.CHATS;
+      console.log(`Using endpoint: ${endpoint}`);
+      
+      // Check if we have a valid token before sending
+      const token = await this.getToken();
+      if (!token) {
+        console.error('No authentication token available');
+        throw new Error('Authentication required. Please log in again.');
+      }
+      
+      const response: AxiosResponse = await apiClient.post(endpoint, { userId });
+      console.log(`Chat created successfully for user ${userId}, chat ID: ${response.data?.id || 'unknown'}`);
       return response.data;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Create chat error:', error);
+      
+      // Handle 409 Conflict (chat already exists) specially
+      if (error.response && error.response.status === 409) {
+        console.log('Chat already exists, extracting existing chat ID');
+        
+        if (error.response.data && error.response.data.chatId) {
+          console.log(`Using existing chat ID: ${error.response.data.chatId}`);
+          return {
+            id: error.response.data.chatId,
+            isActive: true,
+            userId: userId
+          };
+        } else {
+          console.error('No chat ID found in 409 response');
+        }
+      }
+      
+      // Log more detailed error information
+      if (error.response) {
+        console.error('Error response status:', error.response.status);
+        console.error('Error response data:', error.response.data);
+      } else if (error.request) {
+        console.error('No response received:', error.request);
+      } else {
+        console.error('Error message:', error.message);
+      }
+      
       throw error;
     }
   }
@@ -270,14 +375,41 @@ class ApiService {
 
   async sendMessage(chatId: string, content: string, isAdmin: boolean = false): Promise<any> {
     try {
+      console.log(`Sending message to chat ${chatId}: "${content.substring(0, 20)}${content.length > 20 ? '...' : ''}"`);
+      
       const endpoint = ENDPOINTS.CHAT_MESSAGES.replace(':id', chatId);
+      console.log('Using endpoint:', endpoint);
+      
+      // Log the request payload
+      console.log('Request payload:', { content, isAdmin });
+      
+      // Check if we have a valid token before sending
+      const token = await this.getToken();
+      if (!token) {
+        console.error('No authentication token available');
+        throw new Error('Authentication required. Please log in again.');
+      }
+      
       const response: AxiosResponse = await apiClient.post(endpoint, {
         content,
         isAdmin
       });
+      
+      console.log('Message sent successfully, response:', response.status);
       return response.data;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Send message error:', error);
+      
+      // Log more detailed error information
+      if (error.response) {
+        console.error('Error response status:', error.response.status);
+        console.error('Error response data:', error.response.data);
+      } else if (error.request) {
+        console.error('No response received:', error.request);
+      } else {
+        console.error('Error message:', error.message);
+      }
+      
       throw error;
     }
   }

@@ -12,8 +12,7 @@ export const createChatSchema = z.object({
 
 // Create message schema
 export const createMessageSchema = z.object({
-  chatId: z.string(),
-  content: z.string().min(1, 'Message content is required'),
+  content: z.string().min(1, 'Message content is required').max(5000, 'Message content is too long'),
   isAdmin: z.boolean().optional().default(false)
 });
 
@@ -38,32 +37,58 @@ export const chatResponseSchema = z.object({
 export const chatListResponseSchema = z.array(chatResponseSchema);
 export const messageListResponseSchema = z.array(messageResponseSchema);
 
+// Error response schema
+export const errorResponseSchema = z.object({
+  error: z.string(),
+  details: z.string().optional(),
+  chatId: z.string().optional() // For 409 conflict responses
+});
+
 export const chatRouteSchemas = {
   getAll: {
     tags: ['chats'],
     response: {
-      200: chatListResponseSchema
+      200: chatListResponseSchema,
+      400: errorResponseSchema,
+      401: errorResponseSchema,
+      403: errorResponseSchema,
+      500: errorResponseSchema
     }
   },
   getById: {
     tags: ['chats'],
     params: idParamSchema,
     response: {
-      200: chatResponseSchema
+      200: chatResponseSchema,
+      400: errorResponseSchema,
+      401: errorResponseSchema,
+      403: errorResponseSchema,
+      404: errorResponseSchema,
+      500: errorResponseSchema
     }
   },
   create: {
     tags: ['chats'],
     body: createChatSchema,
     response: {
-      201: chatResponseSchema
+      201: chatResponseSchema,
+      400: errorResponseSchema,
+      401: errorResponseSchema,
+      404: errorResponseSchema,
+      409: errorResponseSchema,
+      500: errorResponseSchema
     }
   },
   getMessages: {
     tags: ['chats'],
     params: idParamSchema,
     response: {
-      200: messageListResponseSchema
+      200: messageListResponseSchema,
+      400: errorResponseSchema,
+      401: errorResponseSchema,
+      403: errorResponseSchema,
+      404: errorResponseSchema,
+      500: errorResponseSchema
     }
   },
   createMessage: {
@@ -71,7 +96,12 @@ export const chatRouteSchemas = {
     params: idParamSchema,
     body: createMessageSchema,
     response: {
-      201: messageResponseSchema
+      201: messageResponseSchema,
+      400: errorResponseSchema,
+      401: errorResponseSchema,
+      403: errorResponseSchema,
+      404: errorResponseSchema,
+      500: errorResponseSchema
     }
   }
 };

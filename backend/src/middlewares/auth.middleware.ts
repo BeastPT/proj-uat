@@ -34,13 +34,12 @@ export function registerAuthHandlers(app: FastifyTypedInstance): void {
       request.user = decoded;
       
     } catch (err) {
-      reply.status(401).send({
+      app.log.error('Authentication error: ' + err);
+      return reply.status(401).send({
         statusCode: 401,
         error: 'Unauthorized',
         message: 'Authentication failed',
       });
-
-      app.log.error('Authentication error: ' + err);
     }
   });
 
@@ -55,13 +54,12 @@ export function registerAuthHandlers(app: FastifyTypedInstance): void {
         throw new Error('Admin privileges required');
       }
     } catch (err) {
-      reply.status(403).send({
+      app.log.error('Admin authorization error: ' + err);
+      return reply.status(403).send({
         statusCode: 403,
         error: 'Forbidden',
         message: 'Admin privileges required',
       });
-
-      app.log.error('Admin authorization error: ' + err);
     }
   });
 }

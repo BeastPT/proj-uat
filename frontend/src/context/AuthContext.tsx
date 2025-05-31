@@ -55,23 +55,39 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const token = await apiService.getToken();
         
         if (token) {
-          // If token exists, fetch user profile
-          const userProfile = await apiService.getUserProfile();
-          setUser({
-            id: userProfile.id,
-            name: userProfile.name,
-            email: userProfile.email,
-            country: userProfile.country,
-            phone: userProfile.phone,
-            birthdate: userProfile.birthdate,
-            isVerified: userProfile.isVerified,
-            isAdmin: userProfile.isAdmin,
-          });
+          try {
+            // If token exists, fetch user profile
+            const userProfile = await apiService.getUserProfile();
+            setUser({
+              id: userProfile.id,
+              name: userProfile.name,
+              email: userProfile.email,
+              country: userProfile.country,
+              phone: userProfile.phone,
+              birthdate: userProfile.birthdate,
+              isVerified: userProfile.isVerified,
+              isAdmin: userProfile.isAdmin,
+            });
+          } catch (profileError: any) {
+            console.error("Error fetching user profile:", profileError);
+            
+            // If we get a 401 or 403 error, the token is invalid or expired
+            if (profileError.response &&
+                (profileError.response.status === 401 ||
+                 profileError.response.status === 403)) {
+              console.log("Token invalid or expired, clearing tokens");
+              await apiService.clearTokens();
+            }
+            
+            // Don't set user if profile fetch fails
+            setUser(null);
+          }
         }
       } catch (error) {
         console.error("Token validation error:", error);
         // If token is invalid, clear it
         await apiService.clearTokens();
+        setUser(null);
       } finally {
         setIsLoading(false);
       }
