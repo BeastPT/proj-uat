@@ -86,7 +86,7 @@ export class ChatController {
       const chat = await chatService.createChat(userId);
       return reply.code(201).send(chat);
     } catch (error) {
-      console.log('----------------------------------------------------------------------Error creating chat:', error);
+      console.log('----------------------------------------------------------------------kError creating chat:', error);
       request.log.error(error);
       if (error instanceof Error && error.message === 'User not found') {
         return reply.code(404).send({ error: error.message });

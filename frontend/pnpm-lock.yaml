@@ -11,6 +11,9 @@ dependencies:
   '@react-native-async-storage/async-storage':
     specifier: ^2.1.2
     version: 2.1.2(react-native@0.79.2)
+  '@react-native-community/datetimepicker':
+    specifier: ^8.4.1
+    version: 8.4.1(expo@53.0.9)(react-native@0.79.2)(react@19.0.0)
   '@react-navigation/bottom-tabs':
     specifier: ^7.2.0
     version: 7.3.13(@react-navigation/native@7.1.9)(react-native-safe-area-context@5.4.0)(react-native-screens@4.10.0)(react-native@0.79.2)(react@19.0.0)
@@ -1817,6 +1820,25 @@ packages:
       react-native: ^0.0.0-0 || >=0.65 <1.0
     dependencies:
       merge-options: 3.0.4
+      react-native: 0.79.2(@babel/core@7.27.1)(@types/react@19.0.14)(react@19.0.0)
+    dev: false
+
+  /@react-native-community/datetimepicker@8.4.1(expo@53.0.9)(react-native@0.79.2)(react@19.0.0):
+    resolution: {integrity: sha512-DrK+CUS5fZnz8dhzBezirkzQTcNDdaXer3oDLh0z4nc2tbdIdnzwvXCvi8IEOIvleoc9L95xS5tKUl0/Xv71Mg==}
+    peerDependencies:
+      expo: '>=52.0.0'
+      react: '*'
+      react-native: '*'
+      react-native-windows: '*'
+    peerDependenciesMeta:
+      expo:
+        optional: true
+      react-native-windows:
+        optional: true
+    dependencies:
+      expo: 53.0.9(@babel/core@7.27.1)(react-native-webview@13.13.5)(react-native@0.79.2)(react@19.0.0)
+      invariant: 2.2.4
+      react: 19.0.0
       react-native: 0.79.2(@babel/core@7.27.1)(@types/react@19.0.14)(react@19.0.0)
     dev: false
 

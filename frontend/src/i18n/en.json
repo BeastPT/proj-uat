@@ -1,6 +1,9 @@
 {
-    "cancel": "Cancel",
-    "save": "Save",
+    "common": {
+        "cancel": "Cancel",
+        "save": "Save",
+        "ok": "OK"
+    },
     "saving": "Saving...",
     "profile": {
       "logout": "Logout",
@@ -59,6 +62,41 @@
     "returnDate": "Return Date",
     "bookNow": "Book Now",
     "seeDetails": "See Details"
+  },
+  "car": {
+    "reserve": "Reserve Now",
+    "details": "Car Details",
+    "specifications": "Specifications",
+    "features": "Features",
+    "brand": "Brand",
+    "model": "Model",
+    "year": "Year",
+    "color": "Color",
+    "transmission": "Transmission",
+    "fuel": "Fuel Type",
+    "seats": "Seats",
+    "doors": "Doors",
+    "price": "Price",
+    "perDay": "per day"
+  },
+  "reservation": {
+    "title": "Reserve Car",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "days": "Number of Days",
+    "pricePerDay": "Price Per Day",
+    "totalPrice": "Total Price",
+    "reserve": "Reserve Now",
+    "success": "Reservation Successful",
+    "successMessage": "Your car has been reserved successfully!",
+    "failed": "Reservation Failed",
+    "error": "Failed to make reservation. Please try again.",
+    "invalidDateRange": "End date must be after start date",
+    "viewReservations": "View My Reservations",
+    "cancel": "Cancel Reservation",
+    "cancelConfirm": "Are you sure you want to cancel this reservation?",
+    "cancelSuccess": "Reservation cancelled successfully",
+    "cancelError": "Failed to cancel reservation"
   },
   "search": {
     "title": "Find Your Car",

@@ -76,6 +76,11 @@ export const ENDPOINTS = {
   CHATS: '/chats',
   CHAT_MESSAGES: '/chats/:id/messages',
   USER_CHATS: '/chats/user/:userId',
+  // Reservation endpoints
+  RESERVATIONS: '/reservations',
+  USER_RESERVATIONS: '/reservations/user',
+  RESERVATION_DETAILS: '/reservations/:id',
+  CANCEL_RESERVATION: '/reservations/:id/cancel',
 };
 
 // API timeouts

@@ -1,6 +1,9 @@
 {
-  "cancel": "Cancelar",
-  "save": "Salvar",
+  "common": {
+    "cancel": "Cancelar",
+    "save": "Salvar",
+    "ok": "OK"
+  },
   "saving": "Salvando...",
   "profile": {
     "logout": "Sair",
@@ -58,6 +61,41 @@
     "returnDate": "Data de Devolução",
     "bookNow": "Reservar Agora",
     "seeDetails": "Ver Detalhes"
+  },
+  "car": {
+    "reserve": "Reservar Agora",
+    "details": "Detalhes do Carro",
+    "specifications": "Especificações",
+    "features": "Características",
+    "brand": "Marca",
+    "model": "Modelo",
+    "year": "Ano",
+    "color": "Cor",
+    "transmission": "Transmissão",
+    "fuel": "Tipo de Combustível",
+    "seats": "Assentos",
+    "doors": "Portas",
+    "price": "Preço",
+    "perDay": "por dia"
+  },
+  "reservation": {
+    "title": "Reservar Carro",
+    "startDate": "Data de Início",
+    "endDate": "Data de Término",
+    "days": "Número de Dias",
+    "pricePerDay": "Preço por Dia",
+    "totalPrice": "Preço Total",
+    "reserve": "Reservar Agora",
+    "success": "Reserva Bem-sucedida",
+    "successMessage": "Seu carro foi reservado com sucesso!",
+    "failed": "Falha na Reserva",
+    "error": "Falha ao fazer a reserva. Por favor, tente novamente.",
+    "invalidDateRange": "A data de término deve ser posterior à data de início",
+    "viewReservations": "Ver Minhas Reservas",
+    "cancel": "Cancelar Reserva",
+    "cancelConfirm": "Tem certeza que deseja cancelar esta reserva?",
+    "cancelSuccess": "Reserva cancelada com sucesso",
+    "cancelError": "Falha ao cancelar a reserva"
   },
   "search": {
     "title": "Encontre Seu Carro",

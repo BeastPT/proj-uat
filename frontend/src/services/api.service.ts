@@ -435,6 +435,53 @@ class ApiService {
       throw error;
     }
   }
+
+  // Reservation endpoints
+  async getUserReservations(): Promise<any> {
+    try {
+      const response: AxiosResponse = await apiClient.get(ENDPOINTS.USER_RESERVATIONS);
+      return response.data;
+    } catch (error) {
+      console.error('Get user reservations error:', error);
+      throw error;
+    }
+  }
+
+  async getReservationById(id: string): Promise<any> {
+    try {
+      const endpoint = ENDPOINTS.RESERVATION_DETAILS.replace(':id', id);
+      const response: AxiosResponse = await apiClient.get(endpoint);
+      return response.data;
+    } catch (error) {
+      console.error('Get reservation by ID error:', error);
+      throw error;
+    }
+  }
+
+  async createReservation(reservationData: {
+    carId: string;
+    startDate: string;
+    endDate: string;
+  }): Promise<any> {
+    try {
+      const response: AxiosResponse = await apiClient.post(ENDPOINTS.RESERVATIONS, reservationData);
+      return response.data;
+    } catch (error) {
+      console.error('Create reservation error:', error);
+      throw error;
+    }
+  }
+
+  async cancelReservation(id: string): Promise<any> {
+    try {
+      const endpoint = ENDPOINTS.CANCEL_RESERVATION.replace(':id', id);
+      const response: AxiosResponse = await apiClient.put(endpoint);
+      return response.data;
+    } catch (error) {
+      console.error('Cancel reservation error:', error);
+      throw error;
+    }
+  }
 }
 
 export const apiService = new ApiService();

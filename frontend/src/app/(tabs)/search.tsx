@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   SafeAreaView,
   ActivityIndicator,
+  Image,
 } from "react-native";
 import { Stack } from "expo-router";
 import { SPACING, RADIUS } from "@/src/constants/Spacing";
@@ -17,8 +18,32 @@ import SearchBar from "@/src/components/SearchBar";
 import CarCard from "@/src/components/CarCard";
 import FilterModal, { FilterOptions } from "@/src/components/FilterModal";
 import SortModal, { SortOption } from "@/src/components/SortModal";
-import { cars } from "@/src/data/mockData";
-import { Car } from "@/src/data/mockData";
+import { apiService } from "@/src/services/api.service";
+
+// Default car image
+const DEFAULT_CAR_IMAGE = require("@/src/assets/images/loadingCar.png");
+
+// Define the Car interface based on the backend structure
+interface Car {
+  id: string;
+  brand: string;
+  model: string;
+  year: number;
+  color: string;
+  kilometers: number;
+  plate: string;
+  price: number;
+  description: string;
+  seats: number;
+  doors?: number;
+  status: string;
+  transmission: string;
+  fuel: string;
+  category: string;
+  images: string[];
+  createdAt: string;
+  updatedAt: string;
+}
 
 export default function Search() {
   const { colors } = useTheme();
@@ -33,25 +58,60 @@ export default function Search() {
     fuelType: "all",
   });
   const [sortOption, setSortOption] = useState<SortOption>("priceLowToHigh");
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [cars, setCars] = useState<Car[]>([]);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch cars from API
+  useEffect(() => {
+    const fetchCars = async () => {
+      try {
+        setIsLoading(true);
+        const carsData = await apiService.getCars();
+        setCars(carsData);
+        setError(null);
+      } catch (err) {
+        console.error("Failed to fetch cars:", err);
+        setError("Failed to load cars. Please try again.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchCars();
+  }, []);
 
   // Filter and sort cars based on search query, filters, and sort option
   const filteredCars = useMemo(() => {
-    // Simulate loading
+    if (!cars.length) return [];
+    
     setIsLoading(true);
     
     let filtered = [...cars];
 
-    // Apply search query filter
+    // Apply search query filter (search by brand and model)
     if (searchQuery) {
+      const query = searchQuery.toLowerCase();
       filtered = filtered.filter((car) =>
-        car.name.toLowerCase().includes(searchQuery.toLowerCase())
+        `${car.brand} ${car.model}`.toLowerCase().includes(query)
       );
     }
 
-    // Apply car type filter
+    // Apply car type filter (category in the backend)
     if (filters.carType !== "all") {
-      filtered = filtered.filter((car) => car.type === filters.carType);
+      // Convert frontend filter to backend category format
+      const categoryMap: Record<string, string> = {
+        economy: "ECONOMY",
+        luxury: "LUXURY",
+        suv: "SUV",
+        sports: "LUXURY", // Map sports to LUXURY as closest match
+        electric: "ELECTRIC"
+      };
+      
+      const backendCategory = categoryMap[filters.carType];
+      if (backendCategory) {
+        filtered = filtered.filter((car) => car.category === backendCategory);
+      }
     }
 
     // Apply seats filter
@@ -61,12 +121,32 @@ export default function Search() {
 
     // Apply transmission filter
     if (filters.transmission !== "all") {
-      filtered = filtered.filter((car) => car.transmission === filters.transmission);
+      // Convert frontend filter to backend transmission format
+      const transmissionMap: Record<string, string> = {
+        automatic: "AUTOMATIC",
+        manual: "MANUAL"
+      };
+      
+      const backendTransmission = transmissionMap[filters.transmission];
+      if (backendTransmission) {
+        filtered = filtered.filter((car) => car.transmission === backendTransmission);
+      }
     }
 
     // Apply fuel type filter
     if (filters.fuelType !== "all") {
-      filtered = filtered.filter((car) => car.fuelType === filters.fuelType);
+      // Convert frontend filter to backend fuel format
+      const fuelMap: Record<string, string> = {
+        gasoline: "PETROL",
+        diesel: "DIESEL",
+        electric: "ELECTRIC",
+        hybrid: "HYBRID"
+      };
+      
+      const backendFuel = fuelMap[filters.fuelType];
+      if (backendFuel) {
+        filtered = filtered.filter((car) => car.fuel === backendFuel);
+      }
     }
 
     // Apply sorting
@@ -76,24 +156,21 @@ export default function Search() {
           return a.price - b.price;
         case "priceHighToLow":
           return b.price - a.price;
-        case "rating":
-          return b.rating - a.rating;
         case "newest":
-          // In a real app, we would sort by date added
-          // For now, just use the id as a proxy for "newest"
-          return parseInt(b.id) - parseInt(a.id);
+          // Sort by creation date
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
         default:
           return 0;
       }
     });
 
-    // Simulate API delay
+    // Simulate short delay for better UX
     setTimeout(() => {
       setIsLoading(false);
-    }, 500);
+    }, 300);
 
     return filtered;
-  }, [searchQuery, filters, sortOption]);
+  }, [searchQuery, filters, sortOption, cars]);
 
   const handleApplyFilters = (newFilters: FilterOptions) => {
     setFilters(newFilters);
@@ -107,12 +184,13 @@ export default function Search() {
     <View style={styles.carCardContainer}>
       <CarCard
         id={item.id}
-        name={item.name}
-        image={item.image}
+        name={`${item.brand} ${item.model}`}
+        image={item.images && item.images.length > 0
+          ? { uri: item.images[0] }
+          : DEFAULT_CAR_IMAGE}
         price={item.price}
-        priceUnit={item.priceUnit}
-        rating={item.rating}
-        location={item.location}
+        priceUnit="day"
+        location={`${item.year} • ${item.kilometers} km`}
         onPress={() => {}}
         featured={true}
       />
@@ -167,6 +245,12 @@ export default function Search() {
             {isLoading ? (
               <View style={styles.loadingContainer}>
                 <ActivityIndicator size="large" color={colors.brand} />
+              </View>
+            ) : error ? (
+              <View style={styles.errorContainer}>
+                <Text style={[styles.errorText, { color: colors.textMuted }]}>
+                  {error}
+                </Text>
               </View>
             ) : (
               <FlatList
@@ -285,5 +369,17 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 16,
     fontFamily: "Inter",
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingTop: SPACING.xl * 2,
+  },
+  errorText: {
+    fontSize: 16,
+    fontFamily: "Inter",
+    textAlign: "center",
+    paddingHorizontal: SPACING.lg,
   },
 });
