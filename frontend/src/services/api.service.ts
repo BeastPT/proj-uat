@@ -183,6 +183,16 @@ class ApiService {
     }
   }
 
+  async getAvailableCars(): Promise<any> {
+    try {
+      const response: AxiosResponse = await apiClient.get(`${ENDPOINTS.CARS_BASE}/available`);
+      return response.data;
+    } catch (error) {
+      console.error('Get available cars error:', error);
+      throw error;
+    }
+  }
+
   async getCarById(id: string): Promise<any> {
     try {
       const response: AxiosResponse = await apiClient.get(`${ENDPOINTS.CARS_BASE}/${id}`);
@@ -464,10 +474,31 @@ class ApiService {
     endDate: string;
   }): Promise<any> {
     try {
+      console.log('Creating reservation with data:', JSON.stringify(reservationData, null, 2));
+      
+      // Check if we have a valid token before sending
+      const token = await this.getToken();
+      if (!token) {
+        console.error('No authentication token available');
+        throw new Error('Authentication required. Please log in again.');
+      }
+      
       const response: AxiosResponse = await apiClient.post(ENDPOINTS.RESERVATIONS, reservationData);
+      console.log('Reservation created successfully:', response.status);
       return response.data;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Create reservation error:', error);
+      
+      // Log more detailed error information
+      if (error.response) {
+        console.error('Error response status:', error.response.status);
+        console.error('Error response data:', error.response.data);
+      } else if (error.request) {
+        console.error('No response received:', error.request);
+      } else {
+        console.error('Error message:', error.message);
+      }
+      
       throw error;
     }
   }

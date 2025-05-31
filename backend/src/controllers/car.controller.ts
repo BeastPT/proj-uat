@@ -33,6 +33,30 @@ export class CarController {
   }
 
   /**
+   * Get all available cars
+   */
+  async getAvailableCars(
+    request: FastifyRequest,
+    reply: FastifyReply
+  ) {
+    try {
+      const cars = await carService.getAvailableCars();
+      
+      // Convert Date objects to strings for serialization
+      const serializedCars = cars.map(car => ({
+        ...car,
+        createdAt: car.createdAt.toISOString(),
+        updatedAt: car.updatedAt.toISOString()
+      }));
+      
+      return reply.send(serializedCars);
+    } catch (error) {
+      request.log.error(error);
+      return reply.status(500).send({ error: 'Failed to retrieve available cars' });
+    }
+  }
+
+  /**
    * Get car by ID
    */
   async getCarById(

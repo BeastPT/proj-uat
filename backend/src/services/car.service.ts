@@ -34,6 +34,18 @@ export class CarService {
   }
 
   /**
+   * Get all available cars
+   */
+  async getAvailableCars() {
+    return prisma.car.findMany({
+      where: {
+        status: "AVAILABLE"
+      },
+      select: CarSelect,
+    });
+  }
+
+  /**
    * Get car by ID
    */
   async getCarById(id: string) {

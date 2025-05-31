@@ -76,26 +76,69 @@ const ReservationModal: React.FC<ReservationModalProps> = ({
       const formattedStartDate = startDate.toISOString();
       const formattedEndDate = endDate.toISOString();
       
-      await apiService.createReservation({
+      console.log('Creating reservation with data:', {
         carId,
         startDate: formattedStartDate,
         endDate: formattedEndDate,
       });
       
-      setIsLoading(false);
-      Alert.alert(
-        i18n.t('reservation.success'),
-        i18n.t('reservation.successMessage'),
-        [{ text: i18n.t('common.ok'), onPress: () => {
-          onClose();
-          if (onSuccess) onSuccess();
-        }}]
-      );
+      // Wrap the API call in a try-catch to prevent crashes
+      try {
+        await apiService.createReservation({
+          carId,
+          startDate: formattedStartDate,
+          endDate: formattedEndDate,
+        });
+        
+        setIsLoading(false);
+        Alert.alert(
+          i18n.t('reservation.success'),
+          i18n.t('reservation.successMessage'),
+          [{ text: i18n.t('common.ok'), onPress: () => {
+            onClose();
+            if (onSuccess) onSuccess();
+          }}]
+        );
+      } catch (apiError: any) {
+        throw apiError; // Re-throw to be caught by the outer catch
+      }
     } catch (error: any) {
+      // Always make sure to set loading to false
       setIsLoading(false);
+      console.error('Reservation error details:', error);
       
-      const errorMessage = error.response?.data?.error || i18n.t('reservation.error');
-      Alert.alert(i18n.t('reservation.failed'), errorMessage);
+      let errorMessage = i18n.t('reservation.error');
+      
+      // More detailed error handling
+      if (error.response) {
+        console.error('Error response status:', error.response.status);
+        console.error('Error response data:', error.response.data);
+        
+        // Handle validation errors specifically
+        if (error.response.status === 400 && error.response.data?.error) {
+          if (Array.isArray(error.response.data.error)) {
+            // Join multiple validation errors
+            errorMessage = error.response.data.error
+              .map((err: any) => err.message)
+              .join(', ');
+          } else {
+            errorMessage = error.response.data.error;
+          }
+        } else {
+          errorMessage = error.response?.data?.error || errorMessage;
+        }
+      } else if (error.request) {
+        console.error('No response received:', error.request);
+        errorMessage = 'No response from server. Please check your connection.';
+      } else {
+        console.error('Error message:', error.message);
+        errorMessage = error.message || errorMessage;
+      }
+      
+      // Use a timeout to ensure the alert doesn't cause rendering issues
+      setTimeout(() => {
+        Alert.alert(i18n.t('reservation.failed'), errorMessage);
+      }, 100);
     }
   };
 

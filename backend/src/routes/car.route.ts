@@ -19,6 +19,15 @@ export default async function (app: FastifyTypedInstance) {
         carController.getAllCars
       );
 
+      // Get all available cars
+      router.get(
+        '/available',
+        {
+          schema: carRouteSchemas.getAll // Reusing the same schema as getAll
+        },
+        carController.getAvailableCars
+      );
+
       // Get car by ID
       router.get(
         '/:id',

@@ -10,7 +10,23 @@ export class ReservationController {
   async getAllReservations(request: FastifyRequest, reply: FastifyReply) {
     try {
       const reservations = await reservationService.getAllReservations();
-      return reply.code(200).send(reservations);
+      
+      // Convert Date objects to ISO strings for serialization
+      const serializedReservations = reservations.map(reservation => ({
+        ...reservation,
+        startDate: reservation.startDate.toISOString(),
+        endDate: reservation.endDate.toISOString(),
+        createdAt: reservation.createdAt.toISOString(),
+        updatedAt: reservation.updatedAt.toISOString(),
+        car: {
+          ...reservation.car
+        },
+        user: {
+          ...reservation.user
+        }
+      }));
+      
+      return reply.code(200).send(serializedReservations);
     } catch (error) {
       request.log.error(error);
       return reply.code(500).send({ error: 'Failed to get reservations' });
@@ -24,7 +40,20 @@ export class ReservationController {
     try {
       const userId = (request.user as any).id;
       const reservations = await reservationService.getUserReservations(userId);
-      return reply.code(200).send(reservations);
+      
+      // Convert Date objects to ISO strings for serialization
+      const serializedReservations = reservations.map(reservation => ({
+        ...reservation,
+        startDate: reservation.startDate.toISOString(),
+        endDate: reservation.endDate.toISOString(),
+        createdAt: reservation.createdAt.toISOString(),
+        updatedAt: reservation.updatedAt.toISOString(),
+        car: {
+          ...reservation.car
+        }
+      }));
+      
+      return reply.code(200).send(serializedReservations);
     } catch (error) {
       request.log.error(error);
       return reply.code(500).send({ error: 'Failed to get user reservations' });
@@ -43,7 +72,22 @@ export class ReservationController {
         return reply.code(404).send({ error: 'Reservation not found' });
       }
       
-      return reply.code(200).send(reservation);
+      // Convert Date objects to ISO strings for serialization
+      const serializedReservation = {
+        ...reservation,
+        startDate: reservation.startDate.toISOString(),
+        endDate: reservation.endDate.toISOString(),
+        createdAt: reservation.createdAt.toISOString(),
+        updatedAt: reservation.updatedAt.toISOString(),
+        car: {
+          ...reservation.car
+        },
+        user: {
+          ...reservation.user
+        }
+      };
+      
+      return reply.code(200).send(serializedReservation);
     } catch (error) {
       request.log.error(error);
       return reply.code(500).send({ error: 'Failed to get reservation' });

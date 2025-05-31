@@ -2,10 +2,10 @@ import { User } from "./user.type";
 import { Car } from "./car.type";
 
 export enum ReservationStatus {
-  PENDING = "pending",
-  CONFIRMED = "confirmed",
-  CANCELLED = "cancelled",
-  COMPLETED = "completed",
+  PENDING = "PENDING",
+  CONFIRMED = "CONFIRMED",
+  CANCELLED = "CANCELLED",
+  COMPLETED = "COMPLETED",
 }
 
 export interface Reservation {

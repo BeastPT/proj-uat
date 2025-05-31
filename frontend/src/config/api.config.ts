@@ -1,4 +1,8 @@
+// Set to true for development, false for production
 const isDev = true;
+
+// Enable detailed logging for API requests
+const enableDebugLogs = true;
 
 // Base URLs for different environments
 const DEV_API_URL = 'http://10.0.2.2:3000/api'; // Android emulator
@@ -43,15 +47,23 @@ export const getApiUrl = () => {
   if (isDev) {
     const { isWeb, isIOS, isAndroid, isPhysicalDevice } = getPlatformInfo();
     
+    let apiUrl;
     if (isWeb) {
-      return WEB_DEV_API_URL;
+      apiUrl = WEB_DEV_API_URL;
     } else if (isPhysicalDevice) {
-      return DEVICE_API_URL;
+      apiUrl = DEVICE_API_URL;
     } else if (isIOS) {
-      return IOS_DEV_API_URL;
+      apiUrl = IOS_DEV_API_URL;
     } else {
-      return DEV_API_URL;
+      apiUrl = DEV_API_URL;
     }
+    
+    if (enableDebugLogs) {
+      console.log('Platform info:', { isWeb, isIOS, isAndroid, isPhysicalDevice });
+      console.log('Using API URL:', apiUrl);
+    }
+    
+    return apiUrl;
   }
   return PROD_API_URL;
 };

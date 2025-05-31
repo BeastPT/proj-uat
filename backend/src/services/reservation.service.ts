@@ -2,6 +2,7 @@ import { prisma } from "@/config/db.config";
 import { z } from "zod";
 import { createReservationSchema, updateReservationSchema } from "@/schemas/reservation.schema";
 import { CarStatus } from "@/types/car.type";
+import { ReservationStatus } from "@/types/reservation.type";
 
 const ReservationSelect = {
   id: true,
@@ -35,37 +36,79 @@ export class ReservationService {
    * Get all reservations (admin only)
    */
   async getAllReservations() {
-    // Using $queryRaw until Prisma client is regenerated
-    return prisma.$queryRaw`
-      SELECT * FROM "Reservation"
-    `;
+    return prisma.reservation.findMany({
+      include: {
+        car: true,
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true
+          }
+        }
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
+    });
   }
 
   /**
    * Get reservations for a specific user
    */
   async getUserReservations(userId: string) {
-    // Using $queryRaw until Prisma client is regenerated
-    return prisma.$queryRaw`
-      SELECT r.*, c.brand, c.model, c.year, c.color, c.price, c.images
-      FROM "Reservation" r
-      JOIN "Car" c ON r."carId" = c.id
-      WHERE r."userId" = ${userId}
-      ORDER BY r."createdAt" DESC
-    `;
+    return prisma.reservation.findMany({
+      where: {
+        userId: userId
+      },
+      include: {
+        car: {
+          select: {
+            id: true,
+            brand: true,
+            model: true,
+            year: true,
+            color: true,
+            price: true,
+            images: true
+          }
+        }
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
+    });
   }
 
   /**
    * Get reservation by ID
    */
   async getReservationById(id: string) {
-    // Using $queryRaw until Prisma client is regenerated
-    return prisma.$queryRaw`
-      SELECT r.*, c.brand, c.model, c.year, c.color, c.price, c.images
-      FROM "Reservation" r
-      JOIN "Car" c ON r."carId" = c.id
-      WHERE r.id = ${id}
-    `;
+    return prisma.reservation.findUnique({
+      where: {
+        id: id
+      },
+      include: {
+        car: {
+          select: {
+            id: true,
+            brand: true,
+            model: true,
+            year: true,
+            color: true,
+            price: true,
+            images: true
+          }
+        },
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true
+          }
+        }
+      }
+    });
   }
 
   /**
@@ -105,10 +148,10 @@ export class ReservationService {
         data: {
           userId,
           carId: data.carId,
-          startDate,
-          endDate,
+          startDate: data.startDate,
+          endDate: data.endDate,
           totalPrice,
-          status: 'PENDING',
+          status: "PENDING",
         },
         select: ReservationSelect,
       });
@@ -116,10 +159,17 @@ export class ReservationService {
       // Update car status to RESERVED
       await tx.car.update({
         where: { id: data.carId },
-        data: { status: 'RESERVED' },
+        data: { status: "RESERVED" },
       });
 
-      return reservation;
+      // Convert dates to ISO strings to match the response schema
+      return {
+        ...reservation,
+        startDate: reservation.startDate.toISOString(),
+        endDate: reservation.endDate.toISOString(),
+        createdAt: reservation.createdAt.toISOString(),
+        updatedAt: reservation.updatedAt.toISOString()
+      };
     });
   }
 
@@ -151,16 +201,16 @@ export class ReservationService {
         
         switch (data.status) {
           case 'CONFIRMED':
-            carStatus = 'RESERVED';
+            carStatus = CarStatus.RESERVED;
             break;
           case 'CANCELLED':
-            carStatus = 'AVAILABLE';
+            carStatus = CarStatus.AVAILABLE;
             break;
           case 'COMPLETED':
-            carStatus = 'AVAILABLE';
+            carStatus = CarStatus.AVAILABLE;
             break;
           default:
-            carStatus = 'RESERVED';
+            carStatus = CarStatus.RESERVED;
         }
 
         await tx.car.update({
@@ -169,7 +219,14 @@ export class ReservationService {
         });
       }
 
-      return updatedReservation;
+      // Convert dates to ISO strings to match the response schema
+      return {
+        ...updatedReservation,
+        startDate: updatedReservation.startDate.toISOString(),
+        endDate: updatedReservation.endDate.toISOString(),
+        createdAt: updatedReservation.createdAt.toISOString(),
+        updatedAt: updatedReservation.updatedAt.toISOString()
+      };
     });
   }
 
@@ -205,7 +262,14 @@ export class ReservationService {
         data: { status: 'AVAILABLE' },
       });
 
-      return cancelledReservation;
+      // Convert dates to ISO strings to match the response schema
+      return {
+        ...cancelledReservation,
+        startDate: cancelledReservation.startDate.toISOString(),
+        endDate: cancelledReservation.endDate.toISOString(),
+        createdAt: cancelledReservation.createdAt.toISOString(),
+        updatedAt: cancelledReservation.updatedAt.toISOString()
+      };
     });
   }
 }

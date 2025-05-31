@@ -67,7 +67,7 @@ export default function Search() {
     const fetchCars = async () => {
       try {
         setIsLoading(true);
-        const carsData = await apiService.getCars();
+        const carsData = await apiService.getAvailableCars();
         setCars(carsData);
         setError(null);
       } catch (err) {

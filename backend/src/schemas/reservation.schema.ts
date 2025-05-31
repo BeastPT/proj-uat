@@ -12,10 +12,10 @@ export const reservationStatusEnum = z.enum([
 // Create reservation schema
 export const createReservationSchema = z.object({
   carId: z.string().regex(/^[0-9a-fA-F]{24}$/, 'Invalid car ID format'),
-  startDate: z.string().transform((str) => new Date(str)),
-  endDate: z.string().transform((str) => new Date(str)),
+  startDate: z.string(),
+  endDate: z.string(),
 }).refine(
-  (data) => data.startDate < data.endDate,
+  (data) => new Date(data.startDate) < new Date(data.endDate),
   {
     message: 'End date must be after start date',
     path: ['endDate']
