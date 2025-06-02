@@ -2,12 +2,12 @@
 const isDev = true;
 
 // Enable detailed logging for API requests
-const enableDebugLogs = true;
+const enableDebugLogs = false;
 
 // Base URLs for different environments
 const DEV_API_URL = 'http://10.0.2.2:3000/api'; // Android emulator
 const IOS_DEV_API_URL = 'http://localhost:3000/api'; // iOS simulator
-const DEVICE_API_URL = 'http://192.168.1.130:3000/api'; // Physical device
+const DEVICE_API_URL = 'http://192.168.1.11:3000/api'; // Physical device
 const WEB_DEV_API_URL = 'http://localhost:3000/api'; // Web browser
 const PROD_API_URL = 'https://your-production-api.com/api'; // Production
 
@@ -53,14 +53,8 @@ export const getApiUrl = () => {
     } else if (isPhysicalDevice) {
       apiUrl = DEVICE_API_URL;
     } else if (isIOS) {
-      apiUrl = IOS_DEV_API_URL;
-    } else {
+      apiUrl = IOS_DEV_API_URL;    } else {
       apiUrl = DEV_API_URL;
-    }
-    
-    if (enableDebugLogs) {
-      console.log('Platform info:', { isWeb, isIOS, isAndroid, isPhysicalDevice });
-      console.log('Using API URL:', apiUrl);
     }
     
     return apiUrl;

@@ -117,10 +117,8 @@ export class ChatService {
 
   /**
    * Create a new chat
-   */
-  async createChat(userId: string) {
+   */  async createChat(userId: string) {
     // Check if user exists
-    console.log(`Creating chat for user: ${userId}`);
     
     const userExists = await prisma.user.findUnique({
       where: { id: userId },
@@ -137,9 +135,7 @@ export class ChatService {
         isActive: true,
       },
     });
-    
-    if (existingChat) {
-      console.log(`Chat already exists for user: ${userId}`);
+      if (existingChat) {
       // Convert Date objects to ISO strings
       return {
         ...existingChat,
@@ -147,9 +143,7 @@ export class ChatService {
         updatedAt: existingChat.updatedAt.toISOString()
       };
     }
-    
-    // Create a new chat
-    console.log(`Chat CREATE exists for user: ${userId}`);
+      // Create a new chat
     const newChat = await prisma.chat.create({
       data: {
         userId,
@@ -188,39 +182,24 @@ export class ChatService {
 
   /**
    * Add a message to a chat
-   */
-  async addMessage(chatId: string, content: string, isAdmin: boolean = false) {
+   */  async addMessage(chatId: string, content: string, isAdmin: boolean = false) {
     try {
-      // Log all input parameters for debugging
-      console.log('addMessage called with parameters:');
-      console.log(`- chatId: ${chatId}`);
-      console.log(`- content: ${content?.substring(0, 20)}${content?.length > 20 ? '...' : ''}`);
-      console.log(`- content length: ${content?.length || 0}`);
-      console.log(`- isAdmin: ${isAdmin}`);
-      
       // Input validation with detailed error messages
       if (!chatId) {
-        console.error('Missing chat ID');
         throw new Error('Chat ID is required');
       }
-      
-      if (typeof chatId !== 'string') {
-        console.error(`Invalid chat ID type: ${typeof chatId}`);
+        if (typeof chatId !== 'string') {
         throw new Error('Chat ID must be a string');
       }
       
       if (!content) {
-        console.error('Message content is null or undefined');
         throw new Error('Message content cannot be null or undefined');
       }
-      
-      if (typeof content !== 'string') {
-        console.error(`Invalid content type: ${typeof content}`);
+        if (typeof content !== 'string') {
         throw new Error('Message content must be a string');
       }
       
       if (content.trim() === '') {
-        console.error('Empty message content');
         throw new Error('Message content cannot be empty');
       }
       
@@ -228,19 +207,13 @@ export class ChatService {
       const chatExists = await prisma.chat.findUnique({
         where: { id: chatId },
         select: { id: true, isActive: true }
-      });
-  
-      if (!chatExists) {
-        console.error(`Chat ${chatId} not found`);
+      });      if (!chatExists) {
         throw new Error('Chat not found');
       }
       
       if (!chatExists.isActive) {
-        console.error(`Attempted to add message to inactive chat ${chatId}`);
         throw new Error('Cannot add messages to inactive chat');
       }
-  
-      console.log(`Creating message in chat ${chatId}`);
       
       // Create the message
       const message = await prisma.message.create({
@@ -251,15 +224,10 @@ export class ChatService {
         },
         select: MessageSelect,
       });
-      
-      if (!message) {
-        console.error(`Failed to create message in chat ${chatId}`);
+        if (!message) {
         throw new Error('Failed to create message');
       }
-      
-      console.log(`Message created with ID: ${message.id}`);
-  
-      // Update the chat's updatedAt timestamp
+        // Update the chat's updatedAt timestamp
       await prisma.chat.update({
         where: { id: chatId },
         data: {
@@ -267,18 +235,11 @@ export class ChatService {
         },
       });
       
-      console.log(`Chat ${chatId} updatedAt timestamp updated`);
-  
       // Convert Date object to ISO string
       return {
         ...message,
         createdAt: message.createdAt.toISOString()
-      };
-    } catch (error: any) {
-      // Log the error with detailed information
-      console.error(`Error adding message to chat ${chatId}:`, error);
-      console.error(`Error stack: ${error?.stack || 'No stack trace available'}`);
-      
+      };    } catch (error: any) {
       // Re-throw specific errors with clear messages
       if (error instanceof Error) {
         // Pass through known errors
@@ -290,10 +251,8 @@ export class ChatService {
         ) {
           throw error;
         }
-        
-        // For database or other errors, provide a generic message
+          // For database or other errors, provide a generic message
         if (error.message.includes('prisma') || error.message.includes('database')) {
-          console.error('Database error:', error.message);
           throw new Error('Database error occurred while adding message');
         }
         

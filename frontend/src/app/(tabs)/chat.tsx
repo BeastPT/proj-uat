@@ -114,61 +114,38 @@ export default function Chat() {
 
   // Fetch existing chat or create a new one
   const fetchOrCreateChat = async () => {
-    try {
-      setLoading(true);
+    try {      setLoading(true);
       setError(null);
       
-      console.log('Fetching chat for user:', user?.id);
-      
       if (!user || !user.id) {
-        console.error('No user ID available');
         setError('Authentication error. Please log out and log in again.');
         setLoading(false);
         return;
       }
-      
-      // First try to get user's chats to see if one already exists
-      console.log('Checking for existing chats for user:', user.id);
+        // First try to get user's chats to see if one already exists
       let chatData;
       
       try {
         // Try to get user's chats first
         const userChats = await apiService.getUserChats(user.id);
-        console.log('User chats retrieved:', userChats?.length || 0);
-        
-        // Find the first active chat
+          // Find the first active chat
         const activeChat = userChats.find((chat: any) => chat.isActive);
         
         if (activeChat) {
-          console.log('Found existing active chat:', activeChat.id);
           chatData = activeChat;
         } else {
           // If no active chat exists, create a new one
-          console.log('No active chat found, creating new chat for user:', user.id);
           chatData = await apiService.createChat(user.id);
-          console.log('New chat created:', chatData?.id || 'failed');
-        }
-      } catch (getUserChatsError: any) {
-        console.error('Error getting user chats:', getUserChatsError);
-        
+        }      } catch (getUserChatsError: any) {
         // If we can't get user chats, try to create a new chat
-        console.log('Falling back to create chat for user:', user.id);
-        
         try {
           // Try to create a new chat
-          chatData = await apiService.createChat(user.id);
-          console.log('New chat created:', chatData?.id || 'failed');
-        } catch (createError: any) {
-          console.error('Error creating chat:', createError);
-          
+          chatData = await apiService.createChat(user.id);        } catch (createError: any) {
           // If we get a 409 Conflict, it means a chat already exists
           if (createError.response && createError.response.status === 409) {
-            console.log('Chat already exists, trying to get active chat directly');
-            
             // Try to get the chat ID from the error response
             if (createError.response.data && createError.response.data.chatId) {
               const existingChatId = createError.response.data.chatId;
-              console.log('Using existing chat ID from 409 response:', existingChatId);
               chatData = { id: existingChatId, isActive: true };
             } else {
               throw new Error('Could not determine existing chat ID from 409 response');
@@ -178,14 +155,11 @@ export default function Chat() {
           }
         }
       }
-      
-      if (chatData && chatData.id) {
+        if (chatData && chatData.id) {
         setChatId(chatData.id);
         
         // Fetch messages for this chat
-        console.log('Fetching messages for chat:', chatData.id);
         const messages = await apiService.getChatMessages(chatData.id);
-        console.log('Messages received:', messages?.length || 0);
         
         // Format messages for the UI
         const formattedMessages = messages.map((msg: any) => ({
@@ -195,45 +169,23 @@ export default function Chat() {
           time: new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           isAuthor: !msg.isAdmin,
         }));
-        
-        setChatData(formattedMessages);
+          setChatData(formattedMessages);
       } else {
-        console.error('No active chat available after fetch/create attempt');
         setError('Could not create or retrieve chat. Please try again.');
       }
       
-      setLoading(false);
-    } catch (err: any) {
-      console.error('Error fetching chat:', err);
-      
-      // Log detailed error information
-      if (err.response) {
-        console.error('Error response status:', err.response.status);
-        console.error('Error response data:', JSON.stringify(err.response.data));
-      } else if (err.request) {
-        console.error('No response received:', err.request);
-      } else {
-        console.error('Error message:', err.message);
-        console.error('Error stack:', err.stack);
-      }
-      
+      setLoading(false);    } catch (err: any) {
       // More detailed error message based on the error type
       if (err.response && err.response.status === 409) {
-        console.error('Chat already exists (409 Conflict)');
-        
         // Try to extract the chat ID from the error response
-        if (err.response.data && err.response.data.chatId) {
-          const existingChatId = err.response.data.chatId;
-          console.log('Extracted chat ID from 409 response:', existingChatId);
+        if (err.response.data && err.response.data.chatId) {          const existingChatId = err.response.data.chatId;
           
           // Try to fetch the chat directly
           try {
             setChatId(existingChatId);
             
             // Fetch messages for this chat
-            console.log('Fetching messages for existing chat:', existingChatId);
             const messages = await apiService.getChatMessages(existingChatId);
-            console.log('Messages received:', messages?.length || 0);
             
             // Format messages for the UI
             const formattedMessages = messages.map((msg: any) => ({
@@ -245,34 +197,28 @@ export default function Chat() {
             }));
             
             setChatData(formattedMessages);
-            setLoading(false);
-            return; // Exit early since we've handled the error
+            setLoading(false);            return; // Exit early since we've handled the error
           } catch (fetchError) {
-            console.error('Error fetching existing chat:', fetchError);
             setError('Error loading existing chat. Please try again.');
           }
         } else {
           setError('A chat already exists but could not be loaded. Please try again.');
-        }
-      } else if (err.response && err.response.status === 403) {
-        console.error('Authentication error (403 Forbidden)');
+        }      } else if (err.response && err.response.status === 403) {
         setError('Authentication error. Please log out and log in again to refresh your session.');
         
         // Clear tokens on 403 error to force re-login
         try {
           await apiService.clearTokens();
         } catch (clearError) {
-          console.error('Error clearing tokens:', clearError);
-        }
-      } else if (err.response && err.response.status === 401) {
-        console.error('Authentication error (401 Unauthorized)');
+          // Handle token clearing error silently
+        }      } else if (err.response && err.response.status === 401) {
         setError('Your session has expired. Please log out and log in again.');
         
         // Clear tokens on 401 error to force re-login
         try {
           await apiService.clearTokens();
         } catch (clearError) {
-          console.error('Error clearing tokens:', clearError);
+          // Handle token clearing error silently
         }
       } else if (err.message && (err.message.includes('Network Error') || err.message.includes('timeout'))) {
         setError('Network error. Please check your connection and try again.');
@@ -326,25 +272,11 @@ export default function Chat() {
           time: new Date(sentMessage.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           isAuthor: true,
         };
-        
-        // Replace the temporary message with the real one
+          // Replace the temporary message with the real one
         setChatData(prev =>
           prev.map(msg => msg.id === tempId ? newMessage : msg)
         );
       } catch (err: any) {
-        console.error('Error sending message:', err);
-        
-        // More detailed error message based on the error type
-        if (err.response) {
-          console.log('Error response status:', err.response.status);
-          console.log('Error response data:', JSON.stringify(err.response.data));
-        } else if (err.request) {
-          console.log('No response received:', err.request);
-        } else {
-          console.log('Error message:', err.message);
-          console.log('Error stack:', err.stack);
-        }
-        
         // Remove the optimistic message on error
         setChatData(prev => prev.filter(msg => msg.message !== message));
         
@@ -356,7 +288,7 @@ export default function Chat() {
           try {
             apiService.clearTokens();
           } catch (clearError) {
-            console.error('Error clearing tokens:', clearError);
+            // Handle token clearing error silently
           }
         } else if (err.response && err.response.status === 403) {
           alert('You don\'t have permission to send messages in this chat.');
@@ -397,13 +329,9 @@ export default function Chat() {
             </View>
           ) : error ? (
             <View style={styles.errorContainer}>
-              <Text style={styles.errorText}>{error}</Text>
-              <Pressable
+              <Text style={styles.errorText}>{error}</Text>              <Pressable
                 style={styles.retryButton}
-                onPress={() => {
-                  console.log('Retry button pressed, attempting to fetch chat again');
-                  fetchOrCreateChat();
-                }}
+                onPress={fetchOrCreateChat}
               >
                 <Text style={styles.retryButtonText}>Retry</Text>
               </Pressable>

@@ -11,8 +11,7 @@ dotenv.config();
 async function setUserAsAdmin() {
   try {
     const email = process.argv[2];
-    
-    if (!email) {
+      if (!email) {
       console.error("Please provide an email address");
       console.log("Usage: npx ts-node src/scripts/set-admin.ts admin@example.com");
       process.exit(1);

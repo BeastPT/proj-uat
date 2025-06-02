@@ -82,11 +82,9 @@ export class ChatController {
           chatId: existingChat.id
         });
       }
-      
-      const chat = await chatService.createChat(userId);
+        const chat = await chatService.createChat(userId);
       return reply.code(201).send(chat);
     } catch (error) {
-      console.log('----------------------------------------------------------------------kError creating chat:', error);
       request.log.error(error);
       if (error instanceof Error && error.message === 'User not found') {
         return reply.code(404).send({ error: error.message });
@@ -121,12 +119,7 @@ export class ChatController {
       Body: z.infer<typeof createMessageSchema>;
     }>,
     reply: FastifyReply
-  ) {
-    try {
-      // Log the full request for debugging
-      request.log.info(`addMessage called with params: ${JSON.stringify(request.params)}`);
-      request.log.info(`addMessage called with body: ${JSON.stringify(request.body)}`);
-      
+  ) {    try {
       // Ensure params and body exist
       if (!request.params) {
         request.log.error('Missing params in request');
