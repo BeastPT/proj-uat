@@ -66,8 +66,6 @@ export class CarService {
       description: data.description || '',
     };
     
-    console.log("----------------------CAAR CREATED----------------------")
-
     return prisma.car.create({
       data: carData,
       select: CarSelect,

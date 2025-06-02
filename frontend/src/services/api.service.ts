@@ -44,12 +44,11 @@ apiClient.interceptors.response.use(
         if (refreshToken) {
           // Implement token refresh logic here if your backend supports it
           // For now, we'll just clear tokens to force re-login
-          console.log('Token expired, clearing tokens to force re-login');
           await AsyncStorage.removeItem(STORAGE_KEYS.TOKEN);
           await AsyncStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
         }
       } catch (refreshError) {
-        console.error('Error during token refresh:', refreshError);
+        // Silent error handling for token refresh
       }
     }
     
@@ -72,10 +71,7 @@ class ApiService {
       
       return response.data;
     } catch (error: any) {
-      // Don't log expected authentication errors (status 400/401)
-      if (error.response && (error.response.status !== 400 && error.response.status !== 401)) {
-        console.error('Login error:', error);
-      }
+      // Don't log expected authentication errors
       throw error;
     }
   }
@@ -92,10 +88,7 @@ class ApiService {
       // Then login to get the tokens
       return this.login(email, password);
     } catch (error: any) {
-      // Don't log expected authentication errors (status 400/401/409)
-      if (error.response && (error.response.status !== 400 && error.response.status !== 401 && error.response.status !== 409)) {
-        console.error('Registration error:', error);
-      }
+      // Don't log expected authentication errors
       throw error;
     }
   }
@@ -104,7 +97,6 @@ class ApiService {
     try {
       await this.clearTokens();
     } catch (error) {
-      console.error('Logout error:', error);
       throw error;
     }
   }
@@ -114,7 +106,6 @@ class ApiService {
       const response: AxiosResponse = await apiClient.get(ENDPOINTS.PROFILE);
       return response.data;
     } catch (error) {
-      console.error('Get user profile error:', error);
       throw error;
     }
   }
@@ -130,7 +121,6 @@ class ApiService {
       const response: AxiosResponse = await apiClient.put(ENDPOINTS.UPDATE_PROFILE, userData);
       return response.data;
     } catch (error) {
-      console.error('Update user profile error:', error);
       throw error;
     }
   }
@@ -141,7 +131,7 @@ class ApiService {
       await AsyncStorage.setItem(STORAGE_KEYS.TOKEN, token);
       await AsyncStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, refreshToken);
     } catch (error) {
-      console.error('Error storing tokens:', error);
+      // Silent error handling for token storage
     }
   }
 
@@ -149,7 +139,6 @@ class ApiService {
     try {
       return await AsyncStorage.getItem(STORAGE_KEYS.TOKEN);
     } catch (error) {
-      console.error('Error getting token:', error);
       return null;
     }
   }
@@ -158,7 +147,6 @@ class ApiService {
     try {
       return await AsyncStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN);
     } catch (error) {
-      console.error('Error getting refresh token:', error);
       return null;
     }
   }
@@ -168,7 +156,7 @@ class ApiService {
       await AsyncStorage.removeItem(STORAGE_KEYS.TOKEN);
       await AsyncStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
     } catch (error) {
-      console.error('Error clearing tokens:', error);
+      // Silent error handling for token clearing
     }
   }
 
@@ -178,7 +166,6 @@ class ApiService {
       const response: AxiosResponse = await apiClient.get(ENDPOINTS.CARS);
       return response.data;
     } catch (error) {
-      console.error('Get cars error:', error);
       throw error;
     }
   }
@@ -188,7 +175,6 @@ class ApiService {
       const response: AxiosResponse = await apiClient.get(`${ENDPOINTS.CARS_BASE}/available`);
       return response.data;
     } catch (error) {
-      console.error('Get available cars error:', error);
       throw error;
     }
   }
@@ -198,7 +184,6 @@ class ApiService {
       const response: AxiosResponse = await apiClient.get(`${ENDPOINTS.CARS_BASE}/${id}`);
       return response.data;
     } catch (error) {
-      console.error('Get car by ID error:', error);
       throw error;
     }
   }
@@ -208,7 +193,6 @@ class ApiService {
       const response: AxiosResponse = await apiClient.post(ENDPOINTS.CARS_BASE, carData);
       return response.data;
     } catch (error) {
-      console.error('Create car error:', error);
       throw error;
     }
   }
@@ -218,7 +202,6 @@ class ApiService {
       const response: AxiosResponse = await apiClient.put(`${ENDPOINTS.CARS_BASE}/${id}`, carData);
       return response.data;
     } catch (error) {
-      console.error('Update car error:', error);
       throw error;
     }
   }
@@ -228,7 +211,6 @@ class ApiService {
       const response: AxiosResponse = await apiClient.delete(`${ENDPOINTS.CARS_BASE}/${id}`);
       return response.data;
     } catch (error) {
-      console.error('Delete car error:', error);
       throw error;
     }
   }
@@ -240,7 +222,6 @@ class ApiService {
       const response: AxiosResponse = await apiClient.put(endpoint);
       return response.data;
     } catch (error) {
-      console.error('Set user as admin error:', error);
       throw error;
     }
   }
@@ -251,7 +232,6 @@ class ApiService {
       const response: AxiosResponse = await apiClient.put(endpoint);
       return response.data;
     } catch (error) {
-      console.error('Remove user admin error:', error);
       throw error;
     }
   }
@@ -262,46 +242,27 @@ class ApiService {
       const response: AxiosResponse = await apiClient.get(ENDPOINTS.CHATS);
       return response.data;
     } catch (error) {
-      console.error('Get admin chats error:', error);
       throw error;
     }
   }
 
   async getUserChats(userId: string): Promise<any> {
     try {
-      console.log(`Getting chats for user: ${userId}`);
-      
       if (!userId) {
-        console.error('Missing user ID in getUserChats');
         throw new Error('User ID is required');
       }
       
       const endpoint = ENDPOINTS.USER_CHATS.replace(':userId', userId);
-      console.log(`Using endpoint: ${endpoint}`);
       
       // Check if we have a valid token before sending
       const token = await this.getToken();
       if (!token) {
-        console.error('No authentication token available');
         throw new Error('Authentication required. Please log in again.');
       }
       
       const response: AxiosResponse = await apiClient.get(endpoint);
-      console.log(`Retrieved ${response.data?.length || 0} chats for user ${userId}`);
       return response.data;
     } catch (error: any) {
-      console.error('Get user chats error:', error);
-      
-      // Log more detailed error information
-      if (error.response) {
-        console.error('Error response status:', error.response.status);
-        console.error('Error response data:', error.response.data);
-      } else if (error.request) {
-        console.error('No response received:', error.request);
-      } else {
-        console.error('Error message:', error.message);
-      }
-      
       throw error;
     }
   }
@@ -312,60 +273,36 @@ class ApiService {
       const response: AxiosResponse = await apiClient.get(endpoint);
       return response.data;
     } catch (error) {
-      console.error('Get chat by ID error:', error);
       throw error;
     }
   }
 
   async createChat(userId: string): Promise<any> {
     try {
-      console.log(`Creating chat for user: ${userId}`);
-      
       if (!userId) {
-        console.error('Missing user ID in createChat');
         throw new Error('User ID is required');
       }
       
       const endpoint = ENDPOINTS.CHATS;
-      console.log(`Using endpoint: ${endpoint}`);
       
       // Check if we have a valid token before sending
       const token = await this.getToken();
       if (!token) {
-        console.error('No authentication token available');
         throw new Error('Authentication required. Please log in again.');
       }
       
       const response: AxiosResponse = await apiClient.post(endpoint, { userId });
-      console.log(`Chat created successfully for user ${userId}, chat ID: ${response.data?.id || 'unknown'}`);
       return response.data;
     } catch (error: any) {
-      console.error('Create chat error:', error);
-      
       // Handle 409 Conflict (chat already exists) specially
       if (error.response && error.response.status === 409) {
-        console.log('Chat already exists, extracting existing chat ID');
-        
         if (error.response.data && error.response.data.chatId) {
-          console.log(`Using existing chat ID: ${error.response.data.chatId}`);
           return {
             id: error.response.data.chatId,
             isActive: true,
             userId: userId
           };
-        } else {
-          console.error('No chat ID found in 409 response');
         }
-      }
-      
-      // Log more detailed error information
-      if (error.response) {
-        console.error('Error response status:', error.response.status);
-        console.error('Error response data:', error.response.data);
-      } else if (error.request) {
-        console.error('No response received:', error.request);
-      } else {
-        console.error('Error message:', error.message);
       }
       
       throw error;
@@ -378,25 +315,17 @@ class ApiService {
       const response: AxiosResponse = await apiClient.get(endpoint);
       return response.data;
     } catch (error) {
-      console.error('Get chat messages error:', error);
       throw error;
     }
   }
 
   async sendMessage(chatId: string, content: string, isAdmin: boolean = false): Promise<any> {
     try {
-      console.log(`Sending message to chat ${chatId}: "${content.substring(0, 20)}${content.length > 20 ? '...' : ''}"`);
-      
       const endpoint = ENDPOINTS.CHAT_MESSAGES.replace(':id', chatId);
-      console.log('Using endpoint:', endpoint);
-      
-      // Log the request payload
-      console.log('Request payload:', { content, isAdmin });
       
       // Check if we have a valid token before sending
       const token = await this.getToken();
       if (!token) {
-        console.error('No authentication token available');
         throw new Error('Authentication required. Please log in again.');
       }
       
@@ -405,20 +334,9 @@ class ApiService {
         isAdmin
       });
       
-      console.log('Message sent successfully, response:', response.status);
       return response.data;
     } catch (error: any) {
-      console.error('Send message error:', error);
       
-      // Log more detailed error information
-      if (error.response) {
-        console.error('Error response status:', error.response.status);
-        console.error('Error response data:', error.response.data);
-      } else if (error.request) {
-        console.error('No response received:', error.request);
-      } else {
-        console.error('Error message:', error.message);
-      }
       
       throw error;
     }
@@ -430,7 +348,6 @@ class ApiService {
       const response: AxiosResponse = await apiClient.put(endpoint);
       return response.data;
     } catch (error) {
-      console.error('Close chat error:', error);
       throw error;
     }
   }
@@ -441,7 +358,6 @@ class ApiService {
       const response: AxiosResponse = await apiClient.put(endpoint);
       return response.data;
     } catch (error) {
-      console.error('Reopen chat error:', error);
       throw error;
     }
   }
@@ -452,7 +368,6 @@ class ApiService {
       const response: AxiosResponse = await apiClient.get(ENDPOINTS.USER_RESERVATIONS);
       return response.data;
     } catch (error) {
-      console.error('Get user reservations error:', error);
       throw error;
     }
   }
@@ -463,7 +378,6 @@ class ApiService {
       const response: AxiosResponse = await apiClient.get(endpoint);
       return response.data;
     } catch (error) {
-      console.error('Get reservation by ID error:', error);
       throw error;
     }
   }
@@ -474,30 +388,15 @@ class ApiService {
     endDate: string;
   }): Promise<any> {
     try {
-      console.log('Creating reservation with data:', JSON.stringify(reservationData, null, 2));
-      
       // Check if we have a valid token before sending
       const token = await this.getToken();
       if (!token) {
-        console.error('No authentication token available');
         throw new Error('Authentication required. Please log in again.');
       }
       
       const response: AxiosResponse = await apiClient.post(ENDPOINTS.RESERVATIONS, reservationData);
-      console.log('Reservation created successfully:', response.status);
       return response.data;
     } catch (error: any) {
-      console.error('Create reservation error:', error);
-      
-      // Log more detailed error information
-      if (error.response) {
-        console.error('Error response status:', error.response.status);
-        console.error('Error response data:', error.response.data);
-      } else if (error.request) {
-        console.error('No response received:', error.request);
-      } else {
-        console.error('Error message:', error.message);
-      }
       
       throw error;
     }
@@ -509,7 +408,6 @@ class ApiService {
       const response: AxiosResponse = await apiClient.put(endpoint);
       return response.data;
     } catch (error) {
-      console.error('Cancel reservation error:', error);
       throw error;
     }
   }

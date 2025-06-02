@@ -76,12 +76,6 @@ const ReservationModal: React.FC<ReservationModalProps> = ({
       const formattedStartDate = startDate.toISOString();
       const formattedEndDate = endDate.toISOString();
       
-      console.log('Creating reservation with data:', {
-        carId,
-        startDate: formattedStartDate,
-        endDate: formattedEndDate,
-      });
-      
       // Wrap the API call in a try-catch to prevent crashes
       try {
         await apiService.createReservation({
@@ -105,15 +99,11 @@ const ReservationModal: React.FC<ReservationModalProps> = ({
     } catch (error: any) {
       // Always make sure to set loading to false
       setIsLoading(false);
-      console.error('Reservation error details:', error);
       
       let errorMessage = i18n.t('reservation.error');
       
       // More detailed error handling
       if (error.response) {
-        console.error('Error response status:', error.response.status);
-        console.error('Error response data:', error.response.data);
-        
         // Handle validation errors specifically
         if (error.response.status === 400 && error.response.data?.error) {
           if (Array.isArray(error.response.data.error)) {
@@ -128,17 +118,12 @@ const ReservationModal: React.FC<ReservationModalProps> = ({
           errorMessage = error.response?.data?.error || errorMessage;
         }
       } else if (error.request) {
-        console.error('No response received:', error.request);
         errorMessage = 'No response from server. Please check your connection.';
       } else {
-        console.error('Error message:', error.message);
         errorMessage = error.message || errorMessage;
       }
       
-      // Use a timeout to ensure the alert doesn't cause rendering issues
-      setTimeout(() => {
-        Alert.alert(i18n.t('reservation.failed'), errorMessage);
-      }, 100);
+      Alert.alert(i18n.t('reservation.failed'), errorMessage);
     }
   };
 

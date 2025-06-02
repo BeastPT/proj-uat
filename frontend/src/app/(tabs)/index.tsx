@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from "react";
-import { View, Text, StyleSheet, ScrollView, FlatList, SafeAreaView, Image, ActivityIndicator } from "react-native";
+import { View, Text, StyleSheet, ScrollView, FlatList, SafeAreaView, ActivityIndicator } from "react-native";
 import { Stack } from "expo-router";
 
 import { useAuth } from "@/src/context/AuthContext";
@@ -8,18 +8,13 @@ import i18n from "@/src/i18n";
 import { SPACING } from "@/src/constants/Spacing";
 import { apiService } from "@/src/services/api.service";
 
-import SearchBar from "@/src/components/SearchBar";
 import SectionHeader from "@/src/components/SectionHeader";
 import CarCard from "@/src/components/CarCard";
 import BookingCard from "@/src/components/BookingCard";
-import SpecialOfferCard from "@/src/components/SpecialOfferCard";
-
-import { specialOffers } from "@/src/data/mockData";
 
 export default function Index() {
   const { user } = useAuth();
   const { colors } = useTheme();
-  const [searchQuery, setSearchQuery] = useState("");
   const [cars, setCars] = useState<any[]>([]);
   const [bookings, setBookings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -36,7 +31,6 @@ export default function Index() {
         setCars(carsData);
         setError(null);
       } catch (err) {
-        console.error('Error fetching cars:', err);
         setError('Failed to load cars. Please try again later.');
       } finally {
         setLoading(false);
@@ -46,35 +40,10 @@ export default function Index() {
     const fetchUserBookings = async () => {
       try {
         setLoadingBookings(true);
-        console.log("Fetching user reservations...");
         const reservationsData = await apiService.getUserReservations();
-        console.log("Received reservations data:", JSON.stringify(reservationsData));
         
-        // If no reservations or empty array, use simulated data for testing
         if (!reservationsData || !Array.isArray(reservationsData) || reservationsData.length === 0) {
-          console.log("No reservations found, using simulated data");
-          
-          // Create simulated reservations with cars that are not available (reserved)
-          const simulatedReservations = [
-            {
-              id: "res-1",
-              carName: "Toyota Corolla",
-              carImage: require("@/src/assets/images/loadingCar.png"),
-              startDate: "06/01/2025",
-              endDate: "06/05/2025",
-              status: "active" as "active"
-            },
-            {
-              id: "res-2",
-              carName: "Honda Civic",
-              carImage: require("@/src/assets/images/loadingCar.png"),
-              startDate: "06/10/2025",
-              endDate: "06/15/2025",
-              status: "active" as "active"
-            }
-          ];
-          
-          setBookings(simulatedReservations);
+          setBookings([]);
           setBookingsError(null);
           setLoadingBookings(false);
           return;
@@ -84,8 +53,6 @@ export default function Index() {
         const formattedBookings = reservationsData
           .filter((reservation: any) => reservation && reservation.car) // Filter out reservations without car data
           .map((reservation: any) => {
-            console.log("Processing reservation:", reservation.id);
-            
             // Format dates
             const startDate = new Date(reservation.startDate).toLocaleDateString();
             const endDate = new Date(reservation.endDate).toLocaleDateString();
@@ -117,35 +84,11 @@ export default function Index() {
             };
           });
         
-        console.log("Formatted bookings:", formattedBookings);
         setBookings(formattedBookings);
         setBookingsError(null);
       } catch (err) {
-        console.error('Error fetching bookings:', err);
         setBookingsError('Failed to load bookings. Please try again later.');
-        
-        // Use simulated data on error for testing
-        console.log("Using simulated data due to error");
-        const simulatedReservations = [
-          {
-            id: "res-1",
-            carName: "Toyota Corolla",
-            carImage: require("@/src/assets/images/loadingCar.png"),
-            startDate: "06/01/2025",
-            endDate: "06/05/2025",
-            status: "active" as "active"
-          },
-          {
-            id: "res-2",
-            carName: "Honda Civic",
-            carImage: require("@/src/assets/images/loadingCar.png"),
-            startDate: "06/10/2025",
-            endDate: "06/15/2025",
-            status: "active" as "active"
-          }
-        ];
-        
-        setBookings(simulatedReservations);
+        setBookings([]);
       } finally {
         setLoadingBookings(false);
       }
@@ -155,8 +98,6 @@ export default function Index() {
     fetchUserBookings();
   }, []);
 
-  // All available cars
-  const allCars = cars;
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -175,53 +116,6 @@ export default function Index() {
           </View>
         </View>
 
-        {/* <SearchBar
-          placeholder={i18n.t("home.searchPlaceholder")}
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-        /> */}
-
-        {/* Featured Car Section */}
-        {/* {featuredCar && (
-          <View style={styles.section}>
-            <SectionHeader
-              title={i18n.t("home.featuredCars")}
-              actionText={i18n.t("home.viewAll")}
-              onActionPress={() => {}}
-            />
-            <CarCard
-              id={featuredCar.id}
-              name={featuredCar.name}
-              image={featuredCar.image}
-              price={featuredCar.price}
-              priceUnit={featuredCar.priceUnit}
-              rating={featuredCar.rating}
-              location={featuredCar.location}
-              featured={true}
-              onPress={() => {}}
-            />
-          </View>
-        )} */}
-
-        {/* Special Offers Section */}
-        {/* <View style={styles.section}>
-          <SectionHeader
-            title={i18n.t("home.specialOffers")}
-            actionText={i18n.t("home.viewAll")}
-            onActionPress={() => {}}
-          />
-          {specialOffers.map(offer => (
-            <SpecialOfferCard
-              key={offer.id}
-              id={offer.id}
-              title={offer.title}
-              description={offer.description}
-              discount={offer.discount}
-              backgroundImage={offer.backgroundImage}
-              onPress={() => {}}
-            />
-          ))}
-        </View> */}
 
         {/* Available Cars Section */}
         <View style={styles.section}>
@@ -242,7 +136,7 @@ export default function Index() {
             </View>
           ) : (
             <FlatList
-              data={allCars}
+              data={cars}
               keyExtractor={item => item.id}
               horizontal
               showsHorizontalScrollIndicator={false}

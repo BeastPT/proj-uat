@@ -71,7 +71,6 @@ export default function Search() {
         setCars(carsData);
         setError(null);
       } catch (err) {
-        console.error("Failed to fetch cars:", err);
         setError("Failed to load cars. Please try again.");
       } finally {
         setIsLoading(false);
@@ -164,10 +163,8 @@ export default function Search() {
       }
     });
 
-    // Simulate short delay for better UX
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 300);
+    // Set loading to false immediately
+    setIsLoading(false);
 
     return filtered;
   }, [searchQuery, filters, sortOption, cars]);
