@@ -5,13 +5,20 @@ This project consists of a React Native frontend and a Fastify backend.
 ## Project Structure
 
 - `frontend/`: React Native application built with Expo
+  - User interface for car rental, booking, chat, and profile management
+  - Supports multiple languages (English and Portuguese)
+  - Includes both user and admin interfaces
 - `backend/`: Fastify API server with TypeScript
+  - RESTful API endpoints for all application features
+  - Uses Prisma ORM for database operations
+  - JWT-based authentication system
 
 ## Prerequisites
 
 - Node.js (v18 or higher)
 - pnpm package manager
 - MongoDB (for the backend database)
+- Prisma CLI (installed as a project dependency)
 
 ## Getting Started
 
@@ -113,8 +120,80 @@ The backend API documentation is available at `http://localhost:3000/docs` when 
 
 The application uses JWT-based authentication. When a user logs in or registers, the backend provides an access token and a refresh token. The access token is used for API requests and the refresh token is used to obtain a new access token when the current one expires.
 
+## Database Setup
+
+The project uses Prisma ORM to interact with MongoDB. After installing dependencies, you need to generate the Prisma client:
+
+```bash
+cd backend
+pnpm prisma generate
+```
+
+## Admin Setup
+
+To create an admin user, run the following script:
+
+```bash
+cd backend
+pnpm run set-admin
+```
+
+This will prompt you to enter an email address for the admin user. If the user exists, it will be promoted to admin; if not, you'll be asked to create a new admin user.
+
+## Internationalization
+
+The application supports multiple languages:
+- English (default)
+- Portuguese
+
+Users can change their language preference in the profile settings. Developers can add translations by modifying the JSON files in the `frontend/src/i18n` directory.
+
 ## Features
 
 - User authentication (login, register, profile)
 - Car rental management
 - Booking system
+- Real-time chat functionality
+- Notification system
+- Multi-language support (English and Portuguese)
+- Theme customization
+- Admin dashboard for car management
+
+## Chat System
+
+The application includes a real-time chat system that allows users to:
+- Communicate with support staff
+- Discuss rental details
+- Receive important notifications
+
+## Notification System
+
+The app includes a notification system that alerts users about:
+- New messages
+- Booking status changes
+- Upcoming reservations
+- Payment confirmations
+
+## Admin Dashboard
+
+The admin dashboard provides management capabilities:
+- Car inventory management (add, edit, delete cars)
+- User management
+- Reservation oversight
+- Support chat access
+
+## Theme Support
+
+The application supports light and dark themes, which can be toggled in the user profile settings.
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## License
+
+This project is licensed under the MIT License.
