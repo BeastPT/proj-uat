@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Image, ImageSourcePropType } from "react-native";
 import { SPACING, RADIUS } from "@/src/constants/Spacing";
 import { useTheme } from "@/src/context/ThemeContext";
+import i18n from "@/src/i18n";
 
 interface BookingCardProps {
   id: string;
@@ -10,6 +11,7 @@ interface BookingCardProps {
   startDate: string;
   endDate: string;
   status: "active" | "completed" | "cancelled";
+  isPending?: boolean;
   onPress?: () => void;
 }
 
@@ -19,11 +21,16 @@ const BookingCard: React.FC<BookingCardProps> = ({
   startDate,
   endDate,
   status,
+  isPending,
   onPress,
 }) => {
   const { colors } = useTheme();
   
   const getStatusColor = () => {
+    if (status === "active" && isPending) {
+      return "#FFA726"; // Orange for pending
+    }
+    
     switch (status) {
       case "active":
         return "#4CAF50"; // Green
@@ -35,8 +42,11 @@ const BookingCard: React.FC<BookingCardProps> = ({
         return colors.textMuted;
     }
   };
-
   const getStatusText = () => {
+    if (status === "active" && isPending) {
+      return i18n.t("home.pendingStatus") || "Pending";
+    }
+    
     switch (status) {
       case "active":
         return "Active";

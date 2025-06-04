@@ -47,14 +47,16 @@
       "country": "País",
       "notSet": "Não definido"
     }
-  },
-  "home": {
+  },  "home": {
     "welcome": "Bem-vindo de volta",
     "searchPlaceholder": "Procurar um carro",
     "featuredCars": "Carros em Destaque",
     "viewAll": "Ver Todos",
     "recentBookings": "Reservas Recentes",
     "noBookings": "Sem reservas recentes",
+    "activeReservations": "Reservas Ativas",
+    "noActiveReservations": "Sem reservas ativas",
+    "pendingStatus": "Pendente",
     "specialOffers": "Ofertas Especiais",
     "availableCars": "Carros Disponíveis",
     "pickupDate": "Data de Retirada",

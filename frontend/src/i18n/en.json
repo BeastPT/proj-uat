@@ -48,14 +48,16 @@
         "country": "Country",
         "notSet": "Not set"
       }
-    },
-  "home": {
+    },  "home": {
     "welcome": "Welcome back",
     "searchPlaceholder": "Search for a car",
     "featuredCars": "Featured Cars",
     "viewAll": "View All",
     "recentBookings": "Recent Bookings",
     "noBookings": "No recent bookings",
+    "activeReservations": "Active Reservations",
+    "noActiveReservations": "No active reservations",
+    "pendingStatus": "Pending",
     "specialOffers": "Special Offers",
     "availableCars": "Available Cars",
     "pickupDate": "Pickup Date",
