@@ -62,7 +62,8 @@
     "pickupDate": "Data de Retirada",
     "returnDate": "Data de Devolução",
     "bookNow": "Reservar Agora",
-    "seeDetails": "Ver Detalhes"
+    "seeDetails": "Ver Detalhes",
+    "cancelReservation": "Cancelar"
   },
   "car": {
     "reserve": "Reservar Agora",
@@ -96,7 +97,10 @@
     "viewReservations": "Ver Minhas Reservas",
     "cancel": "Cancelar Reserva",
     "cancelConfirm": "Tem certeza que deseja cancelar esta reserva?",
-    "cancelSuccess": "Reserva cancelada com sucesso",
+    "cancelSuccess": "Reserva Cancelada",
+    "cancelSuccessMessage": "Sua reserva foi cancelada com sucesso.",
+    "cancelFailed": "Falha no Cancelamento",
+    "cancelFailedMessage": "Falha ao cancelar a reserva. Por favor, tente novamente mais tarde.",
     "cancelError": "Falha ao cancelar a reserva"
   },
   "search": {

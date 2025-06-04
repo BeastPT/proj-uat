@@ -63,7 +63,8 @@
     "pickupDate": "Pickup Date",
     "returnDate": "Return Date",
     "bookNow": "Book Now",
-    "seeDetails": "See Details"
+    "seeDetails": "See Details",
+    "cancelReservation": "Cancel"
   },
   "car": {
     "reserve": "Reserve Now",
@@ -97,7 +98,10 @@
     "viewReservations": "View My Reservations",
     "cancel": "Cancel Reservation",
     "cancelConfirm": "Are you sure you want to cancel this reservation?",
-    "cancelSuccess": "Reservation cancelled successfully",
+    "cancelSuccess": "Reservation Cancelled",
+    "cancelSuccessMessage": "Your reservation has been successfully cancelled.",
+    "cancelFailed": "Cancellation Failed",
+    "cancelFailedMessage": "Failed to cancel reservation. Please try again later.",
     "cancelError": "Failed to cancel reservation"
   },
   "search": {

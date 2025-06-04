@@ -8,6 +8,12 @@ export enum ReservationStatus {
   COMPLETED = "COMPLETED",
 }
 
+export enum RentalPeriodStatus {
+  NOT_STARTED = "NOT_STARTED",
+  ACTIVE = "ACTIVE",
+  ENDED = "ENDED",
+}
+
 export interface Reservation {
   id: string;
   userId: string;
@@ -16,6 +22,7 @@ export interface Reservation {
   endDate: Date;
   totalPrice: number;
   status: ReservationStatus;
+  periodStatus?: RentalPeriodStatus;
   createdAt: Date;
   updatedAt: Date;
   

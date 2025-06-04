@@ -109,18 +109,19 @@ model Car {
 }
 
 model Reservation {
-  id          String    @id @default(auto()) @map("_id") @db.ObjectId
-  userId      String    @db.ObjectId
-  carId       String    @db.ObjectId
-  startDate   DateTime
-  endDate     DateTime
-  totalPrice  Float
-  status      ReservationStatus @default(PENDING)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id           String              @id @default(auto()) @map("_id") @db.ObjectId
+  userId       String              @db.ObjectId
+  carId        String              @db.ObjectId
+  startDate    DateTime
+  endDate      DateTime
+  totalPrice   Float
+  status       ReservationStatus   @default(PENDING)
+  periodStatus RentalPeriodStatus? // New field to track rental period status
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
 
-  user        User      @relation(fields: [userId], references: [id])
-  car         Car       @relation(fields: [carId], references: [id])
+  user         User                @relation(fields: [userId], references: [id])
+  car          Car                 @relation(fields: [carId], references: [id])
 }
 
 enum ReservationStatus {
@@ -128,6 +129,13 @@ enum ReservationStatus {
   CONFIRMED
   CANCELLED
   COMPLETED
+}
+
+// This enum represents the actual state of the reservation based on dates
+enum RentalPeriodStatus {
+  NOT_STARTED  // Before start date
+  ACTIVE       // Between start and end date
+  ENDED        // After end date
 }
 
 model Chat {

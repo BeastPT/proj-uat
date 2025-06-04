@@ -15,6 +15,7 @@ interface CarCardProps {
   location?: string;
   onPress?: () => void;
   featured?: boolean;
+  onReservationSuccess?: () => void;
 }
 
 const CarCard: React.FC<CarCardProps> = ({
@@ -27,6 +28,7 @@ const CarCard: React.FC<CarCardProps> = ({
   location,
   onPress,
   featured = false,
+  onReservationSuccess,
 }) => {
   const { colors } = useTheme();
   const [showReservationModal, setShowReservationModal] = useState(false);
@@ -97,7 +99,12 @@ const CarCard: React.FC<CarCardProps> = ({
         carId={id}
         carName={name}
         pricePerDay={price}
-        onSuccess={() => {}}
+        onSuccess={() => {
+          setShowReservationModal(false);
+          if (onReservationSuccess) {
+            onReservationSuccess();
+          }
+        }}
       />
     </>
   );

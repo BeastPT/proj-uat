@@ -1,6 +1,8 @@
 import { prisma } from "@/config/db.config";
 import { z } from "zod";
 import { createCarSchema, updateCarSchema } from "@/schemas/car.schema";
+import { ReservationStatus, RentalPeriodStatus } from "@/types/reservation.type";
+import { CarStatus } from "@/types/car.type";
 
 const CarSelect = {
   id: true,
@@ -34,9 +36,56 @@ export class CarService {
   }
 
   /**
+   * Check and update cars with ended reservations
+   */
+  private async updateCarsWithEndedReservations() {
+    const currentDate = new Date();
+    
+    // Find all active reservations that have ended
+    const endedReservations = await prisma.reservation.findMany({
+      where: {
+        endDate: {
+          lt: currentDate
+        },
+        status: {
+          in: ['CONFIRMED', 'PENDING']
+        }
+      },
+      select: {
+        id: true,
+        carId: true
+      }
+    });
+    
+    // Update the status of these reservations and their cars
+    for (const reservation of endedReservations) {
+      await prisma.$transaction([
+        // Update reservation status to COMPLETED
+        prisma.reservation.update({
+          where: { id: reservation.id },
+          data: {
+            status: ReservationStatus.COMPLETED,
+            periodStatus: RentalPeriodStatus.ENDED
+          }
+        }),
+        
+        // Update car status to AVAILABLE
+        prisma.car.update({
+          where: { id: reservation.carId },
+          data: { status: CarStatus.AVAILABLE }
+        })
+      ]);
+    }
+  }
+
+  /**
    * Get all available cars
    */
   async getAvailableCars() {
+    // First update any cars with ended reservations
+    await this.updateCarsWithEndedReservations();
+    
+    // Then get all available cars
     return prisma.car.findMany({
       where: {
         status: "AVAILABLE"
@@ -49,6 +98,9 @@ export class CarService {
    * Get car by ID
    */
   async getCarById(id: string) {
+    // Check for ended reservations before returning the car
+    await this.updateCarsWithEndedReservations();
+    
     return prisma.car.findUnique({
       where: { id },
       select: CarSelect,

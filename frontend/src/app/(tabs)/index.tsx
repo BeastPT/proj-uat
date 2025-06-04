@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from "react";
+import { Alert } from "react-native";
 import {
   View,
   Text,
@@ -32,21 +33,22 @@ export default function Index() {
   const [bookingsError, setBookingsError] = useState<string | null>(null);
   const styles = useMemo(() => createStyles(colors), [colors]);
 
-  useEffect(() => {
-    const fetchCars = async () => {
-      try {
-        setLoading(true);
-        const carsData = await apiService.getAvailableCars();
-        setCars(carsData);
-        setError(null);
-      } catch (err) {
-        setError("Failed to load cars. Please try again later.");
-      } finally {
-        setLoading(false);
-      }
-    };
+  // Function to refresh available cars
+  const fetchCars = async () => {
+    try {
+      setLoading(true);
+      const carsData = await apiService.getAvailableCars();
+      setCars(carsData);
+      setError(null);
+    } catch (err) {
+      setError("Failed to load cars. Please try again later.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    const fetchUserBookings = async () => {
+  // Function to refresh user bookings
+  const fetchUserBookings = async () => {
       try {
         setLoadingBookings(true);
         const reservationsData = await apiService.getUserReservations();
@@ -114,21 +116,34 @@ export default function Index() {
 
             // Map reservation status to booking status
             let status: "active" | "completed" | "cancelled";
-            switch (reservation.status) {
-              case "CONFIRMED":
+            
+            // First check if reservation is cancelled
+            if (reservation.status === "CANCELLED") {
+              status = "cancelled";
+            } else {
+              // Determine period status based on dates
+              const currentDate = new Date();
+              const startDate = new Date(reservation.startDate);
+              const endDate = new Date(reservation.endDate);
+              
+              let periodStatus;
+              if (currentDate < startDate) {
+                periodStatus = "NOT_STARTED";
+              } else if (currentDate > endDate) {
+                periodStatus = "ENDED";
+              } else {
+                periodStatus = "ACTIVE";
+              }
+              
+              // Set display status based on period status
+              if (periodStatus === "ENDED") {
+                status = "completed"; // Using "completed" for "ended" status
+              } else {
                 status = "active";
-                break;
-              case "PENDING":
-                status = "active"; // Also set PENDING as active
-                break;
-              case "COMPLETED":
-                status = "completed";
-                break;
-              case "CANCELLED":
-                status = "cancelled";
-                break;
-              default:
-                status = "active";
+              }
+              
+              // Log period status for debugging
+              console.log(`Reservation ${reservation.id}: Period status = ${periodStatus}`);
             }
 
             // Handle case where car data might still be missing after fetch attempt
@@ -136,6 +151,21 @@ export default function Index() {
             if (reservation.car && reservation.car.brand && reservation.car.model) {
               carName = `${reservation.car.brand} ${reservation.car.model}`;
             }
+
+            // Determine if the booking is active based on period status
+            const periodStatus = (() => {
+              const currentDate = new Date();
+              const startDate = new Date(reservation.startDate);
+              const endDate = new Date(reservation.endDate);
+              
+              if (currentDate < startDate) {
+                return "NOT_STARTED";
+              } else if (currentDate > endDate) {
+                return "ENDED";
+              } else {
+                return "ACTIVE";
+              }
+            })();
 
             return {
               id: reservation.id,
@@ -146,18 +176,22 @@ export default function Index() {
               status,
               rawStatus: reservation.status,
               isPending: reservation.status === "PENDING",
+              isWithinPeriod: periodStatus === "ACTIVE",
             };
           });
 
-        // Filter active bookings (CONFIRMED or PENDING status)
+        // Filter active bookings (active status based on period)
         const active = formattedBookings.filter(
           booking => booking.status === "active"
         );
 
-        // Filter recent bookings (COMPLETED or CANCELLED status)
+        // Filter recent bookings (ended or cancelled)
         const recent = formattedBookings.filter(
           booking => booking.status === "completed" || booking.status === "cancelled"
         );
+
+        console.log("Active bookings:", active.map(b => ({ id: b.id, status: b.status })));
+        console.log("Recent bookings:", recent.map(b => ({ id: b.id, status: b.status })));
 
         console.log(`Total bookings: ${formattedBookings.length}, Active bookings: ${active.length}, Recent bookings: ${recent.length}`);
         
@@ -175,9 +209,42 @@ export default function Index() {
       }
     };
 
+  useEffect(() => {
     fetchCars();
     fetchUserBookings();
   }, []);
+
+  // Function to refresh both cars and bookings when a reservation is made
+  const handleReservationSuccess = () => {
+    fetchCars();
+    fetchUserBookings();
+  };
+
+  // Function to handle reservation cancellation
+  const handleCancelReservation = async (reservationId: string) => {
+    try {
+      setLoadingBookings(true);
+      await apiService.cancelReservation(reservationId);
+      
+      // Show success message
+      Alert.alert(
+        i18n.t('reservation.cancelSuccess') || "Reservation Cancelled",
+        i18n.t('reservation.cancelSuccessMessage') || "Your reservation has been successfully cancelled."
+      );
+      
+      // Refresh data
+      fetchCars();
+      fetchUserBookings();
+    } catch (error) {
+      console.error("Error cancelling reservation:", error);
+      Alert.alert(
+        i18n.t('reservation.cancelFailed') || "Cancellation Failed",
+        i18n.t('reservation.cancelFailedMessage') || "Failed to cancel reservation. Please try again later."
+      );
+    } finally {
+      setLoadingBookings(false);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -230,6 +297,7 @@ export default function Index() {
                   rating={4.5} // Default rating since backend doesn't provide it
                   location={item.category} // Use category as location for now
                   onPress={() => {}}
+                  onReservationSuccess={handleReservationSuccess}
                 />
               )}
               contentContainerStyle={styles.carsList}
@@ -272,7 +340,9 @@ export default function Index() {
                 endDate={booking.endDate}
                 status={booking.status}
                 isPending={booking.isPending}
+                isWithinPeriod={booking.isWithinPeriod}
                 onPress={() => {}}
+                onCancel={handleCancelReservation}
               />
             ))
           ) : (
@@ -315,6 +385,7 @@ export default function Index() {
                 endDate={booking.endDate}
                 status={booking.status}
                 isPending={booking.isPending}
+                isWithinPeriod={booking.isWithinPeriod}
                 onPress={() => {}}
               />
             ))

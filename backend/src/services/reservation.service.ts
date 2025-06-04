@@ -2,7 +2,7 @@ import { prisma } from "@/config/db.config";
 import { z } from "zod";
 import { createReservationSchema, updateReservationSchema } from "@/schemas/reservation.schema";
 import { CarStatus } from "@/types/car.type";
-import { ReservationStatus } from "@/types/reservation.type";
+import { ReservationStatus, RentalPeriodStatus } from "@/types/reservation.type";
 
 const ReservationSelect = {
   id: true,
@@ -12,6 +12,7 @@ const ReservationSelect = {
   endDate: true,
   totalPrice: true,
   status: true,
+  periodStatus: true,
   createdAt: true,
   updatedAt: true,
 };
@@ -33,10 +34,60 @@ const ReservationWithCarSelect = {
 
 export class ReservationService {
   /**
+   * Helper function to determine the rental period status based on dates
+   */
+  private determineRentalPeriodStatus(startDate: Date, endDate: Date): RentalPeriodStatus {
+    const currentDate = new Date();
+    
+    if (currentDate < startDate) {
+      return RentalPeriodStatus.NOT_STARTED;
+    } else if (currentDate > endDate) {
+      return RentalPeriodStatus.ENDED;
+    } else {
+      return RentalPeriodStatus.ACTIVE;
+    }
+  }
+  /**
+   * Update reservation and car status based on current date
+   */
+  private async updateReservationStatusBasedOnDate(reservation: any) {
+    const currentDate = new Date();
+    const startDate = new Date(reservation.startDate);
+    const endDate = new Date(reservation.endDate);
+    
+    // If the reservation has ended and is not already completed or cancelled
+    if (currentDate > endDate &&
+        reservation.status !== 'COMPLETED' &&
+        reservation.status !== 'CANCELLED') {
+      
+      // Update reservation status to COMPLETED
+      await prisma.reservation.update({
+        where: { id: reservation.id },
+        data: {
+          status: 'COMPLETED',
+          periodStatus: RentalPeriodStatus.ENDED
+        }
+      });
+      
+      // Update car status to AVAILABLE
+      await prisma.car.update({
+        where: { id: reservation.carId },
+        data: { status: CarStatus.AVAILABLE }
+      });
+      
+      // Update the reservation object to reflect the changes
+      reservation.status = 'COMPLETED';
+      reservation.periodStatus = RentalPeriodStatus.ENDED;
+    }
+    
+    return reservation;
+  }
+
+  /**
    * Get all reservations (admin only)
    */
   async getAllReservations() {
-    return prisma.reservation.findMany({
+    const reservations = await prisma.reservation.findMany({
       include: {
         car: true,
         user: {
@@ -51,13 +102,20 @@ export class ReservationService {
         createdAt: 'desc'
       }
     });
+    
+    // Update status of ended reservations
+    for (const reservation of reservations) {
+      await this.updateReservationStatusBasedOnDate(reservation);
+    }
+    
+    return reservations;
   }
 
   /**
    * Get reservations for a specific user
    */
   async getUserReservations(userId: string) {
-    return prisma.reservation.findMany({
+    const reservations = await prisma.reservation.findMany({
       where: {
         userId: userId
       },
@@ -78,13 +136,20 @@ export class ReservationService {
         createdAt: 'desc'
       }
     });
+    
+    // Update status of ended reservations
+    for (const reservation of reservations) {
+      await this.updateReservationStatusBasedOnDate(reservation);
+    }
+    
+    return reservations;
   }
 
   /**
    * Get reservation by ID
    */
   async getReservationById(id: string) {
-    return prisma.reservation.findUnique({
+    const reservation = await prisma.reservation.findUnique({
       where: {
         id: id
       },
@@ -109,6 +174,12 @@ export class ReservationService {
         }
       }
     });
+    
+    if (reservation) {
+      await this.updateReservationStatusBasedOnDate(reservation);
+    }
+    
+    return reservation;
   }
 
   /**
@@ -143,6 +214,12 @@ export class ReservationService {
 
     // Create reservation and update car status in a transaction
     return prisma.$transaction(async (tx) => {
+      // Determine the initial period status
+      const periodStatus = this.determineRentalPeriodStatus(
+        new Date(data.startDate),
+        new Date(data.endDate)
+      );
+
       // Create the reservation
       const reservation = await tx.reservation.create({
         data: {
@@ -152,6 +229,7 @@ export class ReservationService {
           endDate: data.endDate,
           totalPrice,
           status: "PENDING",
+          periodStatus,
         },
         select: ReservationSelect,
       });
