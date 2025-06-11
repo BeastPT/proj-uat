@@ -1,8 +1,13 @@
 import { prisma } from "@/config/db.config";
-import { z } from "zod";
-import { createReservationSchema, updateReservationSchema } from "@/schemas/reservation.schema";
+import {
+  createReservationSchema,
+  updateReservationSchema,
+} from "@/schemas/reservation.schema";
 import { CarStatus } from "@/types/car.type";
-import { ReservationStatus, RentalPeriodStatus } from "@/types/reservation.type";
+import {
+  RentalPeriodStatus
+} from "@/types/reservation.type";
+import { z } from "zod";
 
 const ReservationSelect = {
   id: true,
@@ -17,28 +22,17 @@ const ReservationSelect = {
   updatedAt: true,
 };
 
-const ReservationWithCarSelect = {
-  ...ReservationSelect,
-  car: {
-    select: {
-      id: true,
-      brand: true,
-      model: true,
-      year: true,
-      color: true,
-      price: true,
-      images: true,
-    },
-  },
-};
 
 export class ReservationService {
   /**
    * Helper function to determine the rental period status based on dates
    */
-  private determineRentalPeriodStatus(startDate: Date, endDate: Date): RentalPeriodStatus {
+  private determineRentalPeriodStatus(
+    startDate: Date,
+    endDate: Date
+  ): RentalPeriodStatus {
     const currentDate = new Date();
-    
+
     if (currentDate < startDate) {
       return RentalPeriodStatus.NOT_STARTED;
     } else if (currentDate > endDate) {
@@ -52,34 +46,34 @@ export class ReservationService {
    */
   private async updateReservationStatusBasedOnDate(reservation: any) {
     const currentDate = new Date();
-    const startDate = new Date(reservation.startDate);
     const endDate = new Date(reservation.endDate);
-    
+
     // If the reservation has ended and is not already completed or cancelled
-    if (currentDate > endDate &&
-        reservation.status !== 'COMPLETED' &&
-        reservation.status !== 'CANCELLED') {
-      
+    if (
+      currentDate > endDate &&
+      reservation.status !== "COMPLETED" &&
+      reservation.status !== "CANCELLED"
+    ) {
       // Update reservation status to COMPLETED
       await prisma.reservation.update({
         where: { id: reservation.id },
         data: {
-          status: 'COMPLETED',
-          periodStatus: RentalPeriodStatus.ENDED
-        }
+          status: "COMPLETED",
+          periodStatus: RentalPeriodStatus.ENDED,
+        },
       });
-      
+
       // Update car status to AVAILABLE
       await prisma.car.update({
         where: { id: reservation.carId },
-        data: { status: CarStatus.AVAILABLE }
+        data: { status: CarStatus.AVAILABLE },
       });
-      
+
       // Update the reservation object to reflect the changes
-      reservation.status = 'COMPLETED';
+      reservation.status = "COMPLETED";
       reservation.periodStatus = RentalPeriodStatus.ENDED;
     }
-    
+
     return reservation;
   }
 
@@ -94,20 +88,20 @@ export class ReservationService {
           select: {
             id: true,
             name: true,
-            email: true
-          }
-        }
+            email: true,
+          },
+        },
       },
       orderBy: {
-        createdAt: 'desc'
-      }
+        createdAt: "desc",
+      },
     });
-    
+
     // Update status of ended reservations
     for (const reservation of reservations) {
       await this.updateReservationStatusBasedOnDate(reservation);
     }
-    
+
     return reservations;
   }
 
@@ -117,7 +111,7 @@ export class ReservationService {
   async getUserReservations(userId: string) {
     const reservations = await prisma.reservation.findMany({
       where: {
-        userId: userId
+        userId: userId,
       },
       include: {
         car: {
@@ -128,20 +122,20 @@ export class ReservationService {
             year: true,
             color: true,
             price: true,
-            images: true
-          }
-        }
+            images: true,
+          },
+        },
       },
       orderBy: {
-        createdAt: 'desc'
-      }
+        createdAt: "desc",
+      },
     });
-    
+
     // Update status of ended reservations
     for (const reservation of reservations) {
       await this.updateReservationStatusBasedOnDate(reservation);
     }
-    
+
     return reservations;
   }
 
@@ -151,7 +145,7 @@ export class ReservationService {
   async getReservationById(id: string) {
     const reservation = await prisma.reservation.findUnique({
       where: {
-        id: id
+        id: id,
       },
       include: {
         car: {
@@ -162,30 +156,33 @@ export class ReservationService {
             year: true,
             color: true,
             price: true,
-            images: true
-          }
+            images: true,
+          },
         },
         user: {
           select: {
             id: true,
             name: true,
-            email: true
-          }
-        }
-      }
+            email: true,
+          },
+        },
+      },
     });
-    
+
     if (reservation) {
       await this.updateReservationStatusBasedOnDate(reservation);
     }
-    
+
     return reservation;
   }
 
   /**
    * Create a new reservation
    */
-  async createReservation(userId: string, data: z.infer<typeof createReservationSchema>) {
+  async createReservation(
+    userId: string,
+    data: z.infer<typeof createReservationSchema>
+  ) {
     // Get car details to calculate total price
     const car = await prisma.car.findUnique({
       where: { id: data.carId },
@@ -193,20 +190,22 @@ export class ReservationService {
     });
 
     if (!car) {
-      throw new Error('Car not found');
+      throw new Error("Car not found");
     }
 
-    if (car.status !== 'AVAILABLE') {
-      throw new Error('Car is not available for reservation');
+    if (car.status !== "AVAILABLE") {
+      throw new Error("Car is not available for reservation");
     }
 
     // Calculate number of days
     const startDate = new Date(data.startDate);
     const endDate = new Date(data.endDate);
-    const days = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
-    
+    const days = Math.ceil(
+      (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
+    );
+
     if (days < 1) {
-      throw new Error('Reservation must be for at least one day');
+      throw new Error("Reservation must be for at least one day");
     }
 
     // Calculate total price
@@ -246,7 +245,7 @@ export class ReservationService {
         startDate: reservation.startDate.toISOString(),
         endDate: reservation.endDate.toISOString(),
         createdAt: reservation.createdAt.toISOString(),
-        updatedAt: reservation.updatedAt.toISOString()
+        updatedAt: reservation.updatedAt.toISOString(),
       };
     });
   }
@@ -254,14 +253,17 @@ export class ReservationService {
   /**
    * Update reservation status
    */
-  async updateReservation(id: string, data: z.infer<typeof updateReservationSchema>) {
+  async updateReservation(
+    id: string,
+    data: z.infer<typeof updateReservationSchema>
+  ) {
     const reservation = await prisma.reservation.findUnique({
       where: { id },
       select: { carId: true, status: true },
     });
 
     if (!reservation) {
-      throw new Error('Reservation not found');
+      throw new Error("Reservation not found");
     }
 
     // Update reservation and car status in a transaction
@@ -276,15 +278,15 @@ export class ReservationService {
       // Update car status based on reservation status
       if (data.status) {
         let carStatus: CarStatus;
-        
+
         switch (data.status) {
-          case 'CONFIRMED':
+          case "CONFIRMED":
             carStatus = CarStatus.RESERVED;
             break;
-          case 'CANCELLED':
+          case "CANCELLED":
             carStatus = CarStatus.AVAILABLE;
             break;
-          case 'COMPLETED':
+          case "COMPLETED":
             carStatus = CarStatus.AVAILABLE;
             break;
           default:
@@ -303,7 +305,7 @@ export class ReservationService {
         startDate: updatedReservation.startDate.toISOString(),
         endDate: updatedReservation.endDate.toISOString(),
         createdAt: updatedReservation.createdAt.toISOString(),
-        updatedAt: updatedReservation.updatedAt.toISOString()
+        updatedAt: updatedReservation.updatedAt.toISOString(),
       };
     });
   }
@@ -318,11 +320,11 @@ export class ReservationService {
     });
 
     if (!reservation) {
-      throw new Error('Reservation not found');
+      throw new Error("Reservation not found");
     }
 
-    if (reservation.status === 'CANCELLED') {
-      throw new Error('Reservation is already cancelled');
+    if (reservation.status === "CANCELLED") {
+      throw new Error("Reservation is already cancelled");
     }
 
     // Cancel reservation and update car status in a transaction
@@ -330,14 +332,14 @@ export class ReservationService {
       // Update the reservation status to CANCELLED
       const cancelledReservation = await tx.reservation.update({
         where: { id },
-        data: { status: 'CANCELLED' },
+        data: { status: "CANCELLED" },
         select: ReservationSelect,
       });
 
       // Update car status to AVAILABLE
       await tx.car.update({
         where: { id: reservation.carId },
-        data: { status: 'AVAILABLE' },
+        data: { status: "AVAILABLE" },
       });
 
       // Convert dates to ISO strings to match the response schema
@@ -346,7 +348,7 @@ export class ReservationService {
         startDate: cancelledReservation.startDate.toISOString(),
         endDate: cancelledReservation.endDate.toISOString(),
         createdAt: cancelledReservation.createdAt.toISOString(),
-        updatedAt: cancelledReservation.updatedAt.toISOString()
+        updatedAt: cancelledReservation.updatedAt.toISOString(),
       };
     });
   }

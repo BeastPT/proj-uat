@@ -100,7 +100,6 @@ export default async function (app: FastifyTypedInstance) {
           preHandler: router.authenticate
         },
         async (request, reply) => {
-          console.log('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
           const body = request.body as { userId: string };
           return chatController.createChat(
             { body } as any,

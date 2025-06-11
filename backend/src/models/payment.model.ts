@@ -31,7 +31,7 @@ export interface PaymentMethodUpdateInput {
 
 export interface PaymentMethodResponse {
   id: string;
-  cardNumber: string; // Should be masked in a real application
+  cardNumber: string;
   cardHolder: string;
   expiryDate: Date;
   billingAddress: Address;

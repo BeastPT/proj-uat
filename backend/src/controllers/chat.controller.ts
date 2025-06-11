@@ -140,9 +140,6 @@ export class ChatController {
       const { id } = request.params;
       const { content, isAdmin } = request.body;
       
-      // Log the extracted values
-      request.log.info(`Extracted values - id: ${id}, content: ${content?.substring(0, 20)}${content?.length > 20 ? '...' : ''}, isAdmin: ${isAdmin}`);
-      
       // Validate chat ID
       if (!id) {
         request.log.error('Missing chat ID in request params');

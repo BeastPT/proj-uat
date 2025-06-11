@@ -1,13 +1,12 @@
 import { prisma } from "@/config/db.config";
-import { User, UserCreateInput, UserUpdateInput } from "@/models/user.model";
+import { UserCreateInput, UserUpdateInput } from "@/models/user.model";
 import { removeUndefined } from "@/utils/common.utils";
 import { sign } from "jsonwebtoken";
-
 
 import { compare, hash } from "bcrypt";
 
 const JWT_SECRET = process.env.JWT_SECRET;
-const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET
+const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET;
 
 export class UserService {
   /**

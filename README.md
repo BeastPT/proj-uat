@@ -16,7 +16,7 @@ This project consists of a React Native frontend and a Fastify backend.
 ## Prerequisites
 
 - Node.js (v18 or higher)
-- pnpm package manager
+- pnpm package manager (preferred) / npm 
 - MongoDB (for the backend database)
 - Prisma CLI (installed as a project dependency)
 
@@ -65,7 +65,7 @@ The frontend API service is configured to connect to the backend at:
 - `http://localhost:3000/api` for iOS simulators
 - `http://YOUR_COMPUTER_IP:3000/api` for physical devices
 
-**Important for physical devices:** You need to update the `PHYSICAL_DEVICE_API_URL` in `frontend/.env` with your computer's local IP address.
+**Important for physical devices:** You need to update the `PHYSICAL_DEVICE_API_URL` in `frontend/src/config/api.config.ts` with your computer's local IP address.
 
 1. Find your local IP address by running:
 
@@ -73,14 +73,15 @@ The frontend API service is configured to connect to the backend at:
 pnpm run get-ip
 ```
 
-2. Update the `frontend/.env` file with your IP address:
+2. Update the `frontend/src/config/api.config.ts` file with your IP address:
 
-```
-# API URLs
-API_URL=http://localhost:3000/api
-ANDROID_API_URL=http://10.0.2.2:3000/api
-IOS_API_URL=http://localhost:3000/api
-PHYSICAL_DEVICE_API_URL=http://YOUR_IP_ADDRESS:3000/api
+```ts
+// Base URLs for different environments
+const DEV_API_URL = 'http://10.0.2.2:3000/api'; // Android emulator
+const IOS_DEV_API_URL = 'http://localhost:3000/api'; // iOS simulator
+const DEVICE_API_URL = 'http://YOUR_IP_ADDRESS:3000/api'; // Physical device !!!
+const WEB_DEV_API_URL = 'http://localhost:3000/api'; // Web browser
+const PROD_API_URL = 'https://your-production-api.com/api'; // Production
 ```
 
 Replace `YOUR_IP_ADDRESS` with your actual IP address (e.g., 192.168.1.5).
@@ -185,15 +186,3 @@ The admin dashboard provides management capabilities:
 ## Theme Support
 
 The application supports light and dark themes, which can be toggled in the user profile settings.
-
-## Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## License
-
-This project is licensed under the MIT License.
