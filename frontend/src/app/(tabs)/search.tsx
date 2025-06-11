@@ -18,6 +18,7 @@ import i18n from "@/src/i18n";
 import * as Location from 'expo-location';
 
 import SearchBar from "@/src/components/SearchBar";
+import { Car, calculateDistance } from "@/src/types/car.type";
 import CarCard from "@/src/components/CarCard";
 import FilterModal, { FilterOptions } from "@/src/components/FilterModal";
 import SortModal, { SortOption } from "@/src/components/SortModal";
@@ -25,35 +26,6 @@ import { apiService } from "@/src/services/api.service";
 
 // Default car image
 const DEFAULT_CAR_IMAGE = require("@/src/assets/images/loadingCar.png");
-
-// Define the Car interface based on the backend structure
-interface Car {
-  id: string;
-  brand: string;
-  model: string;
-  year: number;
-  color: string;
-  kilometers: number;
-  plate: string;
-  price: number;
-  description: string;
-  seats: number;
-  doors?: number;
-  status: string;
-  transmission: string;
-  fuel: string;
-  category: string;
-  images: string[];
-  createdAt: string;
-  updatedAt: string;
-  // Location data from backend
-  location?: {
-    latitude: number;
-    longitude: number;
-    address?: string;
-  };
-  distance?: number;
-}
 
 export default function Search() {
   const { colors } = useTheme();
@@ -109,8 +81,29 @@ export default function Search() {
           carsData = await apiService.getNearbyCars(
             userLocation.coords.latitude,
             userLocation.coords.longitude,
-            100 // 50km radius
+            100 // 100km radius
           );
+          
+          // Ensure all cars have a distance property
+          // This is a fallback in case the backend doesn't calculate it
+          carsData = carsData.map((car: Car) => {
+            if (car.distance !== undefined) {
+              return car;
+            }
+            
+            // Calculate distance if the car has location data but no distance
+            if (car.location && car.location.latitude && car.location.longitude) {
+              const distance = calculateDistance(
+                userLocation.coords.latitude,
+                userLocation.coords.longitude,
+                car.location.latitude,
+                car.location.longitude
+              );
+              return { ...car, distance };
+            }
+            
+            return car;
+          });
         } else {
           // Otherwise get all available cars
           carsData = await apiService.getAvailableCars();
@@ -196,6 +189,30 @@ export default function Search() {
       }
     }
 
+    // Calculate distances for all cars with location data before sorting
+    if (sortOption === "nearest" && userLocation) {
+      filtered = filtered.map(car => {
+        // If car already has a distance, use it
+        if (car.distance !== undefined) {
+          return car;
+        }
+        
+        // If car has location data, calculate distance
+        if (car.location && car.location.latitude && car.location.longitude) {
+          const distance = calculateDistance(
+            userLocation.coords.latitude,
+            userLocation.coords.longitude,
+            car.location.latitude,
+            car.location.longitude
+          );
+          return { ...car, distance };
+        }
+        
+        // Car has no location data, set distance to Infinity to sort to end
+        return { ...car, distance: Infinity };
+      });
+    }
+
     // Apply sorting
     filtered.sort((a, b) => {
       switch (sortOption) {
@@ -207,11 +224,10 @@ export default function Search() {
           // Sort by creation date
           return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
         case "nearest":
-          // Sort by distance if available
-          if (a.distance !== undefined && b.distance !== undefined) {
-            return a.distance - b.distance;
-          }
-          return 0;
+          // Get distances (will be Infinity for cars without location)
+          const distA = a.distance !== undefined ? a.distance : Infinity;
+          const distB = b.distance !== undefined ? b.distance : Infinity;
+          return distA - distB;
         default:
           return 0;
       }
@@ -231,26 +247,43 @@ export default function Search() {
     setSortOption(option);
   };
 
-  const renderCarItem = ({ item }: { item: Car }) => (
-    <View style={styles.carCardContainer}>
-      <CarCard
-        id={item.id}
-        name={`${item.brand} ${item.model}`}
-        image={item.images && item.images.length > 0
-          ? { uri: item.images[0] }
-          : DEFAULT_CAR_IMAGE}
-        price={item.price}
-        priceUnit="day"
-        location={
-          item.distance !== undefined
-            ? `${item.year} • ${item.kilometers} km • ${item.distance.toFixed(1)} km away`
-            : `${item.year} • ${item.kilometers} km`
-        }
-        onPress={() => {}}
-        featured={true}
-      />
-    </View>
-  );
+  const renderCarItem = ({ item }: { item: Car }) => {
+    // Calculate distance on-the-fly if not already available
+    let displayDistance = "";
+    if (item.distance !== undefined && item.distance !== Infinity) {
+      displayDistance = `${item.distance.toFixed(1)} km away`;
+    } else if (item.location && item.location.latitude && item.location.longitude && userLocation) {
+      // Calculate distance if we have both car location and user location
+      const distance = calculateDistance(
+        userLocation.coords.latitude,
+        userLocation.coords.longitude,
+        item.location.latitude,
+        item.location.longitude
+      );
+      displayDistance = `${distance.toFixed(1)} km away`;
+    }
+
+    return (
+      <View style={styles.carCardContainer}>
+        <CarCard
+          id={item.id}
+          name={`${item.brand} ${item.model}`}
+          image={item.images && item.images.length > 0
+            ? { uri: item.images[0] }
+            : DEFAULT_CAR_IMAGE}
+          price={item.price}
+          priceUnit="day"
+          location={
+            displayDistance
+              ? `${item.year} • ${item.kilometers} km • ${displayDistance}`
+              : `${item.year} • ${item.kilometers} km`
+          }
+          onPress={() => {}}
+          featured={true}
+        />
+      </View>
+    );
+  };
 
   return (
     <>
