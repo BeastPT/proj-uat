@@ -11,13 +11,14 @@ import { SPACING, RADIUS } from "@/src/constants/Spacing";
 import { useTheme } from "@/src/context/ThemeContext";
 import i18n from "@/src/i18n";
 
-export type SortOption = "priceLowToHigh" | "priceHighToLow" | "rating" | "newest";
+export type SortOption = "priceLowToHigh" | "priceHighToLow" | "rating" | "newest" | "nearest";
 
 interface SortModalProps {
   visible: boolean;
   onClose: () => void;
   onSelectOption: (option: SortOption) => void;
   selectedOption: SortOption;
+  showNearestOption?: boolean;
 }
 
 const SortModal: React.FC<SortModalProps> = ({
@@ -25,15 +26,26 @@ const SortModal: React.FC<SortModalProps> = ({
   onClose,
   onSelectOption,
   selectedOption,
+  showNearestOption = false,
 }) => {
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
-  const sortOptions: SortOption[] = [
-    "priceLowToHigh",
-    "priceHighToLow",
-    "rating",
-    "newest",
-  ];
+  
+  // Include "nearest" option only if showNearestOption is true
+  const sortOptions: SortOption[] = useMemo(() => {
+    const options: SortOption[] = [
+      "priceLowToHigh",
+      "priceHighToLow",
+      "rating",
+      "newest",
+    ];
+    
+    if (showNearestOption) {
+      options.unshift("nearest");
+    }
+    
+    return options;
+  }, [showNearestOption]);
 
   const handleSelect = (option: SortOption) => {
     onSelectOption(option);

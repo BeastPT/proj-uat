@@ -100,12 +100,20 @@ model Car {
   transmission Transmission
   fuel         FuelType
   category     CarCategory
+  location     Location?     // Car location information
   details      Json?
   images       String[]
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
   
   reservations Reservation[]
+}
+
+// Location type for storing car location
+type Location {
+  latitude   Float
+  longitude  Float
+  address    String?
 }
 
 model Reservation {

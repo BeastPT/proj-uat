@@ -33,6 +33,11 @@ type Car = {
   transmission: "AUTOMATIC" | "MANUAL";
   fuel: "PETROL" | "DIESEL" | "ELECTRIC" | "HYBRID";
   category: "ECONOMY" | "COMPACT" | "SUV" | "LUXURY" | "ELECTRIC" | "VAN";
+  location?: {
+    latitude: number;
+    longitude: number;
+    address?: string;
+  };
   images: string[];
   createdAt: string;
   updatedAt: string;
@@ -61,6 +66,11 @@ export default function ManageCarsScreen() {
     transmission: "AUTOMATIC",
     fuel: "PETROL",
     category: "ECONOMY",
+    location: {
+      latitude: "",
+      longitude: "",
+      address: ""
+    },
     images: ["https://via.placeholder.com/300x200"],
   });
 
@@ -100,6 +110,11 @@ export default function ManageCarsScreen() {
       transmission: "AUTOMATIC",
       fuel: "PETROL",
       category: "ECONOMY",
+      location: {
+        latitude: "",
+        longitude: "",
+        address: ""
+      },
       images: ["https://via.placeholder.com/300x200"],
     });
     setModalVisible(true);
@@ -123,6 +138,11 @@ export default function ManageCarsScreen() {
       transmission: car.transmission,
       fuel: car.fuel,
       category: car.category,
+      location: {
+        latitude: car.location?.latitude?.toString() || "",
+        longitude: car.location?.longitude?.toString() || "",
+        address: car.location?.address || ""
+      },
       images: car.images,
     });
     setModalVisible(true);
@@ -172,6 +192,18 @@ export default function ManageCarsScreen() {
         Alert.alert("Error", "Please fill in all required fields");
         return;
       }
+      let lon, lat;
+      // Validate numeric fields
+      if (formData.location && formData.location.latitude && formData.location.longitude) {
+        lat = formData.location.latitude.replace(",", ".");
+        lon = formData.location.longitude.replace(",", ".");
+        if (isNaN(parseFloat(lat)) || isNaN(parseFloat(lon))) {
+          Alert.alert("Error", "Invalid latitude or longitude");
+          return;
+        }
+        lat = parseFloat(lat);
+        lon = parseFloat(lon);
+      }
 
       // Convert string values to appropriate types
       const carData = {
@@ -181,6 +213,13 @@ export default function ManageCarsScreen() {
         price: parseFloat(formData.price),
         seats: parseInt(formData.seats),
         doors: formData.doors ? parseInt(formData.doors) : undefined,
+        location: lat && lon
+          ? {
+              latitude: lat,
+              longitude: lon,
+              address: formData.location.address || ""
+            }
+          : undefined
       };
 
       if (isEditing && selectedCar) {
@@ -244,6 +283,11 @@ export default function ManageCarsScreen() {
         <Text style={styles.carInfo}>Year: {item.year}</Text>
         <Text style={styles.carInfo}>Price: ${item.price}/day</Text>
         <Text style={styles.carInfo}>Status: {item.status}</Text>
+        {item.location && (
+          <Text style={styles.carInfo}>
+            Location: {parseFloat(item.location.latitude).toFixed(6)}, {parseFloat(item.location.longitude).toFixed(6)}
+          </Text>
+        )}
         <View style={styles.actionButtons}>
           <TouchableOpacity
             style={[styles.actionButton, styles.editButton]}
@@ -454,6 +498,42 @@ export default function ManageCarsScreen() {
                   value={formData.images[0]}
                   onChangeText={(text) => setFormData({ ...formData, images: [text] })}
                   placeholder="Enter image URL"
+                />
+              </View>
+
+              <View style={styles.formField}>
+                <Text style={styles.formLabel}>Location</Text>
+                <Text style={styles.formLabel}>Latitude</Text>
+                <TextInput
+                  style={styles.formInput}
+                  value={formData.location.latitude}
+                  onChangeText={(text) => setFormData({
+                    ...formData,
+                    location: { ...formData.location, latitude: text }
+                  })}
+                  placeholder="Enter latitude (e.g., 47.4979)"
+                  keyboardType="numeric"
+                />
+                <Text style={styles.formLabel}>Longitude</Text>
+                <TextInput
+                  style={styles.formInput}
+                  value={formData.location.longitude}
+                  onChangeText={(text) => setFormData({
+                    ...formData,
+                    location: { ...formData.location, longitude: text }
+                  })}
+                  placeholder="Enter longitude (e.g., 19.0402)"
+                  keyboardType="numeric"
+                />
+                <Text style={styles.formLabel}>Address (optional)</Text>
+                <TextInput
+                  style={styles.formInput}
+                  value={formData.location.address}
+                  onChangeText={(text) => setFormData({
+                    ...formData,
+                    location: { ...formData.location, address: text }
+                  })}
+                  placeholder="Enter address"
                 />
               </View>
             </ScrollView>

@@ -8,11 +8,14 @@ import {
   SafeAreaView,
   ActivityIndicator,
   Image,
+  Alert,
+  Platform,
 } from "react-native";
 import { Stack } from "expo-router";
 import { SPACING, RADIUS } from "@/src/constants/Spacing";
 import { useTheme } from "@/src/context/ThemeContext";
 import i18n from "@/src/i18n";
+import * as Location from 'expo-location';
 
 import SearchBar from "@/src/components/SearchBar";
 import CarCard from "@/src/components/CarCard";
@@ -43,6 +46,13 @@ interface Car {
   images: string[];
   createdAt: string;
   updatedAt: string;
+  // Location data from backend
+  location?: {
+    latitude: number;
+    longitude: number;
+    address?: string;
+  };
+  distance?: number;
 }
 
 export default function Search() {
@@ -61,13 +71,51 @@ export default function Search() {
   const [isLoading, setIsLoading] = useState(true);
   const [cars, setCars] = useState<Car[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [userLocation, setUserLocation] = useState<Location.LocationObject | null>(null);
+  const [locationPermissionDenied, setLocationPermissionDenied] = useState(false);
+
+  // Get user location
+  useEffect(() => {
+    (async () => {
+      try {
+        // Request location permission
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        
+        if (status !== 'granted') {
+          setLocationPermissionDenied(true);
+          return;
+        }
+        
+        // Get current location
+        const location = await Location.getCurrentPositionAsync({});
+        setUserLocation(location);
+      } catch (err) {
+        console.error('Error getting location:', err);
+        setLocationPermissionDenied(true);
+      }
+    })();
+  }, []);
 
   // Fetch cars from API
   useEffect(() => {
     const fetchCars = async () => {
       try {
         setIsLoading(true);
-        const carsData = await apiService.getAvailableCars();
+        
+        let carsData;
+        
+        // If user location is available, get nearby cars
+        if (userLocation) {
+          carsData = await apiService.getNearbyCars(
+            userLocation.coords.latitude,
+            userLocation.coords.longitude,
+            100 // 50km radius
+          );
+        } else {
+          // Otherwise get all available cars
+          carsData = await apiService.getAvailableCars();
+        }
+        
         setCars(carsData);
         setError(null);
       } catch (err) {
@@ -78,7 +126,7 @@ export default function Search() {
     };
 
     fetchCars();
-  }, []);
+  }, [userLocation]);
 
   // Filter and sort cars based on search query, filters, and sort option
   const filteredCars = useMemo(() => {
@@ -158,6 +206,12 @@ export default function Search() {
         case "newest":
           // Sort by creation date
           return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        case "nearest":
+          // Sort by distance if available
+          if (a.distance !== undefined && b.distance !== undefined) {
+            return a.distance - b.distance;
+          }
+          return 0;
         default:
           return 0;
       }
@@ -187,7 +241,11 @@ export default function Search() {
           : DEFAULT_CAR_IMAGE}
         price={item.price}
         priceUnit="day"
-        location={`${item.year} • ${item.kilometers} km`}
+        location={
+          item.distance !== undefined
+            ? `${item.year} • ${item.kilometers} km • ${item.distance.toFixed(1)} km away`
+            : `${item.year} • ${item.kilometers} km`
+        }
         onPress={() => {}}
         featured={true}
       />
@@ -203,6 +261,16 @@ export default function Search() {
             <Text style={[styles.title, { color: colors.textHeading }]}>
               {i18n.t("search.title")}
             </Text>
+            {locationPermissionDenied && (
+              <Text style={[styles.locationWarning, { color: colors.textMuted }]}>
+                Location access denied. Showing all cars.
+              </Text>
+            )}
+            {userLocation && (
+              <Text style={[styles.locationInfo, { color: colors.textMuted }]}>
+                Using your current location
+              </Text>
+            )}
           </View>
 
           <View style={styles.searchContainer}>
@@ -280,6 +348,7 @@ export default function Search() {
             onClose={() => setIsSortModalVisible(false)}
             onSelectOption={handleSelectSortOption}
             selectedOption={sortOption}
+            showNearestOption={userLocation !== null}
           />
         </View>
       </SafeAreaView>
@@ -295,6 +364,16 @@ const styles = StyleSheet.create({
   header: {
     marginTop: SPACING.xl,
     marginBottom: SPACING.md,
+  },
+  locationWarning: {
+    fontSize: 12,
+    marginTop: SPACING.xs,
+    fontFamily: "Inter",
+  },
+  locationInfo: {
+    fontSize: 12,
+    marginTop: SPACING.xs,
+    fontFamily: "Inter",
   },
   title: {
     fontSize: 24,

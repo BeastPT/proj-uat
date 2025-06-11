@@ -28,6 +28,29 @@ export default async function (app: FastifyTypedInstance) {
         carController.getAvailableCars
       );
 
+      // Get available cars near a location
+      router.get(
+        '/nearby',
+        {
+          schema: {
+            tags: ['cars'],
+            querystring: {
+              type: 'object',
+              required: ['latitude', 'longitude'],
+              properties: {
+                latitude: { type: 'string' },
+                longitude: { type: 'string' },
+                maxDistance: { type: 'string' }
+              }
+            },
+            response: {
+              200: carRouteSchemas.getAll.response[200]
+            }
+          }
+        },
+        carController.getAvailableCarsNearby
+      );
+
       // Get car by ID
       router.get(
         '/:id',

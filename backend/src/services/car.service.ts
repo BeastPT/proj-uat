@@ -1,8 +1,8 @@
 import { prisma } from "@/config/db.config";
 import { z } from "zod";
-import { createCarSchema, updateCarSchema } from "@/schemas/car.schema";
+import { createCarSchema, updateCarSchema, locationSchema } from "@/schemas/car.schema";
 import { ReservationStatus, RentalPeriodStatus } from "@/types/reservation.type";
-import { CarStatus } from "@/types/car.type";
+import { CarStatus, Location } from "@/types/car.type";
 import { createErrorResponse, removeUndefined } from "@/utils/common.utils";
 
 const CarSelect = {
@@ -21,6 +21,7 @@ const CarSelect = {
   transmission: true,
   fuel: true,
   category: true,
+  location: true,
   images: true,
   createdAt: true,
   updatedAt: true,
@@ -98,6 +99,81 @@ export class CarService {
       },
       select: CarSelect,
     });
+  }
+
+  /**
+   * Calculate distance between two coordinates using the Haversine formula
+   * @param lat1 Latitude of first point
+   * @param lon1 Longitude of first point
+   * @param lat2 Latitude of second point
+   * @param lon2 Longitude of second point
+   * @returns Distance in kilometers
+   */
+  private calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+    const R = 6371; // Radius of the earth in km
+    const dLat = this.deg2rad(lat2 - lat1);
+    const dLon = this.deg2rad(lon2 - lon1);
+    const a =
+      Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(this.deg2rad(lat1)) * Math.cos(this.deg2rad(lat2)) *
+      Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    const distance = R * c; // Distance in km
+    return distance;
+  }
+
+  /**
+   * Convert degrees to radians
+   */
+  private deg2rad(deg: number): number {
+    return deg * (Math.PI/180);
+  }
+
+  /**
+   * Get available cars near a specific location
+   * @param latitude User's latitude
+   * @param longitude User's longitude
+   * @param maxDistance Maximum distance in kilometers (optional, default 50km)
+   */
+  async getAvailableCarsNearby(latitude: number, longitude: number, maxDistance: number = 50) {
+    // First update any cars with ended reservations
+    await this.updateCarsWithEndedReservations();
+    
+    // Get all available cars
+    const availableCars = await prisma.car.findMany({
+      where: {
+        status: "AVAILABLE"
+      },
+      select: CarSelect,
+    });
+    
+    // Filter cars by distance and add distance information
+    const carsWithDistance = availableCars
+      .filter(car => car.location !== null && car.location !== undefined) // Only include cars with location data
+      .map(car => {
+        // Type assertion to help TypeScript understand the structure
+        const carLocation = car.location as Location;
+        
+        if (!carLocation) return null;
+        
+        const distance = this.calculateDistance(
+          latitude,
+          longitude,
+          carLocation.latitude,
+          carLocation.longitude
+        );
+        
+        return {
+          ...car,
+          distance // Add distance to the car object
+        };
+      })
+      .filter((car): car is (typeof car & { distance: number }) =>
+        car !== null && (car as any).distance <= maxDistance
+      ) // Filter by max distance with type guard
+      .sort((a, b) => (a.distance - b.distance)); // Sort by distance
+    
+    return carsWithDistance;
   }
 
   /**

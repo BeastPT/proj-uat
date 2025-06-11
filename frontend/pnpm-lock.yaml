@@ -24,7 +24,7 @@ dependencies:
     specifier: ^1.9.0
     version: 1.9.0
   expo:
-    specifier: ~53.0.11
+    specifier: ~53.0.9
     version: 53.0.11(@babel/core@7.27.1)(react-native-webview@13.13.5)(react-native@0.79.2)(react@19.0.0)
   expo-blur:
     specifier: ~14.1.4
@@ -44,6 +44,9 @@ dependencies:
   expo-localization:
     specifier: ^16.1.5
     version: 16.1.5(expo@53.0.11)(react@19.0.0)
+  expo-location:
+    specifier: ^18.1.5
+    version: 18.1.5(expo@53.0.11)
   expo-router:
     specifier: ~5.0.7
     version: 5.0.7(@types/react@19.0.14)(expo-constants@17.1.6)(expo-linking@7.1.5)(expo@53.0.11)(react-native-reanimated@3.17.5)(react-native-safe-area-context@5.4.0)(react-native-screens@4.10.0)(react-native@0.79.2)(react@19.0.0)
@@ -3836,6 +3839,14 @@ packages:
       expo: 53.0.11(@babel/core@7.27.1)(react-native-webview@13.13.5)(react-native@0.79.2)(react@19.0.0)
       react: 19.0.0
       rtl-detect: 1.1.2
+    dev: false
+
+  /expo-location@18.1.5(expo@53.0.11):
+    resolution: {integrity: sha512-/ugxS4Ort9DbKD0Do6xn4TjeHaA/by5vv0p0PrY5Zbcez1S0AfrQn/4JG/8PLT2imngMwZU9TDKrgxqJQ4RuPQ==}
+    peerDependencies:
+      expo: '*'
+    dependencies:
+      expo: 53.0.11(@babel/core@7.27.1)(react-native-webview@13.13.5)(react-native@0.79.2)(react@19.0.0)
     dev: false
 
   /expo-modules-autolinking@2.1.11:

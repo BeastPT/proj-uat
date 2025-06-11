@@ -79,6 +79,8 @@ export const ENDPOINTS = {
   REMOVE_ADMIN: '/user/:id/remove-admin',
   CARS: '/cars/all',
   CARS_BASE: '/cars',
+  CARS_AVAILABLE: '/cars/available',
+  CARS_NEARBY: '/cars/nearby',
   CHATS: '/chats',
   CHAT_MESSAGES: '/chats/:id/messages',
   USER_CHATS: '/chats/user/:userId',

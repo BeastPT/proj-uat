@@ -172,7 +172,31 @@ class ApiService {
 
   async getAvailableCars(): Promise<any> {
     try {
-      const response: AxiosResponse = await apiClient.get(`${ENDPOINTS.CARS_BASE}/available`);
+      const response: AxiosResponse = await apiClient.get(ENDPOINTS.CARS_AVAILABLE);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * Get available cars near a specific location
+   * @param latitude User's latitude
+   * @param longitude User's longitude
+   * @param maxDistance Maximum distance in kilometers (optional)
+   */
+  async getNearbyCars(latitude: number, longitude: number, maxDistance?: number): Promise<any> {
+    try {
+      const params: Record<string, string | number> = {
+        latitude: latitude.toString(),
+        longitude: longitude.toString()
+      };
+      
+      if (maxDistance !== undefined) {
+        params.maxDistance = maxDistance.toString();
+      }
+      
+      const response: AxiosResponse = await apiClient.get(ENDPOINTS.CARS_NEARBY, { params });
       return response.data;
     } catch (error) {
       throw error;

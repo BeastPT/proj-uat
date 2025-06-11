@@ -124,7 +124,8 @@
       "priceLowToHigh": "Preço: Menor para Maior",
       "priceHighToLow": "Preço: Maior para Menor",
       "rating": "Avaliação",
-      "newest": "Mais Recente"
+      "newest": "Mais Recente",
+      "nearest": "Mais Próximo de Você"
     },
     "carTypes": {
       "all": "Todos",

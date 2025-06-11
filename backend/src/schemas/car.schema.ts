@@ -37,6 +37,17 @@ export const carCategoryEnum = z.enum([
   'VAN'
 ]);
 
+// Location schema
+export const locationSchema = z.object({
+  latitude: z.number().min(-90).max(90).refine(val => Number.isFinite(val), {
+    message: "Latitude must be a valid floating-point number"
+  }),
+  longitude: z.number().min(-180).max(180).refine(val => Number.isFinite(val), {
+    message: "Longitude must be a valid floating-point number"
+  }),
+  address: z.string().optional().nullable(),
+}).nullable().optional();
+
 // Create car schema
 export const createCarSchema = z.object({
   brand: z.string().min(1, 'Brand is required'),
@@ -53,6 +64,7 @@ export const createCarSchema = z.object({
   transmission: transmissionEnum,
   fuel: fuelTypeEnum,
   category: carCategoryEnum,
+  location: locationSchema.optional(),
   images: z.array(z.string().url()).min(1, 'At least one image is required'),
 });
 
@@ -76,6 +88,7 @@ export const carBasicResponseSchema = z.object({
   transmission: transmissionEnum,
   fuel: fuelTypeEnum,
   category: carCategoryEnum,
+  location: locationSchema.optional(),
   images: z.array(z.string().url()),
   createdAt: z.string(),
   updatedAt: z.string(),
