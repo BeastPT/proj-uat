@@ -3,6 +3,7 @@ import { z } from "zod";
 import { createCarSchema, updateCarSchema } from "@/schemas/car.schema";
 import { ReservationStatus, RentalPeriodStatus } from "@/types/reservation.type";
 import { CarStatus } from "@/types/car.type";
+import { createErrorResponse, removeUndefined } from "@/utils/common.utils";
 
 const CarSelect = {
   id: true,
@@ -59,22 +60,27 @@ export class CarService {
     
     // Update the status of these reservations and their cars
     for (const reservation of endedReservations) {
-      await prisma.$transaction([
-        // Update reservation status to COMPLETED
-        prisma.reservation.update({
-          where: { id: reservation.id },
-          data: {
-            status: ReservationStatus.COMPLETED,
-            periodStatus: RentalPeriodStatus.ENDED
-          }
-        }),
-        
-        // Update car status to AVAILABLE
-        prisma.car.update({
-          where: { id: reservation.carId },
-          data: { status: CarStatus.AVAILABLE }
-        })
-      ]);
+      try {
+        await prisma.$transaction([
+          // Update reservation status to COMPLETED
+          prisma.reservation.update({
+            where: { id: reservation.id },
+            data: {
+              status: ReservationStatus.COMPLETED,
+              periodStatus: RentalPeriodStatus.ENDED
+            }
+          }),
+          
+          // Update car status to AVAILABLE
+          prisma.car.update({
+            where: { id: reservation.carId },
+            data: { status: CarStatus.AVAILABLE }
+          })
+        ]);
+      } catch (error) {
+        // Log the error but continue processing other reservations
+        console.error(`Failed to update reservation ${reservation.id}:`, error);
+      }
     }
   }
 
@@ -129,26 +135,55 @@ export class CarService {
    */
   async updateCar(id: string, data: z.infer<typeof updateCarSchema>) {
     // Convert the data to match Prisma's expected types
+    const cleanedData = removeUndefined(data);
     const carData = {
-      ...data,
+      ...cleanedData,
       // Only include description if it's provided
       ...(data.description !== undefined && { description: data.description || '' }),
     };
     
-    return prisma.car.update({
-      where: { id },
-      data: carData,
-      select: CarSelect,
-    });
+    try {
+      return prisma.car.update({
+        where: { id },
+        data: carData,
+        select: CarSelect,
+      });
+    } catch (error) {
+      if ((error as any).code === 'P2025') {
+        throw createErrorResponse('Car not found', 'NOT_FOUND');
+      }
+      throw error;
+    }
   }
 
   /**
    * Delete a car
    */
   async deleteCar(id: string) {
-    return prisma.car.delete({
-      where: { id },
-    });
+    try {
+      // Check if car has any active reservations
+      const activeReservations = await prisma.reservation.findFirst({
+        where: {
+          carId: id,
+          status: {
+            in: ['CONFIRMED', 'PENDING']
+          }
+        }
+      });
+      
+      if (activeReservations) {
+        throw createErrorResponse('Cannot delete car with active reservations', 'HAS_RESERVATIONS');
+      }
+      
+      return prisma.car.delete({
+        where: { id },
+      });
+    } catch (error) {
+      if ((error as any).code === 'P2025') {
+        throw createErrorResponse('Car not found', 'NOT_FOUND');
+      }
+      throw error;
+    }
   }
 }
 

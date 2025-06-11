@@ -8,6 +8,7 @@ import {
   updateUserBodySchema,
   updateProfileBodySchema
 } from '@/schemas/user.schema';
+import { createErrorResponse } from '@/utils/common.utils';
 
 export class UserController {
   /**
@@ -96,14 +97,19 @@ export class UserController {
       const { id } = request.params as z.infer<typeof idParamSchema>;
       const userData = request.body as z.infer<typeof updateUserBodySchema>;
       
-      await userService.updateUser(id, userData);
-      return reply.send({ message: 'User updated successfully' });
+      const updatedUser = await userService.updateUser(id, userData);
+      return reply.send({ 
+        message: 'User updated successfully',
+        user: { id: updatedUser.id } 
+      });
     } catch (error) {
       request.log.error(error);
-      if ((error as any).code === 'P2025') {
-        return reply.status(404).send({ error: 'User not found' });
+      
+      if ((error as any).code === 'NOT_FOUND') {
+        return reply.status(404).send(createErrorResponse('User not found'));
       }
-      return reply.status(500).send({ error: 'Failed to update user' });
+      
+      return reply.status(500).send(createErrorResponse('Failed to update user'));
     }
   }
 
@@ -120,10 +126,12 @@ export class UserController {
       return reply.status(204).send();
     } catch (error) {
       request.log.error(error);
-      if ((error as any).code === 'P2025') {
-        return reply.status(404).send({ error: 'User not found' });
+      
+      if ((error as any).code === 'NOT_FOUND') {
+        return reply.status(404).send(createErrorResponse('User not found'));
       }
-      return reply.status(500).send({ error: 'Failed to delete user' });
+      
+      return reply.status(500).send(createErrorResponse('Failed to delete user'));
     }
   }
 

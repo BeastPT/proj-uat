@@ -1,8 +1,7 @@
 import { prisma } from "@/config/db.config";
 import { UserCreateInput, UserUpdateInput } from "@/models/user.model";
-import { removeUndefined } from "@/utils/common.utils";
+import { createErrorResponse, removeUndefined, safeParseDate } from "@/utils/common.utils";
 import { sign } from "jsonwebtoken";
-
 import { compare, hash } from "bcrypt";
 
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -85,34 +84,53 @@ export class UserService {
    * Update user by ID
    */
   async updateUser(id: string, userData: UserUpdateInput) {
+    // Process dates if present
+    if (userData.birthdate && typeof userData.birthdate === 'string') {
+      userData.birthdate = safeParseDate(userData.birthdate);
+    }
+    
     const cleanedData = removeUndefined(userData);
 
-    return prisma.user.update({
-      where: { id },
-      data: cleanedData,
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        country: true,
-        phone: true,
-        birthdate: true,
-        address: true,
-        isVerified: true,
-        isAdmin: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    });
+    try {
+      return prisma.user.update({
+        where: { id },
+        data: cleanedData,
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          country: true,
+          phone: true,
+          birthdate: true,
+          address: true,
+          isVerified: true,
+          isAdmin: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      });
+    } catch (error) {
+      if ((error as any).code === 'P2025') {
+        throw createErrorResponse('User not found', 'NOT_FOUND');
+      }
+      throw error;
+    }
   }
 
   /**
    * Delete user by ID
    */
   async deleteUser(id: string) {
-    return prisma.user.delete({
-      where: { id },
-    });
+    try {
+      return prisma.user.delete({
+        where: { id },
+      });
+    } catch (error) {
+      if ((error as any).code === 'P2025') {
+        throw createErrorResponse('User not found', 'NOT_FOUND');
+      }
+      throw error;
+    }
   }
 
   /**

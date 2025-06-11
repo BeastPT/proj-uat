@@ -62,3 +62,46 @@ export function removeUndefined<T>(obj: T): T {
 export function formatDate(date: Date): string {
   return date.toISOString().split('T')[0];
 }
+
+/**
+ * Safely parse a date string without throwing an exception
+ * @param dateStr The date string to parse
+ * @param fallback The fallback date if parsing fails (defaults to current date)
+ * @returns A valid Date object
+ */
+export function safeParseDate(dateStr: string | undefined, fallback: Date = new Date()): Date {
+  if (!dateStr) return fallback;
+  
+  const parsedDate = new Date(dateStr);
+  return isNaN(parsedDate.getTime()) ? fallback : parsedDate;
+}
+
+/**
+ * Create a standardized error response object
+ * @param message Error message
+ * @param code Optional error code
+ * @param details Optional additional details
+ * @returns Error response object
+ */
+export function createErrorResponse(message: string, code?: string, details?: unknown): {
+  error: string;
+  code?: string;
+  details?: unknown;
+} {
+  return {
+    error: message,
+    ...(code && { code }),
+    ...(details && { details })
+  };
+}
+
+/**
+ * Calculate date difference in days
+ * @param startDate Start date
+ * @param endDate End date
+ * @returns Number of days between dates (rounded up)
+ */
+export function dateDiffInDays(startDate: Date, endDate: Date): number {
+  const diffTime = endDate.getTime() - startDate.getTime();
+  return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+}

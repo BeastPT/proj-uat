@@ -4,9 +4,12 @@ import {
   updateReservationSchema,
 } from "@/schemas/reservation.schema";
 import { CarStatus } from "@/types/car.type";
+import { RentalPeriodStatus } from "@/types/reservation.type";
 import {
-  RentalPeriodStatus
-} from "@/types/reservation.type";
+  createErrorResponse,
+  dateDiffInDays,
+  safeParseDate,
+} from "@/utils/common.utils";
 import { z } from "zod";
 
 const ReservationSelect = {
@@ -21,7 +24,6 @@ const ReservationSelect = {
   createdAt: true,
   updatedAt: true,
 };
-
 
 export class ReservationService {
   /**
@@ -41,6 +43,7 @@ export class ReservationService {
       return RentalPeriodStatus.ACTIVE;
     }
   }
+
   /**
    * Update reservation and car status based on current date
    */
@@ -190,64 +193,76 @@ export class ReservationService {
     });
 
     if (!car) {
-      throw new Error("Car not found");
+      throw createErrorResponse("Car not found", "NOT_FOUND");
     }
 
     if (car.status !== "AVAILABLE") {
-      throw new Error("Car is not available for reservation");
+      throw createErrorResponse(
+        "Car is not available for reservation",
+        "UNAVAILABLE"
+      );
     }
 
     // Calculate number of days
-    const startDate = new Date(data.startDate);
-    const endDate = new Date(data.endDate);
-    const days = Math.ceil(
-      (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
-    );
+    const startDate = safeParseDate(data.startDate);
+    const endDate = safeParseDate(data.endDate);
+    const days = dateDiffInDays(startDate, endDate);
 
     if (days < 1) {
-      throw new Error("Reservation must be for at least one day");
+      throw createErrorResponse(
+        "Reservation must be for at least one day",
+        "INVALID_DURATION"
+      );
     }
 
     // Calculate total price
     const totalPrice = car.price * days;
 
     // Create reservation and update car status in a transaction
-    return prisma.$transaction(async (tx) => {
-      // Determine the initial period status
-      const periodStatus = this.determineRentalPeriodStatus(
-        new Date(data.startDate),
-        new Date(data.endDate)
+    try {
+      return prisma.$transaction(async (tx) => {
+        // Determine the initial period status
+        const periodStatus = this.determineRentalPeriodStatus(
+          startDate,
+          endDate
+        );
+
+        // Create the reservation
+        const reservation = await tx.reservation.create({
+          data: {
+            userId,
+            carId: data.carId,
+            startDate,
+            endDate,
+            totalPrice,
+            status: "PENDING",
+            periodStatus,
+          },
+          select: ReservationSelect,
+        });
+
+        // Update car status to RESERVED
+        await tx.car.update({
+          where: { id: data.carId },
+          data: { status: "RESERVED" },
+        });
+
+        // Convert dates to ISO strings to match the response schema
+        return {
+          ...reservation,
+          startDate: reservation.startDate.toISOString(),
+          endDate: reservation.endDate.toISOString(),
+          createdAt: reservation.createdAt.toISOString(),
+          updatedAt: reservation.updatedAt.toISOString(),
+        };
+      });
+    } catch (error) {
+      throw createErrorResponse(
+        "Failed to create reservation",
+        "TRANSACTION_FAILED",
+        error
       );
-
-      // Create the reservation
-      const reservation = await tx.reservation.create({
-        data: {
-          userId,
-          carId: data.carId,
-          startDate: data.startDate,
-          endDate: data.endDate,
-          totalPrice,
-          status: "PENDING",
-          periodStatus,
-        },
-        select: ReservationSelect,
-      });
-
-      // Update car status to RESERVED
-      await tx.car.update({
-        where: { id: data.carId },
-        data: { status: "RESERVED" },
-      });
-
-      // Convert dates to ISO strings to match the response schema
-      return {
-        ...reservation,
-        startDate: reservation.startDate.toISOString(),
-        endDate: reservation.endDate.toISOString(),
-        createdAt: reservation.createdAt.toISOString(),
-        updatedAt: reservation.updatedAt.toISOString(),
-      };
-    });
+    }
   }
 
   /**
