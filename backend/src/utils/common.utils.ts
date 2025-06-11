@@ -91,7 +91,7 @@ export function createErrorResponse(message: string, code?: string, details?: un
   return {
     error: message,
     ...(code && { code }),
-    ...(details && { details })
+    ...(details !== undefined ? { details } : {})
   };
 }
 
