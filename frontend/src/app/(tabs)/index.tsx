@@ -167,10 +167,18 @@ export default function Index() {
               }
             })();
 
+            // Get car image if available
+            let carImage;
+            if (reservation.car && reservation.car.images && reservation.car.images.length > 0) {
+              carImage = { uri: reservation.car.images[0] };
+            } else {
+              carImage = require("@/src/assets/images/loadingCar.png"); // Default image
+            }
+
             return {
               id: reservation.id,
               carName: carName,
-              carImage: require("@/src/assets/images/loadingCar.png"), // Default image
+              carImage: carImage,
               startDate,
               endDate,
               status,
@@ -274,7 +282,7 @@ export default function Index() {
           {loading ? (
             <View style={styles.loadingContainer}>
               <ActivityIndicator size="large" color={colors.brand} />
-              <Text style={styles.loadingText}>Loading cars...</Text>
+              <Text style={styles.loadingText}>{i18n.t("home.loading") || "Loading cars..."}</Text>
             </View>
           ) : error ? (
             <View style={styles.errorContainer}>
@@ -290,8 +298,12 @@ export default function Index() {
                 <CarCard
                   id={item.id}
                   name={`${item.brand} ${item.model}`}
-                  // Use a local image as fallback if no images available
-                  image={require("@/src/assets/images/loadingCar.png")}
+                  // Use the first image from the car's images array if available, otherwise use fallback
+                  image={
+                    item.images && item.images.length > 0
+                      ? { uri: item.images[0] }
+                      : require("@/src/assets/images/loadingCar.png")
+                  }
                   price={item.price}
                   priceUnit="day"
                   rating={4.5} // Default rating since backend doesn't provide it
@@ -323,7 +335,7 @@ export default function Index() {
           {loadingBookings ? (
             <View style={styles.loadingContainer}>
               <ActivityIndicator size="large" color={colors.brand} />
-              <Text style={styles.loadingText}>Loading reservations...</Text>
+              <Text style={styles.loadingText}>{i18n.t("home.loadingReservations") || "Loading reservations..."}</Text>
             </View>
           ) : bookingsError ? (
             <View style={styles.errorContainer}>
@@ -368,7 +380,7 @@ export default function Index() {
           {loadingBookings ? (
             <View style={styles.loadingContainer}>
               <ActivityIndicator size="large" color={colors.brand} />
-              <Text style={styles.loadingText}>Loading bookings...</Text>
+              <Text style={styles.loadingText}>{i18n.t("home.loadingBookings") || "Loading bookings..."}</Text>
             </View>
           ) : bookingsError ? (
             <View style={styles.errorContainer}>

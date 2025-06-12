@@ -18,6 +18,7 @@ import { apiService } from "../../services/api.service";
 import { useAuth } from "../../context/AuthContext";
 import { SPACING, RADIUS } from "../../constants/Spacing";
 import { useTheme } from "../../context/ThemeContext";
+import i18n from "../../i18n";
 
 // TypeScript interfaces
 interface ChatMessage {
@@ -77,7 +78,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ message, setMessage, onSend }) =>
     <View style={styles.inputContainer}>
       <TextInput
         style={styles.inputField}
-        placeholder="Type a message"
+        placeholder={i18n.t("chat.typePlaceholder") || "Type a message"}
         placeholderTextColor={colors.textMuted}
         value={message}
         onChangeText={setMessage}
@@ -88,7 +89,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ message, setMessage, onSend }) =>
         style={styles.inputButton}
         onPress={onSend}
       >
-        <Text style={styles.inputButtonText}>Send</Text>
+        <Text style={styles.inputButtonText}>{i18n.t("chat.send") || "Send"}</Text>
       </Pressable>
     </View>
   );
@@ -320,12 +321,12 @@ export default function Chat() {
       <Stack.Screen options={{ title: "Chat", headerShown: false }} />
       <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
         <View style={styles.wrapper}>
-          <ChatHeader title="Chat with Rent A Car" />
+          <ChatHeader title={i18n.t("chat.title") || "Chat with Rent A Car"} />
           
           {loading ? (
             <View style={styles.loadingContainer}>
               <ActivityIndicator size="large" color={colors.brand} />
-              <Text style={styles.loadingText}>Loading chat...</Text>
+              <Text style={styles.loadingText}>{i18n.t("chat.loading") || "Loading chat..."}</Text>
             </View>
           ) : error ? (
             <View style={styles.errorContainer}>
@@ -352,7 +353,7 @@ export default function Chat() {
                 ListEmptyComponent={
                   <View style={styles.emptyContainer}>
                     <Text style={styles.emptyText}>
-                      No messages yet. Send a message to start a conversation with our support team!
+                      {i18n.t("chat.noMessages") || "No messages yet. Send a message to start a conversation with our support team!"}
                     </Text>
                   </View>
                 }

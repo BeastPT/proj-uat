@@ -1,0 +1,190 @@
+{
+    "common": {
+        "cancel": "Prekliči",
+        "save": "Shrani",
+        "ok": "V redu"
+    },
+    "saving": "Shranjevanje...",
+    "profile": {
+      "logout": "Odjava",
+      "accountInfo": "Podatki o računu",
+      "editProfile": "Uredi profil",
+      "appearance": "Videz",
+      "language": "Jezik",
+
+      "locationServices": "Lokacijske storitve",
+      "locationServicesDescription": "Dovoli aplikaciji dostop do tvoje lokacije",
+      "privacy_security": "Zasebnost in varnost",
+      "help_support": "Pomoč in podpora",
+      "terms_conditions": "Pogoji uporabe",
+      "privacy_policy": "Pravilnik o zasebnosti",
+      "contact_us": "Kontaktiraj nas",
+      "theme": "Tema",
+      "dark": "Temna",
+      "light": "Svetla",
+      "notifications": {
+        "title": "Obvestila",
+        "push": "Potisna obvestila",
+        "pushDescription": "Prejemaj obvestila o rezervacijah in ponudbah",
+        "email": "E-poštna obvestila",
+        "emailDescription": "Prejemaj posodobitve in promocije po e-pošti"
+      },
+      "help": {
+        "title": "Pomoč in podpora",
+        "contactSupport": "Kontaktiraj podporo",
+        "faq": "Pogosta vprašanja",
+        "about": "O aplikaciji"
+      },
+      "privacy": {
+        "title": "Zasebnost in varnost",
+        "privacyPolicy": "Pravilnik o zasebnosti",
+        "termsOfService": "Pogoji uporabe"
+      },
+      "personalInfo": {
+        "fullName": "Polno ime",
+        "email": "E-pošta",
+        "phoneNumber": "Telefonska številka",
+        "dateOfBirth": "Datum rojstva",
+        "country": "Država",
+        "notSet": "Ni nastavljeno"
+      }
+    },  "home": {
+    "welcome": "Dobrodošli nazaj",
+    "searchPlaceholder": "Išči avto",
+    "featuredCars": "Izpostavljeni avtomobili",
+    "viewAll": "Prikaži vse",
+    "recentBookings": "Nedavne rezervacije",
+    "noBookings": "Ni nedavnih rezervacij",
+    "activeReservations": "Aktivne rezervacije",
+    "noActiveReservations": "Ni aktivnih rezervacij",
+    "pendingStatus": "V obdelavi",
+    "specialOffers": "Posebne ponudbe",
+    "availableCars": "Razpoložljivi avtomobili",
+    "pickupDate": "Datum prevzema",
+    "returnDate": "Datum vrnitve",
+    "bookNow": "Rezerviraj zdaj",
+    "seeDetails": "Poglej podrobnosti",
+    "cancelReservation": "Prekliči",
+    "loading": "Nalaganje avtomobilov...",
+    "loadingReservations": "Nalaganje rezervacij...",
+    "loadingBookings": "Nalaganje rezervacij..."
+  },
+  "car": {
+    "reserve": "Rezerviraj zdaj",
+    "details": "Podrobnosti avtomobila",
+    "specifications": "Specifikacije",
+    "features": "Lastnosti",
+    "brand": "Znamka",
+    "model": "Model",
+    "year": "Leto",
+    "color": "Barva",
+    "transmission": "Menjalnik",
+    "fuel": "Vrsta goriva",
+    "seats": "Sedeži",
+    "doors": "Vrata",
+    "price": "Cena",
+    "perDay": "na dan"
+  },
+  "reservation": {
+    "title": "Rezerviraj avto",
+    "startDate": "Začetni datum",
+    "endDate": "Končni datum",
+    "days": "Število dni",
+    "pricePerDay": "Cena na dan",
+    "totalPrice": "Skupna cena",
+    "reserve": "Rezerviraj zdaj",
+    "success": "Rezervacija uspešna",
+    "successMessage": "Vaš avto je bil uspešno rezerviran!",
+    "failed": "Rezervacija ni uspela",
+    "error": "Rezervacija ni uspela. Prosimo, poskusite znova.",
+    "invalidDateRange": "Končni datum mora biti po začetnem datumu",
+    "viewReservations": "Poglej moje rezervacije",
+    "cancel": "Prekliči rezervacijo",
+    "cancelConfirm": "Ali ste prepričani, da želite preklicati to rezervacijo?",
+    "cancelSuccess": "Rezervacija preklicana",
+    "cancelSuccessMessage": "Vaša rezervacija je bila uspešno preklicana.",
+    "cancelFailed": "Preklic ni uspel",
+    "cancelFailedMessage": "Preklic rezervacije ni uspel. Prosimo, poskusite znova kasneje.",
+    "cancelError": "Preklic rezervacije ni uspel"
+  },
+  "search": {
+    "title": "Najdi svoj avto",
+    "searchPlaceholder": "Išči po imenu avtomobila",
+    "filter": "Filter",
+    "sort": "Razvrsti",
+    "allCars": "Vsi avtomobili",
+    "noResults": "Ni najdenih avtomobilov",
+    "locationDenied": "Dostop do lokacije zavrnjen. Prikazani so vsi avtomobili.",
+    "usingLocation": "Uporaba vaše trenutne lokacije",
+    "loading": "Nalaganje avtomobilov...",
+    "filters": {
+      "title": "Filtri",
+      "carType": "Tip avtomobila",
+      "priceRange": "Cenovni razpon",
+      "seats": "Sedeži",
+      "transmission": "Menjalnik",
+      "fuelType": "Vrsta goriva",
+      "apply": "Uporabi filtre",
+      "reset": "Ponastavi"
+    },
+    "sortOptions": {
+      "priceLowToHigh": "Cena: od najnižje do najvišje",
+      "priceHighToLow": "Cena: od najvišje do najnižje",
+      "rating": "Ocena",
+      "newest": "Najnovejši",
+      "nearest": "Najbližji tebi"
+    },
+    "carTypes": {
+      "all": "Vsi",
+      "economy": "Ekonomični",
+      "luxury": "Luksuzni",
+      "suv": "SUV",
+      "sports": "Športni"
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Dobrodošli nazaj",
+      "subtitle": "Prijavite se za nadaljevanje",
+      "email": "E-pošta",
+      "password": "Geslo",
+      "forgotPassword": "Ste pozabili geslo?",
+      "signIn": "Prijava",
+      "noAccount": "Nimate računa?",
+      "signUp": "Registracija",
+      "show": "Prikaži",
+      "hide": "Skrij",
+      "emailPlaceholder": "Vnesite svojo e-pošto",
+      "passwordPlaceholder": "Vnesite svoje geslo"
+    },
+    "register": {
+      "title": "Ustvari račun",
+      "subtitle": "Registrirajte se za začetek",
+      "fullName": "Polno ime",
+      "email": "E-pošta",
+      "password": "Geslo",
+      "confirmPassword": "Potrdi geslo",
+      "signUp": "Registracija",
+      "haveAccount": "Že imate račun?",
+      "signIn": "Prijava",
+      "fullNamePlaceholder": "Vnesite svoje polno ime",
+      "emailPlaceholder": "Vnesite svojo e-pošto",
+      "passwordPlaceholder": "Vnesite svoje geslo",
+      "confirmPasswordPlaceholder": "Potrdite svoje geslo"
+    },
+    "errors": {
+      "allFieldsRequired": "Vsa polja so obvezna",
+      "invalidCredentials": "Neveljavna e-pošta ali geslo",
+      "passwordsDoNotMatch": "Gesli se ne ujemata",
+      "registrationFailed": "Registracija ni uspela. Prosimo, poskusite znova.",
+      "emailAlreadyExists": "Ta e-pošta je že v uporabi."
+    }
+  },
+  "chat": {
+    "title": "Klepet z Rent A Car",
+    "typePlaceholder": "Vnesite sporočilo",
+    "send": "Pošlji",
+    "loading": "Nalaganje klepeta...",
+    "noMessages": "Še ni sporočil. Pošljite sporočilo za začetek pogovora z našo podporno ekipo!"
+  }
+}

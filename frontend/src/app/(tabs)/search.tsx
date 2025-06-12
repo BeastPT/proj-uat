@@ -296,12 +296,12 @@ export default function Search() {
             </Text>
             {locationPermissionDenied && (
               <Text style={[styles.locationWarning, { color: colors.textMuted }]}>
-                Location access denied. Showing all cars.
+                {i18n.t("search.locationDenied") || "Location access denied. Showing all cars."}
               </Text>
             )}
             {userLocation && (
               <Text style={[styles.locationInfo, { color: colors.textMuted }]}>
-                Using your current location
+                {i18n.t("search.usingLocation") || "Using your current location"}
               </Text>
             )}
           </View>

@@ -14,6 +14,7 @@ import {
 } from "react-native";
 import { router } from "expo-router";
 import { apiService } from "@/src/services/api.service";
+import { carDataService } from "@/src/services/carData.service";
 import { Colors } from "@/src/constants/Colors";
 
 // Car type definition based on the schema
@@ -49,6 +50,14 @@ export default function ManageCarsScreen() {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedCar, setSelectedCar] = useState<Car | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+  
+  // Car data from external API
+  const [carBrands, setCarBrands] = useState<{ id: number; name: string }[]>([]);
+  const [carModels, setCarModels] = useState<{ id: number; name: string }[]>([]);
+  const [availableYears, setAvailableYears] = useState<number[]>([]);
+  const [loadingBrands, setLoadingBrands] = useState(false);
+  const [loadingModels, setLoadingModels] = useState(false);
+  const [selectedBrandId, setSelectedBrandId] = useState<number | null>(null);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -76,7 +85,18 @@ export default function ManageCarsScreen() {
 
   useEffect(() => {
     fetchCars();
+    fetchCarBrands();
+    fetchYears();
   }, []);
+
+  // Fetch car models when brand changes
+  useEffect(() => {
+    if (selectedBrandId) {
+      fetchCarModels(selectedBrandId);
+    } else {
+      setCarModels([]);
+    }
+  }, [selectedBrandId]);
 
   const fetchCars = async () => {
     try {
@@ -92,9 +112,48 @@ export default function ManageCarsScreen() {
     }
   };
 
+  // Fetch car brands from external API
+  const fetchCarBrands = async () => {
+    try {
+      setLoadingBrands(true);
+      const brands = await carDataService.getAllMakes();
+      setCarBrands(brands);
+    } catch (error) {
+      console.error("Error fetching car brands:", error);
+      Alert.alert("Error", "Failed to load car brands");
+    } finally {
+      setLoadingBrands(false);
+    }
+  };
+
+  // Fetch car models for a specific brand
+  const fetchCarModels = async (brandId: number) => {
+    try {
+      setLoadingModels(true);
+      const models = await carDataService.getModelsByMake(brandId);
+      setCarModels(models);
+    } catch (error) {
+      console.error("Error fetching car models:", error);
+      Alert.alert("Error", "Failed to load car models");
+    } finally {
+      setLoadingModels(false);
+    }
+  };
+
+  // Fetch available years
+  const fetchYears = async () => {
+    try {
+      const years = await carDataService.getYears();
+      setAvailableYears(years);
+    } catch (error) {
+      console.error("Error fetching years:", error);
+    }
+  };
+
   const handleAddCar = () => {
     setIsEditing(false);
     setSelectedCar(null);
+    setSelectedBrandId(null);
     setFormData({
       brand: "",
       model: "",
@@ -123,6 +182,13 @@ export default function ManageCarsScreen() {
   const handleEditCar = (car: Car) => {
     setIsEditing(true);
     setSelectedCar(car);
+    
+    // Find the brand ID based on the car's brand name
+    const brandObj = carBrands.find(brand =>
+      brand.name.toLowerCase() === car.brand.toLowerCase()
+    );
+    setSelectedBrandId(brandObj?.id || null);
+    
     setFormData({
       brand: car.brand,
       model: car.model,
@@ -285,7 +351,12 @@ export default function ManageCarsScreen() {
         <Text style={styles.carInfo}>Status: {item.status}</Text>
         {item.location && (
           <Text style={styles.carInfo}>
-            Location: {parseFloat(item.location.latitude).toFixed(6)}, {parseFloat(item.location.longitude).toFixed(6)}
+            Location: {(typeof item.location.latitude === 'string'
+              ? parseFloat(item.location.latitude)
+              : item.location.latitude).toFixed(6)},
+            {(typeof item.location.longitude === 'string'
+              ? parseFloat(item.location.longitude)
+              : item.location.longitude).toFixed(6)}
           </Text>
         )}
         <View style={styles.actionButtons}>
@@ -305,6 +376,22 @@ export default function ManageCarsScreen() {
       </View>
     </View>
   );
+
+  // Handle brand selection
+  const handleBrandSelect = (brandId: number, brandName: string) => {
+    setSelectedBrandId(brandId);
+    setFormData({ ...formData, brand: brandName, model: "" });
+  };
+
+  // Handle model selection
+  const handleModelSelect = (modelName: string) => {
+    setFormData({ ...formData, model: modelName });
+  };
+
+  // Handle year selection
+  const handleYearSelect = (year: number) => {
+    setFormData({ ...formData, year: year.toString() });
+  };
 
   const renderFormField = (
     label: string,
@@ -380,9 +467,168 @@ export default function ManageCarsScreen() {
             </Text>
             
             <ScrollView style={styles.formContainer}>
-              {renderFormField("Brand", "brand", "Enter brand")}
-              {renderFormField("Model", "model", "Enter model")}
-              {renderFormField("Year", "year", "Enter year", "numeric")}
+              {/* Brand Input with Suggestions */}
+              <View style={styles.formField}>
+                <Text style={styles.formLabel}>Brand</Text>
+                <TextInput
+                  style={styles.formInput}
+                  value={formData.brand}
+                  onChangeText={(text) => {
+                    setFormData({ ...formData, brand: text });
+                    // Find matching brand ID if exists
+                    const matchingBrand = carBrands.find(
+                      brand => brand.name.toLowerCase() === text.toLowerCase()
+                    );
+                    setSelectedBrandId(matchingBrand?.id || null);
+                  }}
+                  placeholder="Enter brand (e.g., Toyota, Honda)"
+                />
+                {loadingBrands ? (
+                  <ActivityIndicator size="small" color={Colors.light.brand} />
+                ) : (
+                  <View style={styles.suggestionsContainer}>
+                    <Text style={styles.suggestionsLabel}>Suggestions:</Text>
+                    <ScrollView
+                      horizontal
+                      showsHorizontalScrollIndicator={false}
+                      style={styles.pickerScrollContainer}
+                    >
+                      <View style={styles.pickerContainer}>
+                        {carBrands
+                          .filter(brand =>
+                            brand.name.toLowerCase().includes(formData.brand.toLowerCase()) ||
+                            formData.brand === ""
+                          )
+                          .slice(0, 10) // Limit to 10 suggestions
+                          .map((brand) => (
+                            <TouchableOpacity
+                              key={brand.id}
+                              style={[
+                                styles.pickerOption,
+                                formData.brand === brand.name && styles.pickerOptionSelected,
+                              ]}
+                              onPress={() => handleBrandSelect(brand.id, brand.name)}
+                            >
+                              <Text
+                                style={[
+                                  styles.pickerOptionText,
+                                  formData.brand === brand.name && styles.pickerOptionTextSelected,
+                                ]}
+                              >
+                                {brand.name}
+                              </Text>
+                            </TouchableOpacity>
+                          ))}
+                      </View>
+                    </ScrollView>
+                  </View>
+                )}
+              </View>
+
+              {/* Model Input with Suggestions */}
+              <View style={styles.formField}>
+                <Text style={styles.formLabel}>Model</Text>
+                <TextInput
+                  style={styles.formInput}
+                  value={formData.model}
+                  onChangeText={(text) => setFormData({ ...formData, model: text })}
+                  placeholder="Enter model"
+                />
+                {loadingModels ? (
+                  <ActivityIndicator size="small" color={Colors.light.brand} />
+                ) : selectedBrandId ? (
+                  carModels.length > 0 ? (
+                    <View style={styles.suggestionsContainer}>
+                      <Text style={styles.suggestionsLabel}>Suggestions:</Text>
+                      <ScrollView
+                        horizontal
+                        showsHorizontalScrollIndicator={false}
+                        style={styles.pickerScrollContainer}
+                      >
+                        <View style={styles.pickerContainer}>
+                          {carModels
+                            .filter(model =>
+                              model.name.toLowerCase().includes(formData.model.toLowerCase()) ||
+                              formData.model === ""
+                            )
+                            .slice(0, 10) // Limit to 10 suggestions
+                            .map((model) => (
+                              <TouchableOpacity
+                                key={model.id}
+                                style={[
+                                  styles.pickerOption,
+                                  formData.model === model.name && styles.pickerOptionSelected,
+                                ]}
+                                onPress={() => handleModelSelect(model.name)}
+                              >
+                                <Text
+                                  style={[
+                                    styles.pickerOptionText,
+                                    formData.model === model.name && styles.pickerOptionTextSelected,
+                                  ]}
+                                >
+                                  {model.name}
+                                </Text>
+                              </TouchableOpacity>
+                            ))}
+                        </View>
+                      </ScrollView>
+                    </View>
+                  ) : (
+                    <Text style={styles.noDataText}>No models found for this brand</Text>
+                  )
+                ) : (
+                  <Text style={styles.noDataText}>Enter a brand to see model suggestions</Text>
+                )}
+              </View>
+
+              {/* Year Input with Suggestions */}
+              <View style={styles.formField}>
+                <Text style={styles.formLabel}>Year</Text>
+                <TextInput
+                  style={styles.formInput}
+                  value={formData.year}
+                  onChangeText={(text) => setFormData({ ...formData, year: text })}
+                  placeholder="Enter year"
+                  keyboardType="numeric"
+                />
+                <View style={styles.suggestionsContainer}>
+                  <Text style={styles.suggestionsLabel}>Suggestions:</Text>
+                  <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    style={styles.pickerScrollContainer}
+                  >
+                    <View style={styles.pickerContainer}>
+                      {availableYears
+                        .filter(year =>
+                          year.toString().includes(formData.year) ||
+                          formData.year === ""
+                        )
+                        .slice(0, 10) // Limit to 10 suggestions
+                        .map((year) => (
+                          <TouchableOpacity
+                            key={year}
+                            style={[
+                              styles.pickerOption,
+                              formData.year === year.toString() && styles.pickerOptionSelected,
+                            ]}
+                            onPress={() => handleYearSelect(year)}
+                          >
+                            <Text
+                              style={[
+                                styles.pickerOptionText,
+                                formData.year === year.toString() && styles.pickerOptionTextSelected,
+                              ]}
+                            >
+                              {year}
+                            </Text>
+                          </TouchableOpacity>
+                        ))}
+                    </View>
+                  </ScrollView>
+                </View>
+              </View>
               {renderFormField("Color", "color", "Enter color")}
               {renderFormField("Kilometers", "kilometers", "Enter kilometers", "numeric")}
               {renderFormField("License Plate", "plate", "Enter license plate")}
@@ -560,6 +806,15 @@ export default function ManageCarsScreen() {
 }
 
 const styles = StyleSheet.create({
+  pickerScrollContainer: {
+    maxHeight: 120,
+    marginBottom: 10,
+  },
+  noDataText: {
+    color: "#999",
+    fontStyle: "italic",
+    padding: 10,
+  },
   container: {
     flex: 1,
     backgroundColor: "#f5f5f5",
@@ -729,9 +984,20 @@ const styles = StyleSheet.create({
     padding: 10,
     fontSize: 14,
   },
+  suggestionsContainer: {
+    marginTop: 5,
+    marginBottom: 10,
+  },
+  suggestionsLabel: {
+    fontSize: 12,
+    color: "#666",
+    marginBottom: 5,
+    fontStyle: "italic",
+  },
   pickerContainer: {
     flexDirection: "row",
     flexWrap: "wrap",
+    paddingVertical: 5,
   },
   pickerOption: {
     borderWidth: 1,
@@ -740,6 +1006,8 @@ const styles = StyleSheet.create({
     padding: 8,
     marginRight: 8,
     marginBottom: 8,
+    minWidth: 80,
+    alignItems: "center",
   },
   pickerOptionSelected: {
     backgroundColor: Colors.light.brand,

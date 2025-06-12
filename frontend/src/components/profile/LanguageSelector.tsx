@@ -17,9 +17,25 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
 
   const handleLanguageChange = (language: string) => {
     onLanguageChange(language);
+    
+    let languageName = "";
+    switch (language) {
+      case 'en':
+        languageName = 'English';
+        break;
+      case 'pt':
+        languageName = 'Portuguese';
+        break;
+      case 'sl':
+        languageName = 'Slovenian';
+        break;
+      default:
+        languageName = language;
+    }
+    
     Alert.alert(
-      "Language Changed", 
-      `Language set to ${language === 'en' ? 'English' : 'Portuguese'}`
+      "Language Changed",
+      `Language set to ${languageName}`
     );
   };
 
@@ -64,6 +80,25 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
             ]}
           >
             Português
+          </Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity
+          style={[
+            styles.languageButton,
+            { backgroundColor: colors.bgSection },
+            currentLanguage === "sl" && styles.activeButton,
+          ]}
+          onPress={() => handleLanguageChange("sl")}
+        >
+          <Text
+            style={[
+              styles.buttonText,
+              { color: colors.textBody },
+              currentLanguage === "sl" && { color: colors.brand, fontWeight: "600" },
+            ]}
+          >
+            Slovenščina
           </Text>
         </TouchableOpacity>
       </View>

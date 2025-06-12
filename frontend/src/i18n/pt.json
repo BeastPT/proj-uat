@@ -22,11 +22,11 @@
     "dark": "Escuro",
     "light": "Claro",
     "notifications": {
-        "title": "Notifications",
-        "push": "Push Notifications",
-        "pushDescription": "Receive notifications about bookings and offers",
-        "email": "Email Notifications",
-        "emailDescription": "Receive updates and promotions via email"
+        "title": "Notificações",
+        "push": "Notificações Push",
+        "pushDescription": "Receba notificações sobre reservas e ofertas",
+        "email": "Notificações por Email",
+        "emailDescription": "Receba atualizações e promoções por email"
       },
     "help": {
       "title": "Ajuda e Suporte",
@@ -63,7 +63,10 @@
     "returnDate": "Data de Devolução",
     "bookNow": "Reservar Agora",
     "seeDetails": "Ver Detalhes",
-    "cancelReservation": "Cancelar"
+    "cancelReservation": "Cancelar",
+    "loading": "Carregando carros...",
+    "loadingReservations": "Carregando reservas...",
+    "loadingBookings": "Carregando reservas..."
   },
   "car": {
     "reserve": "Reservar Agora",
@@ -110,6 +113,9 @@
     "sort": "Ordenar",
     "allCars": "Todos os Carros",
     "noResults": "Nenhum carro encontrado",
+    "locationDenied": "Acesso à localização negado. Mostrando todos os carros.",
+    "usingLocation": "Usando sua localização atual",
+    "loading": "Carregando carros...",
     "filters": {
       "title": "Filtros",
       "carType": "Tipo de Carro",
@@ -172,5 +178,12 @@
       "registrationFailed": "Falha no registro. Por favor, tente novamente.",
       "emailAlreadyExists": "Este email já está em uso."
     }
+  },
+  "chat": {
+    "title": "Chat com Aluguel de Carros",
+    "typePlaceholder": "Digite uma mensagem",
+    "send": "Enviar",
+    "loading": "Carregando chat...",
+    "noMessages": "Nenhuma mensagem ainda. Envie uma mensagem para iniciar uma conversa com nossa equipe de suporte!"
   }
 }

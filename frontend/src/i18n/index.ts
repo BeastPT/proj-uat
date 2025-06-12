@@ -5,6 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const i18n = new I18n({
     en: require('./en.json'),
     pt: require('./pt.json'),
+    sl: require('./sl.json'),
 });
 
 // Set default locale based on device settings

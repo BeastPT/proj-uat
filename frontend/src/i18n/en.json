@@ -64,7 +64,10 @@
     "returnDate": "Return Date",
     "bookNow": "Book Now",
     "seeDetails": "See Details",
-    "cancelReservation": "Cancel"
+    "cancelReservation": "Cancel",
+    "loading": "Loading cars...",
+    "loadingReservations": "Loading reservations...",
+    "loadingBookings": "Loading bookings..."
   },
   "car": {
     "reserve": "Reserve Now",
@@ -111,6 +114,9 @@
     "sort": "Sort",
     "allCars": "All Cars",
     "noResults": "No cars found",
+    "locationDenied": "Location access denied. Showing all cars.",
+    "usingLocation": "Using your current location",
+    "loading": "Loading cars...",
     "filters": {
       "title": "Filters",
       "carType": "Car Type",
@@ -173,5 +179,12 @@
       "registrationFailed": "Registration failed. Please try again.",
       "emailAlreadyExists": "This email is already in use."
     }
+  },
+  "chat": {
+    "title": "Chat with Rent A Car",
+    "typePlaceholder": "Type a message",
+    "send": "Send",
+    "loading": "Loading chat...",
+    "noMessages": "No messages yet. Send a message to start a conversation with our support team!"
   }
 }
